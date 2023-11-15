@@ -121,7 +121,7 @@ export default class HabitTracker extends Plugin {
 		function toggleHabit(el, path, date, currentValue) {
 			const file = oApp.vault.getAbstractFileByPath(path);
 			let fm = oApp.metadataCache.getFileCache(file)?.frontmatter || { entries: []};
-			let entries =  fm.entries;
+			let entries =  fm.entries || [];
 
 			if(currentValue === 'x') {
 				entries = entries.filter((e) => {
