@@ -33,14 +33,14 @@ If your plugin does not need CSS, delete this file.
   text-align: center;
 }
 .habit-cell + .habit-cell {
-  border-left: 1px solid;
+  border-left: 1px solid #333;
 }
 .habit-tracker__header .habit-cell {
   text-align: end;
 }
 
 .habit-tracker__row + .habit-tracker__row {
-  border-top: 1px solid;
+  border-top: 1px solid #666;
 }
 
 .habit-tick {
