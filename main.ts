@@ -21,6 +21,7 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 
+		// read the data
 		const files = this.app.vault.getMarkdownFiles().filter(f => {
 			return f.path.indexOf('Habits/') == 0;
 		});
@@ -28,6 +29,16 @@ export default class MyPlugin extends Plugin {
 		const data = this.app.metadataCache.getFileCache(files[0])?.frontmatter.habitTracker;
 
 		console.log('data for', files[0].name, data);
+
+
+		//codeblock
+		this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
+			// console.log('this is the config', src);
+			console.log('this is the root el', el.innerHTML);
+			// console.log('context', ctx);
+			el.createEl('h3', {text: "hello world"})
+			return null;
+		});
 
 		return null;
 
