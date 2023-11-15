@@ -107,7 +107,7 @@ export default class HabitTracker extends Plugin {
 
 				for(let i = 0; i < settings.range; i++) {
 					cell = row.createEl('div', {
-						cls: `habit-cell habit-tick habit-tick--${entries.includes(currentDate.toISOString().substring(0, 10))}`,
+						cls: `habit-cell habit-tick ${entries.includes(currentDate.toISOString().substring(0, 10)) ? 'habit-tick--true' : ''}`,
 						text: entries.includes(currentDate.toISOString().substring(0, 10)) ? 'x' : '',
 					});
 					cell.setAttribute('date', currentDate.toISOString().substring(0, 10));
@@ -137,10 +137,12 @@ export default class HabitTracker extends Plugin {
 					return e !== date;
 				})
 				el.innerHTML = '';
+				el.removeClass('habit-tick--true')
 			} else {
 				entries.push(date);
 				entries = entries.sort();
 				el.innerHTML = 'x';
+				el.addClass('habit-tick--true')
 			}
 
 			fm.entries = entries;
@@ -154,7 +156,6 @@ export default class HabitTracker extends Plugin {
 					file,
 					makeFrontmatter(fm) + '\n' + fileContent
 					)
-
 
 			});
 		}
