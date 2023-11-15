@@ -16,6 +16,9 @@ If your plugin does not need CSS, delete this file.
   display: flex;
   width: 100%
 }
+.habit-tracker__row:hover {
+  background-color: var(--color-base-10);
+}
 .habit-tracker__row + .habit-tracker__row {
   border-top: 1px solid var(--color-base-50);
 }
@@ -44,17 +47,12 @@ If your plugin does not need CSS, delete this file.
 
 /* today */
 .habit-cell:last-child {
-  background-color: rgba(255,255,255,.1);
+  background-color: var(--color-base-20);
 }
 
-
-.habit-tick {
-  cursor: pointer;
-  opacity: 0.8;
-}
 .habit-tick:hover {
-  opacity: 1;
-  background-color: rgba(255,255,255,.1);
+  background-color: var(--color-base-30);
+  cursor: pointer;
 }
 
 .habit-tick--true {
