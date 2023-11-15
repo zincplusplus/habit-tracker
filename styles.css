@@ -16,6 +16,9 @@ If your plugin does not need CSS, delete this file.
   display: flex;
   width: 100%
 }
+.habit-tracker__row + .habit-tracker__row {
+  border-top: 1px solid #666;
+}
 
 .habit-name {
   flex: auto 1 0;
@@ -25,8 +28,8 @@ If your plugin does not need CSS, delete this file.
 
 .habit-cell {
   box-sizing: content-box;
-  width: var(--checkbox-size);
-  height: var(--checkbox-size);
+  width: 16px;
+  height: 16px;
   padding: 8px 4px;
   font-size: 11px;
   display: inline-block;
@@ -39,9 +42,6 @@ If your plugin does not need CSS, delete this file.
   text-align: end;
 }
 
-.habit-tracker__row + .habit-tracker__row {
-  border-top: 1px solid #666;
-}
 
 .habit-tick {
   cursor: pointer;
@@ -50,4 +50,36 @@ If your plugin does not need CSS, delete this file.
 .habit-tick:hover {
   opacity: 1;
   background-color: rgba(255,255,255,.1);
+}
+
+.habit-tick--true {
+  overflow: hidden;
+  white-space: nowrap;
+  padding-left: 0;
+  padding-right: 0;
+  width: 24px;
+}
+.habit-tick--true:before {
+  background: var(--checkbox-color);
+  border-radius: 10px;
+  content: "";
+  display: inline-block;
+  height: 16px;
+  margin-bottom: 100px;
+  margin-left: 4px;
+  margin-right: 100px;
+  width: 16px;
+}
+
+.habit-tick--true + .habit-tick--true:before {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: 0;
+  width: 20px;
+}
+
+.habit-tick--true:has(+ .habit-tick--true):before {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 100%;
 }

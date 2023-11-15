@@ -21,7 +21,7 @@ export default class HabitTracker extends Plugin {
 
 	async onload() {
 		let settings = {
-			path: 'Habits/',
+			path: 'Habits/Good',
 			range: 21
 		}
 
@@ -37,6 +37,14 @@ export default class HabitTracker extends Plugin {
 
 					return true;
 				})
+				.sort((a,b) => {
+					if (a.name < b.name) {
+						return -1;
+					} else if (a.name > b.name) {
+						return 1;
+					}
+					return 0;
+				});
 
 			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s)`);
 
