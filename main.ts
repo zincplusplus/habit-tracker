@@ -8,60 +8,152 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
+interface HabitTrackerSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class HabitTracker extends Plugin {
+	settings: HabitTrackerSettings;
 
 	async onload() {
+		let settings = {
+			path: 'Habits/',
+			range: 21
+		}
 
-
-		// read the data
-		const files = this.app.vault.getMarkdownFiles().filter(f => {
-			return f.path.indexOf('Habits/') == 0;
-		});
-
-		const data = this.app.metadataCache.getFileCache(files[0])?.frontmatter.habitTracker;
-
-		// console.log('data for', files[0].name, data);
-
-
-		//codeblock
-		this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
-			// console.log('this is the config', src);
-			// console.log('this is the root el', el.innerHTML);
-			// console.log('context', ctx);
-			const button = el.createEl('button', {
-				text: "write something"
-			});
-
-			button.addEventListener('click',() => {
-				habbitTrackerToggle(files[0],'2023-11-15', 'valueee');
-			})
-			return null;
-		});
 		window.oApp = this.app;
 
-		//write something
-		window.habbitTrackerToggle = function(file ,date, value) {
-			console.log('habbitTrackerToggle', file, date);
+		this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
+
+			// 1. get all the habits
+			const files = this.app.vault.getMarkdownFiles()
+				.filter(file => {
+					// only habbits
+					if(file.path.indexOf(settings.path) !== 0) return false;
+
+					// valid habits
+					if(!Array.isArray(this.app.metadataCache.getFileCache(file)?.frontmatter.entries)) return false;
+
+					return true;
+				})
+
+			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s)`);
+
+			// 2. figure out the date range
+			// get today
+			// get starting date
+			// show all dates
+
+			const root = el.createEl('div', {
+				cls: 'habit_tracker'
+			});
+			root.addEventListener('click', e => {
+				if(e.target.classList.contains('habit-tick')) {
+					toggleHabit(
+						e.target,
+						e.target.getAttribute('habit'),
+						e.target.getAttribute('date'),
+						e.target.innerHTML.trim(),
+					)
+				}
+			})
+
+
+			// 2.1 header
+			const header = root.createEl('div', {
+				cls: 'habit-tracker__header habit-tracker__row'
+			});
+
+			header.createEl('div',{
+				text: '',
+				cls: 'habit-name habit-cell'
+			})
+
+			let currentDate = new Date();
+			currentDate.setDate(currentDate.getDate() - settings.range + 1);
+			for(let i = 0; i < settings.range; i++) {
+				header.createEl('span', {
+					cls: 'habit-cell',
+					text: currentDate.getDate()
+				});
+				currentDate.setDate(currentDate.getDate() + 1);
+			}
+
+			// 2.2 rows
+			let row;
+			files.forEach(f => {
+				row = root.createEl('div',{
+					cls: 'habit-tracker__row'
+				})
+
+				row.createEl('div', {
+					text: f['name'].replace('.md',''),
+					cls: 'habit-name habit-cell',
+				})
+
+				let cell;
+				let entries = oApp.metadataCache.getFileCache(f)?.frontmatter.entries;
+				currentDate = new Date();
+				currentDate.setDate(currentDate.getDate() - settings.range + 1);
+
+				for(let i = 0; i < settings.range; i++) {
+					cell = row.createEl('div', {
+						cls: `habit-cell habit-tick habit-tick--${entries.includes(currentDate.toISOString().substring(0, 10))}`,
+						text: entries.includes(currentDate.toISOString().substring(0, 10)) ? 'x' : '',
+					});
+					cell.setAttribute('date', currentDate.toISOString().substring(0, 10));
+					cell.setAttribute('habit', f.path);
+					currentDate.setDate(currentDate.getDate() + 1);
+				}
+			})
+
+
+
+			// 99. remove the code below once everything is working
+			// el.createEl('pre', {
+			// 		text: "hello world - habit tracker"
+			// 	});
+
+			return null;
+		});
+
+		function toggleHabit(el, path, date, currentValue) {
+			const file = oApp.vault.getAbstractFileByPath(path);
+			let fm = oApp.metadataCache.getFileCache(file)?.frontmatter;
+			let entries =  fm.entries
+
+			if(currentValue === 'x') {
+				entries = entries.filter((e) => {
+					console.log(e, date, e !== date);
+					return e !== date;
+				})
+				el.innerHTML = '';
+			} else {
+				entries.push(date);
+				entries = entries.sort();
+				el.innerHTML = 'x';
+			}
+
+			fm.entries = entries;
+
+			console.log('entries', entries);
+
 			oApp.vault.read(file).then((r:string) => {
 				const fileContent = r.replace('---\n','').split('---\n')[1]
-				const frontmatter = makeFrontmatter(oApp.metadataCache.getFileCache(file)?.frontmatter);
 
 				oApp.vault.modify(
 					file,
-					makeFrontmatter(frontmatter + '\n' + fileContent
+					makeFrontmatter(fm) + '\n' + fileContent
 					)
+
+
 			});
 		}
+
 
 		function makeFrontmatter(fm) {
 			console.log('raw frontmatter', fm)
@@ -83,9 +175,74 @@ export default class MyPlugin extends Plugin {
 			return result;
 		}
 
-		function makeFile(file,frontmatter,content) {
+		// async function toggleHabit(path,date,value) {
+		// 	const file = await oApp.vault.read(file);
+		// 	console.log(file);
+		// }
 
-		}
+
+
+
+
+
+		// const data = this.app.metadataCache.getFileCache(files[0])?.frontmatter.habitTracker;
+
+		// // console.log('data for', files[0].name, data);
+
+
+		// //codeblock
+		// this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
+		// 	// console.log('this is the config', src);
+		// 	// console.log('this is the root el', el.innerHTML);
+		// 	// console.log('context', ctx);
+		// 	const button = el.createEl('button', {
+		// 		text: "write something"
+		// 	});
+
+		// 	button.addEventListener('click',() => {
+		// 		habbitTrackerToggle(files[0],'2023-11-15', 'valueee');
+		// 	})
+		// 	return null;
+		// });
+		// window.oApp = this.app;
+
+		// //write something
+		// window.habbitTrackerToggle = function(file ,date, value) {
+		// 	console.log('habbitTrackerToggle', file, date);
+		// 	oApp.vault.read(file).then((r:string) => {
+		// 		const fileContent = r.replace('---\n','').split('---\n')[1]
+		// 		const frontmatter = makeFrontmatter(oApp.metadataCache.getFileCache(file)?.frontmatter);
+
+		// 		oApp.vault.modify(
+		// 			file,
+		// 			makeFrontmatter(frontmatter + '\n' + fileContent
+		// 			)
+		// 	});
+		// }
+
+		// function makeFrontmatter(fm) {
+		// 	console.log('raw frontmatter', fm)
+		// 	let result = "---\n"
+		// 	Object.keys(fm).forEach(f => {
+		// 		if(Array.isArray(fm[f])) {
+		// 			let fmArray = `${f}:\n`;
+		// 			fm[f].forEach(el => {
+		// 				fmArray += `  - ${el}\n`
+		// 			});
+		// 			result +=fmArray;
+		// 		} else {
+		// 			result += `${f}: ${fm[f]}\n`;
+		// 		}
+		// 	});
+		// 	result+="---"
+
+		// 	console.log('rendered frontmatter', result)
+		// 	return result;
+		// }
+
+		// function makeFile(file,frontmatter,content) {
+
+		// }
 
 		return null;
 

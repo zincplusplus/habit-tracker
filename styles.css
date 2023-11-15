@@ -6,3 +6,48 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.block-language-habittracker {
+  font-family: monospace;
+  font-size: 14px;
+  line-height: var(--checkbox-size);
+}
+
+.habit-tracker__row {
+  display: flex;
+  width: 100%
+}
+
+.habit-name {
+  flex: auto 1 0;
+  text-align: start !important;
+  letter-spacing: 0.05em;
+}
+
+.habit-cell {
+  box-sizing: content-box;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  padding: 8px 4px;
+  font-size: 11px;
+  display: inline-block;
+  text-align: center;
+}
+.habit-cell + .habit-cell {
+  border-left: 1px solid;
+}
+.habit-tracker__header .habit-cell {
+  text-align: end;
+}
+
+.habit-tracker__row + .habit-tracker__row {
+  border-top: 1px solid;
+}
+
+.habit-tick {
+  cursor: pointer;
+  opacity: 0.8;
+}
+.habit-tick:hover {
+  opacity: 1;
+  background-color: rgba(255,255,255,.1);
+}
