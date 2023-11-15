@@ -17,7 +17,7 @@ If your plugin does not need CSS, delete this file.
   width: 100%
 }
 .habit-tracker__row + .habit-tracker__row {
-  border-top: 1px solid #666;
+  border-top: 1px solid var(--color-base-50);
 }
 
 .habit-name {
@@ -36,10 +36,15 @@ If your plugin does not need CSS, delete this file.
   text-align: center;
 }
 .habit-cell + .habit-cell {
-  border-left: 1px solid #333;
+  border-left: 1px solid var(--color-base-30);
 }
 .habit-tracker__header .habit-cell {
   text-align: end;
+}
+
+/* today */
+.habit-cell:last-child {
+  background-color: rgba(255,255,255,.1);
 }
 
 
