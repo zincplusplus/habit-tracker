@@ -21,6 +21,8 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 
+		window.oVault = this.app.vault;
+
 		// read the data
 		const files = this.app.vault.getMarkdownFiles().filter(f => {
 			return f.path.indexOf('Habits/') == 0;
@@ -34,11 +36,23 @@ export default class MyPlugin extends Plugin {
 		//codeblock
 		this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
 			// console.log('this is the config', src);
-			console.log('this is the root el', el.innerHTML);
+			// console.log('this is the root el', el.innerHTML);
 			// console.log('context', ctx);
-			el.createEl('h3', {text: "hello world"})
+			const button = el.createEl('button', {
+				text: "write something"
+			});
+
+			button.addEventListener('click',() => {
+				habbitTrackerToggle(files[0],'2023-11-15');
+			})
 			return null;
 		});
+
+		//write something
+		window.habbitTrackerToggle = function(file,date,vault) {
+			console.log('habbitTrackerToggle', file, date);
+			oVault.modify(file,"yyy")
+		}
 
 		return null;
 
