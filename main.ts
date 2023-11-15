@@ -35,9 +35,6 @@ export default class HabitTracker extends Plugin {
 					// only habbits
 					if(file.path.indexOf(settings.path) !== 0) return false;
 
-					// valid habits
-					if(!Array.isArray(this.app.metadataCache.getFileCache(file)?.frontmatter.entries)) return false;
-
 					return true;
 				})
 
@@ -96,7 +93,7 @@ export default class HabitTracker extends Plugin {
 				})
 
 				let cell;
-				let entries = oApp.metadataCache.getFileCache(f)?.frontmatter.entries;
+				let entries = oApp.metadataCache.getFileCache(f)?.frontmatter?.entries || [];
 				currentDate = new Date();
 				currentDate.setDate(currentDate.getDate() - settings.range + 1);
 
@@ -123,8 +120,8 @@ export default class HabitTracker extends Plugin {
 
 		function toggleHabit(el, path, date, currentValue) {
 			const file = oApp.vault.getAbstractFileByPath(path);
-			let fm = oApp.metadataCache.getFileCache(file)?.frontmatter;
-			let entries =  fm.entries
+			let fm = oApp.metadataCache.getFileCache(file)?.frontmatter || { entries: []};
+			let entries =  fm.entries;
 
 			if(currentValue === 'x') {
 				entries = entries.filter((e) => {
@@ -140,10 +137,10 @@ export default class HabitTracker extends Plugin {
 
 			fm.entries = entries;
 
-			console.log('entries', entries);
-
 			oApp.vault.read(file).then((r:string) => {
-				const fileContent = r.replace('---\n','').split('---\n')[1]
+				let fileContent = r.replace('---\n','').split('---\n')[1];
+				if(fileContent == undefined)
+					fileContent = "";
 
 				oApp.vault.modify(
 					file,
