@@ -3,6 +3,7 @@
 // Easy and fast UI development with Svelte: https://www.youtube.com/watch?v=mCF80HBfUWA&ab_channel=Obsidian
 // https://github.com/OliverBalfour/obsidian-pandoc/blob/master/renderer.ts
 // example of replacing codeblocks https://github.com/joleaf/obsidian-email-block-plugin
+// https://ourgreenstory.com/nl/sticky-whiteboard/habit-tracker/
 
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
@@ -21,7 +22,6 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 
-		window.oVault = this.app.vault;
 
 		// read the data
 		const files = this.app.vault.getMarkdownFiles().filter(f => {
@@ -30,7 +30,7 @@ export default class MyPlugin extends Plugin {
 
 		const data = this.app.metadataCache.getFileCache(files[0])?.frontmatter.habitTracker;
 
-		console.log('data for', files[0].name, data);
+		// console.log('data for', files[0].name, data);
 
 
 		//codeblock
@@ -43,15 +43,48 @@ export default class MyPlugin extends Plugin {
 			});
 
 			button.addEventListener('click',() => {
-				habbitTrackerToggle(files[0],'2023-11-15');
+				habbitTrackerToggle(files[0],'2023-11-15', 'valueee');
 			})
 			return null;
 		});
+		window.oApp = this.app;
 
 		//write something
-		window.habbitTrackerToggle = function(file,date,vault) {
+		window.habbitTrackerToggle = function(file ,date, value) {
 			console.log('habbitTrackerToggle', file, date);
-			oVault.modify(file,"yyy")
+			oApp.vault.read(file).then((r:string) => {
+				const fileContent = r.replace('---\n','').split('---\n')[1]
+				const frontmatter = makeFrontmatter(oApp.metadataCache.getFileCache(file)?.frontmatter);
+
+				oApp.vault.modify(
+					file,
+					makeFrontmatter(frontmatter + '\n' + fileContent
+					)
+			});
+		}
+
+		function makeFrontmatter(fm) {
+			console.log('raw frontmatter', fm)
+			let result = "---\n"
+			Object.keys(fm).forEach(f => {
+				if(Array.isArray(fm[f])) {
+					let fmArray = `${f}:\n`;
+					fm[f].forEach(el => {
+						fmArray += `  - ${el}\n`
+					});
+					result +=fmArray;
+				} else {
+					result += `${f}: ${fm[f]}\n`;
+				}
+			});
+			result+="---"
+
+			console.log('rendered frontmatter', result)
+			return result;
+		}
+
+		function makeFile(file,frontmatter,content) {
+
 		}
 
 		return null;
