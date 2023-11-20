@@ -1,9 +1,9 @@
 {
 	"id": "habit-tracker",
-	"name": "Zinc's Habit Tracker",
-	"version": "1.0.0",
+	"name": "21 Days Habit Tracker",
+	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
+	"description": "Description TBD",
 	"author": "Zoreet",
 	"authorUrl": "https://github.com/zoreet",
 	"isDesktopOnly": false

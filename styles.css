@@ -27,16 +27,19 @@ If your plugin does not need CSS, delete this file.
   flex: auto 1 0;
   text-align: start !important;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .habit-cell {
   box-sizing: content-box;
-  width: 16px;
-  height: 16px;
-  padding: 8px 4px;
-  font-size: 11px;
   display: inline-block;
+  font-size: 11px;
+  height: 16px;
+  overflow: hidden;
+  padding: 8px 4px;
   text-align: center;
+  width: 16px;
 }
 .habit-cell + .habit-cell {
   border-left: 1px solid var(--color-base-30);
