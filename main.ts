@@ -4,226 +4,276 @@
 // https://github.com/OliverBalfour/obsidian-pandoc/blob/master/renderer.ts
 // example of replacing codeblocks https://github.com/joleaf/obsidian-email-block-plugin
 // https://ourgreenstory.com/nl/sticky-whiteboard/habit-tracker/
+// listen to file change https://github.com/obsidianmd/obsidian-api/blob/c01fc3074deeb3dfc6ee02546d113b448735b294/obsidian.d.ts#L3724
 
-/* eslint-disable */
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TAbstractFile } from 'obsidian';
+const yaml = require('js-yaml');
 
 // Remember to rename these classes and interfaces!
 interface HabitTrackerSettings {
-	mySetting: string;
+	path: string;
+	range: number;
+	wrapper: HTMLDivElement | null,
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
-	mySetting: 'default'
+	path: 'Habits/Good',
+	range: 21,
+	wrapper: null,
 }
 
 export default class HabitTracker extends Plugin {
 	settings: HabitTrackerSettings;
 
+	renderWrapper(parent) {
+		const wrapper = parent.createEl('div', {
+			cls: 'habit_tracker'
+		});
+		wrapper.addEventListener('click', e => {
+			let target = e.target as HTMLDivElement;
+			if(target?.classList.contains('habit-tick')) {
+				this.toggleHabit(target);
+			}
+		});
+
+		const header = wrapper.createEl('div', {
+			cls: 'habit-tracker__header habit-tracker__row'
+		});
+
+		header.createEl('div',{
+			text: '',
+			cls: 'habit-name habit-cell'
+		})
+
+		let currentDate = new Date();
+		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
+		for(let i = 0; i < this.settings.range; i++) {
+			header.createEl('span', {
+				cls: 'habit-cell',
+				text: currentDate.getDate().toString()
+			});
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+
+		return wrapper;
+	}
+
+
+	async getFrontmatter(path:string) {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		return await this.app.vault.read(file).then((result) => {
+			let frontmatter = result.split('---')[1];
+
+			if (!frontmatter) return {};
+
+			return yaml.load(frontmatter, {schema: yaml.JSON_SCHEMA});
+		})
+
+	}
+	async getHabitEntries(path:string) {
+		// let entries = await this.getFrontmatter(path)?.entries || [];
+		let fm = await this.getFrontmatter(path);
+		console.log(`Found ${fm.entries} for ${path}`);
+		return fm.entries || [];
+	}
+
+
+
+	renderHabit(path:string, entries:string[]) {
+		if (!this.settings.wrapper) return null;
+
+		let name = path.split('/').pop()?.replace('.md','');
+
+		// no. this needs to be queried insise this.settings.wrapper;
+		let row = document.getElementById(path);
+
+		if(!row) {
+			row = this.settings.wrapper.createEl('div',{
+				cls: 'habit-tracker__row',
+			});
+			row.setAttribute("id", path);
+		} else {
+			row.innerHTML = '';
+		}
+
+
+
+		row.createEl('div', {
+			text: name,
+			cls: 'habit-name habit-cell',
+		});
+
+		let cell;
+		let currentDate = new Date();
+		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
+
+		console.log('entries', entries);
+		for(let i = 0; i < this.settings.range; i++) {
+			cell = row.createEl('div', {
+				cls: `habit-cell habit-tick ${entries.includes(currentDate.toISOString().substring(0, 10)) ? 'habit-tick--true' : ''}`,
+				text: entries.includes(currentDate.toISOString().substring(0, 10)) ? 'x' : '',
+			});
+			cell.setAttribute('date', currentDate.toISOString().substring(0, 10));
+			cell.setAttribute('habit', path);
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+	}
+
+
+
+	async toggleHabit(el) {
+		const file = this.app.vault.getAbstractFileByPath(el.getAttribute('habit'));
+		const currentValue = el.innerHTML.trim();
+		const date = el.getAttribute('date');
+
+		if(!file) {
+			return;
+		}
+
+		let fm = await this.getFrontmatter(file.path) || {};
+		let entries = fm.entries || [];
+
+		if(currentValue === 'x') {
+			entries = entries.filter((e) => {
+				// console.log(e, date, e !== date);
+				return e !== date;
+			});
+		} else {
+			console.log('entries');
+			entries.push(date);
+			entries = entries.sort();
+		}
+
+		fm.entries = entries;
+		let fileContent = await this.app.vault.read(file).then(result => {
+			return result.replace('---\n','').split('---\n')[1];
+		});
+		if(fileContent == undefined)
+		fileContent = "";
+
+		this.writeFile(file, this.makeFrontmatter(fm) + '\n' + fileContent);
+	}
+
+
+
+	makeFrontmatter(fm) {
+		console.log('raw frontmatter', fm)
+		let result = "---\n"
+		Object.keys(fm).forEach(f => {
+			if(Array.isArray(fm[f])) {
+				let fmArray = `${f}:\n`;
+				fm[f].forEach((el) => {
+					fmArray += `  - ${el}\n`
+				});
+				result +=fmArray;
+			} else {
+				result += `${f}: ${fm[f]}\n`;
+			}
+		});
+		result+="---"
+
+		console.log('rendered frontmatter', result)
+		return result;
+	}
+
+
+
+	writeFile(file:TAbstractFile, content:string) {
+		if(!content) return null;
+
+		this.app.vault.modify(file, content).then(async () => {
+			this.renderHabit(
+				file.path,
+				await this.getHabitEntries(file.path))
+			})
+	}
+
+
+
 	async onload() {
+		await this.loadSettings();
 		let settings = {
 			path: 'Habits/Good',
 			range: 21
 		}
 
-		window.oApp = this.app;
-
 		this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
 
 			// 1. get all the habits
 			const files = this.app.vault.getMarkdownFiles()
-				.filter(file => {
-					// only habbits
-					if(file.path.indexOf(settings.path) !== 0) return false;
+			.filter(file => {
+				// only habbits
+				if(file.path.indexOf(settings.path) !== 0) return false;
 
-					return true;
-				})
-				.sort((a,b) => {
-					if (a.name < b.name) {
-						return -1;
-					} else if (a.name > b.name) {
-						return 1;
-					}
-					return 0;
-				});
-
-			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s)`);
-
-			// 2. figure out the date range
-			// get today
-			// get starting date
-			// show all dates
-
-			const root = el.createEl('div', {
-				cls: 'habit_tracker'
-			});
-			root.addEventListener('click', e => {
-				if(e.target?.classList.contains('habit-tick')) {
-					toggleHabit(
-						e.target,
-						e.target.getAttribute('habit'),
-						e.target.getAttribute('date'),
-						e.target.innerHTML.trim(),
-					)
+				return true;
+			})
+			.sort((a,b) => {
+				if (a.name < b.name) {
+					return -1;
+				} else if (a.name > b.name) {
+					return 1;
 				}
-			})
-
-
-			// 2.1 header
-			const header = root.createEl('div', {
-				cls: 'habit-tracker__header habit-tracker__row'
+				return 0;
 			});
 
-			header.createEl('div',{
-				text: '',
-				cls: 'habit-name habit-cell'
-			})
+			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s) from ${settings.path}`);
 
-			let currentDate = new Date();
-			currentDate.setDate(currentDate.getDate() - settings.range + 1);
-			for(let i = 0; i < settings.range; i++) {
-				header.createEl('span', {
-					cls: 'habit-cell',
-					text: currentDate.getDate()
+			if(!files.length) {
+				el.createEl('div', {
+					text: `No habits found under ${settings.path}`
 				});
-				currentDate.setDate(currentDate.getDate() + 1);
+				return null;
 			}
 
-			// 2.2 rows
-			let row;
-			files.forEach(f => {
-				row = root.createEl('div',{
-					cls: 'habit-tracker__row'
+			// 2. render the wrapper/root element
+			this.settings.wrapper = this.renderWrapper(el);
+
+			// 2.2 render each habit
+			files.forEach(async f => {
+				this.renderHabit(
+					f.path,
+					await this.getHabitEntries(f.path))
 				})
-
-				row.createEl('a', {
-					text: `${f['name']}`.replace('.md',''),
-					cls: 'habit-name habit-cell',
-					href: f.path,
-				})
-
-				let cell;
-				let entries = oApp.metadataCache.getFileCache(f)?.frontmatter?.entries || [];
-				currentDate = new Date();
-				currentDate.setDate(currentDate.getDate() - settings.range + 1);
-
-				for(let i = 0; i < settings.range; i++) {
-					cell = row.createEl('div', {
-						cls: `habit-cell habit-tick ${entries.includes(currentDate.toISOString().substring(0, 10)) ? 'habit-tick--true' : ''}`,
-						text: entries.includes(currentDate.toISOString().substring(0, 10)) ? 'x' : '',
-					});
-					cell.setAttribute('date', currentDate.toISOString().substring(0, 10));
-					cell.setAttribute('habit', f.path);
-					currentDate.setDate(currentDate.getDate() + 1);
-				}
-			})
-
-
-
-			// 99. remove the code below once everything is working
-			// el.createEl('pre', {
-			// 		text: "hello world - habit tracker"
-			// 	});
+			});
 
 			return null;
-		});
 
-		function toggleHabit(el, path, date, currentValue) {
-			const file = oApp.vault.getAbstractFileByPath(path);
-			let fm = oApp.metadataCache.getFileCache(file)?.frontmatter || { entries: []};
-			let entries =  fm.entries || [];
-
-			if(currentValue === 'x') {
-				entries = entries.filter((e) => {
-					console.log(e, date, e !== date);
-					return e !== date;
-				})
-				el.innerHTML = '';
-				el.removeClass('habit-tick--true')
-			} else {
-				entries.push(date);
-				entries = entries.sort();
-				el.innerHTML = 'x';
-				el.addClass('habit-tick--true')
-			}
-
-			fm.entries = entries;
-
-			oApp.vault.read(file).then((r:string) => {
-				let fileContent = r.replace('---\n','').split('---\n')[1];
-				if(fileContent == undefined)
-					fileContent = "";
-
-				oApp.vault.modify(
-					file,
-					makeFrontmatter(fm) + '\n' + fileContent
-					)
-
-			});
 		}
 
+		onunload() {}
 
-		function makeFrontmatter(fm) {
-			console.log('raw frontmatter', fm)
-			let result = "---\n"
-			Object.keys(fm).forEach(f => {
-				if(Array.isArray(fm[f])) {
-					let fmArray = `${f}:\n`;
-					fm[f].forEach((el) => {
-						fmArray += `  - ${el}\n`
-					});
-					result +=fmArray;
-				} else {
-					result += `${f}: ${fm[f]}\n`;
-				}
-			});
-			result+="---"
-
-			console.log('rendered frontmatter', result)
-			return result;
+		async loadSettings() {
+			this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 		}
 
-
-		return null;
-
+		async saveSettings() {
+			await this.saveData(this.settings);
+		}
 	}
 
-	onunload() {
+	// class SampleSettingTab extends PluginSettingTab {
+	// 	plugin: MyPlugin;
 
-	}
+	// 	constructor(app: App, plugin: MyPlugin) {
+	// 		super(app, plugin);
+	// 		this.plugin = plugin;
+	// 	}
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
+	// 	display(): void {
+	// 		const {containerEl} = this;
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-}
+	// 		containerEl.empty();
 
-// class SampleSettingTab extends PluginSettingTab {
-// 	plugin: MyPlugin;
-
-// 	constructor(app: App, plugin: MyPlugin) {
-// 		super(app, plugin);
-// 		this.plugin = plugin;
-// 	}
-
-// 	display(): void {
-// 		const {containerEl} = this;
-
-// 		containerEl.empty();
-
-// 		new Setting(containerEl)
-// 			.setName('Setting #1')
-// 			.setDesc('It\'s a secret')
-// 			.addText(text => text
-// 				.setPlaceholder('Enter your secret')
-// 				.setValue(this.plugin.settings.mySetting)
-// 				.onChange(async (value) => {
-// 					this.plugin.settings.mySetting = value;
-// 					await this.plugin.saveSettings();
-// 				}));
-// 	}
-// }
-/* eslint-enable */
+	// 		new Setting(containerEl)
+	// 			.setName('Setting #1')
+	// 			.setDesc('It\'s a secret')
+	// 			.addText(text => text
+	// 				.setPlaceholder('Enter your secret')
+	// 				.setValue(this.plugin.settings.mySetting)
+	// 				.onChange(async (value) => {
+	// 					this.plugin.settings.mySetting = value;
+	// 					await this.plugin.saveSettings();
+	// 				}));
+	// 	}
+	// }
+	/* eslint-enable */
