@@ -17,7 +17,7 @@ interface HabitTrackerSettings {
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
-	path: 'Habits/Good',
+	path: '',
 	range: 21,
 	wrapper: null,
 }
@@ -191,19 +191,19 @@ export default class HabitTracker extends Plugin {
 
 
 	async onload() {
-		await this.loadSettings();
-		let settings = {
-			path: 'Habits/Good',
-			range: 21
-		}
-
+		this.settings = this.settings = Object.assign({}, DEFAULT_SETTINGS);
 		this.registerMarkdownCodeBlockProcessor("habittracker", async (src, el, ctx) => {
 
+			// await this.loadSettings();
+			this.settings.path = JSON.parse(src).path;
 			// 1. get all the habits
 			const files = this.app.vault.getMarkdownFiles()
 			.filter(file => {
 				// only habbits
-				if(file.path.indexOf(settings.path) !== 0) return false;
+				if(file.path.indexOf(this.settings.path) !== 0) {
+					console.log(`${file.path} doesn't match ${this.settings.path}`);
+					return false;
+				}
 
 				return true;
 			})
@@ -216,11 +216,11 @@ export default class HabitTracker extends Plugin {
 				return 0;
 			});
 
-			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s) from ${settings.path}`);
+			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s) from ${this.settings.path}`);
 
 			if(!files.length) {
 				el.createEl('div', {
-					text: `No habits found under ${settings.path}`
+					text: `No habits found under ${this.settings.path}`
 				});
 				return null;
 			}
