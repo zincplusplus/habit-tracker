@@ -73,7 +73,7 @@ export default class HabitTracker extends Plugin {
 	async getHabitEntries(path:string) {
 		// let entries = await this.getFrontmatter(path)?.entries || [];
 		let fm = await this.getFrontmatter(path);
-		console.log(`Found ${fm.entries} for ${path}`);
+		// console.log(`Found ${fm.entries} for ${path}`);
 		return fm.entries || [];
 	}
 
@@ -107,7 +107,7 @@ export default class HabitTracker extends Plugin {
 		let currentDate = new Date();
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
 
-		console.log('entries', entries);
+		// console.log('entries', entries);
 		for(let i = 0; i < this.settings.range; i++) {
 			cell = row.createEl('div', {
 				cls: `habit-cell habit-tick ${entries.includes(currentDate.toISOString().substring(0, 10)) ? 'habit-tick--true' : ''}`,
@@ -139,7 +139,7 @@ export default class HabitTracker extends Plugin {
 				return e !== date;
 			});
 		} else {
-			console.log('entries');
+			// console.log('entries');
 			entries.push(date);
 			entries = entries.sort();
 		}
@@ -157,7 +157,7 @@ export default class HabitTracker extends Plugin {
 
 
 	makeFrontmatter(fm) {
-		console.log('raw frontmatter', fm)
+		// console.log('raw frontmatter', fm)
 		let result = "---\n"
 		Object.keys(fm).forEach(f => {
 			if(Array.isArray(fm[f])) {
@@ -172,7 +172,7 @@ export default class HabitTracker extends Plugin {
 		});
 		result+="---"
 
-		console.log('rendered frontmatter', result)
+		// console.log('rendered frontmatter', result)
 		return result;
 	}
 
@@ -201,7 +201,7 @@ export default class HabitTracker extends Plugin {
 			.filter(file => {
 				// only habbits
 				if(file.path.indexOf(this.settings.path) !== 0) {
-					console.log(`${file.path} doesn't match ${this.settings.path}`);
+					// console.log(`${file.path} doesn't match ${this.settings.path}`);
 					return false;
 				}
 
