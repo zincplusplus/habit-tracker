@@ -6,6 +6,11 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.habit_tracker {
+  container-type: inline-size;
+  container-name: habit_tracker;
+  min-width: 200px;
+}
 .block-language-habittracker {
   font-family: monospace;
   font-size: 14px;
@@ -23,13 +28,6 @@ If your plugin does not need CSS, delete this file.
   border-top: 1px solid var(--color-base-50);
 }
 
-.habit-name {
-  flex: auto 1 0;
-  text-align: start !important;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
 
 .habit-cell {
   box-sizing: content-box;
@@ -47,15 +45,50 @@ If your plugin does not need CSS, delete this file.
 .habit-tracker__header .habit-cell {
   text-align: end;
 }
-
 /* today */
 .habit-cell:last-child {
   background-color: var(--color-base-20);
 }
 
+
+
+.habit-cell__name {
+  flex: auto 1 0;
+  text-align: start !important;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+
 .habit-tick:hover {
   background-color: var(--color-base-30);
   cursor: pointer;
+}
+@container habit_tracker (min-width:461px) and (max-width: 640px) {
+  .habit-cell__name ~ .habit-cell {
+    display: none;
+  }
+  .habit-cell__name ~ .habit-cell:nth-child(n + 9) {
+    display: block;
+  }
+}
+@container habit_tracker (min-width:281px) and (max-width: 460px) {
+  .habit-cell__name ~ .habit-cell {
+    display: none;
+  }
+  .habit-cell__name ~ .habit-cell:nth-child(n + 16) {
+    display: block;
+  }
+}
+@container habit_tracker (max-width: 280px) {
+  .habit-cell__name ~ .habit-cell {
+    display: none;
+  }
+  .habit-cell__name ~ .habit-cell:nth-child(n + 20) {
+    display: block;
+  }
 }
 
 .habit-tick--true {

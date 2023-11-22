@@ -14,9 +14,11 @@ interface HabitTrackerSettings {
 	wrapper: HTMLDivElement | null,
 }
 
+const DAYS_TO_SHOW = 21;
+
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
-	range: 21,
+	range: DAYS_TO_SHOW,
 	wrapper: null,
 }
 
@@ -26,7 +28,7 @@ export default class HabitTracker {
 
 	constructor(src, el, ctx, app) {
 		this.app = app;
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(src));
+		this.settings = this.loadSettings(src);
 		this.settings.wrapper = el;
 		console.log('Habit Tracker 21 loaded with ', this.settings);
 
@@ -70,6 +72,10 @@ export default class HabitTracker {
 				})
 	}
 
+	loadSettings(rawSettings) {
+		return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(rawSettings))
+	}
+
 	renderWrapper(parent) {
 		const wrapper = parent.createEl('div', {
 			cls: 'habit_tracker'
@@ -87,7 +93,7 @@ export default class HabitTracker {
 
 		header.createEl('div',{
 			text: '',
-			cls: 'habit-name habit-cell'
+			cls: 'habit-cell__name habit-cell'
 		})
 
 		const currentDate = new Date();
@@ -145,7 +151,7 @@ export default class HabitTracker {
 
 		row.createEl('div', {
 			text: name,
-			cls: 'habit-name habit-cell',
+			cls: 'habit-cell__name habit-cell',
 		});
 
 		let cell;
