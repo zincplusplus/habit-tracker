@@ -1,10 +1,7 @@
 ## Now
-- error handling
 
 ## Next
 - pass Today as a variable
-- readme/tutorial
-- publish it
 - link to pages
 - listen for changes and auto update
 - auto switch to new day at midnight
@@ -15,5 +12,8 @@
 - add dashboard for each habit with stats (current streak, avg streak, best streak, avg completion rate etc)
 
 ## Done
+- publish it
+- readme/tutorial
 - allow user to specify the path
 - make it work in portrait mode
+- error handling
