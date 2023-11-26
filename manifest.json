@@ -1,9 +1,9 @@
 {
 	"id": "habit-tracker",
 	"name": "21 Days Habit Tracker",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"minAppVersion": "0.15.0",
-	"description": "Description TBD",
+	"description": "Your 21-day journey to habit formation simplified",
 	"author": "Zoreet",
 	"authorUrl": "https://github.com/zoreet",
 	"isDesktopOnly": false

@@ -6,88 +6,118 @@
 // https://ourgreenstory.com/nl/sticky-whiteboard/habit-tracker/
 // listen to file change https://github.com/obsidianmd/obsidian-api/blob/c01fc3074deeb3dfc6ee02546d113b448735b294/obsidian.d.ts#L3724
 
-import { App, parseYaml, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TAbstractFile } from 'obsidian';
+import { App, parseYaml, Notice, TAbstractFile } from 'obsidian';
+
+const PLUGIN_NAME = "Habit Tracker 21"
+const DAYS_TO_SHOW = 21;
 
 interface HabitTrackerSettings {
 	path: string;
 	range: number;
-	wrapper: HTMLDivElement | null,
+	rootElement: HTMLDivElement | undefined,
+	habitsGoHere: HTMLDivElement | undefined,
 }
-
-const DAYS_TO_SHOW = 21;
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
 	range: DAYS_TO_SHOW,
-	wrapper: null,
+	rootElement: undefined,
+	habitsGoHere: undefined,
 }
 
 export default class HabitTracker {
 	settings: HabitTrackerSettings;
 	app: App;
 
+
+
 	constructor(src, el, ctx, app) {
 		this.app = app;
 		this.settings = this.loadSettings(src);
-		this.settings.wrapper = el;
-		console.log('Habit Tracker 21 loaded with ', this.settings);
+		this.settings.rootElement = el;
+		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings);
 
 		this.settings.path = JSON.parse(src).path;
-			// 1. get all the habits
-			const files = this.app.vault.getMarkdownFiles()
-			.filter(file => {
-				// only habbits
-				if(file.path.indexOf(this.settings.path) !== 0) {
-					// console.log(`${file.path} doesn't match ${this.settings.path}`);
-					return false;
-				}
 
-				return true;
+		// 1. get all the habits
+		const files = this.loadFiles();
+
+		if (files.length === 0) {
+			this.renderNoHabitsFoundMessage();
+			return;
+		}
+
+		console.log(`${PLUGIN_NAME} loaded successfully ${files.length} file(s) from ${this.settings.path}`);
+
+		// 2.1 render the element that holds all habits
+		this.settings.habitsGoHere = this.renderRoot(el);
+
+		// 2.2 render the header
+		this.renderHeader(this.settings.habitsGoHere);
+
+		// 2.3 render each habit
+		files.forEach(async f => {
+			this.renderHabit(
+				f.path,
+				await this.getHabitEntries(f.path))
 			})
-			.sort((a,b) => {
-				if (a.name < b.name) {
-					return -1;
-				} else if (a.name > b.name) {
-					return 1;
-				}
-				return 0;
-			});
+	}
 
-			console.log('Habit Tracker: ', `Loaded successfully ${files.length} file(s) from ${this.settings.path}`);
 
-			if(!files.length) {
-				el.createEl('div', {
-					text: `No habits found under ${this.settings.path}`
-				});
+
+	loadFiles() {
+		return this.app.vault.getMarkdownFiles()
+		.filter(file => {
+			// only habits
+			if(!file.path.includes(this.settings.path)) {
+				// console.log(`${file.path} doesn't match ${this.settings.path}`);
+				return false;
 			}
 
-			// 2. render the wrapper/root element
-			this.settings.wrapper = this.renderWrapper(el);
-
-			// 2.2 render each habit
-			files.forEach(async f => {
-				this.renderHabit(
-					f.path,
-					await this.getHabitEntries(f.path))
-				})
+			return true;
+		})
+		.sort((a, b) => a.name.localeCompare(b.name));
 	}
+
+
 
 	loadSettings(rawSettings) {
-		return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(rawSettings))
+		try {
+			return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(rawSettings))
+		} catch(error) {
+			new Notice(`${PLUGIN_NAME}: received invalid settings. continuing with default settings`)
+			return DEFAULT_SETTINGS;
+		}
 	}
 
-	renderWrapper(parent) {
-		const wrapper = parent.createEl('div', {
+
+
+	renderNoHabitsFoundMessage() {
+		this.settings.rootElement.createEl('div', {
+			text: `No habits found under ${this.settings.path}`
+		});
+	}
+
+
+
+	renderRoot(parent) {
+		const rootElement = parent.createEl('div', {
 			cls: 'habit_tracker'
 		});
-		wrapper.addEventListener('click', e => {
+		rootElement.addEventListener('click', e => {
 			const target = e.target as HTMLDivElement;
 			if(target?.classList.contains('habit-tick')) {
 				this.toggleHabit(target);
 			}
 		});
 
-		const header = wrapper.createEl('div', {
+		return rootElement;
+	}
+
+
+
+	renderHeader(parent) {
+		const header = parent.createEl('div', {
 			cls: 'habit-tracker__header habit-tracker__row'
 		});
 
@@ -99,28 +129,41 @@ export default class HabitTracker {
 		const currentDate = new Date();
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
 		for(let i = 0; i < this.settings.range; i++) {
+			const day = currentDate.getDate().toString();
 			header.createEl('span', {
 				cls: 'habit-cell',
-				text: currentDate.getDate().toString()
+				text: day
 			});
 			currentDate.setDate(currentDate.getDate() + 1);
 		}
-
-		return wrapper;
 	}
+
 
 
 	async getFrontmatter(path:string) {
 		const file = this.app.vault.getAbstractFileByPath(path);
-		return await this.app.vault.read(file).then((result) => {
-			const frontmatter = result.split('---')[1];
+		if (!file) {
+			new Notice(`${PLUGIN_NAME}: No file found for path: ${path}`);
+			return {};
+		}
 
-			if (!frontmatter) return {};
+		try {
+			return await this.app.vault.read(file).then((result) => {
+				const frontmatter = result.split('---')[1];
 
-			return parseYaml(frontmatter);
-		})
+				if (!frontmatter) return {};
+
+				return parseYaml(frontmatter);
+			});
+		} catch(error) {
+			return {};
+		}
+
 
 	}
+
+
+
 	async getHabitEntries(path:string) {
 		// let entries = await this.getFrontmatter(path)?.entries || [];
 		const fm = await this.getFrontmatter(path);
@@ -131,15 +174,18 @@ export default class HabitTracker {
 
 
 	renderHabit(path:string, entries:string[]) {
-		if (!this.settings.wrapper) return null;
+		if (!this.settings.habitsGoHere) {
+			new Notice(`${PLUGIN_NAME}: missing div that holds all habits`);
+			return null;
+		}
 
 		const name = path.split('/').pop()?.replace('.md','');
 
-		// no. this needs to be queried insise this.settings.wrapper;
+		// no. this needs to be queried inside this.settings.rootElement;
 		let row = document.getElementById(path);
 
 		if(!row) {
-			row = this.settings.wrapper.createEl('div',{
+			row = this.settings.habitsGoHere.createEl('div',{
 				cls: 'habit-tracker__row',
 			});
 			row.setAttribute("id", path);
@@ -148,24 +194,28 @@ export default class HabitTracker {
 		}
 
 
-
 		row.createEl('div', {
 			text: name,
 			cls: 'habit-cell__name habit-cell',
 		});
 
-		let cell;
 		const currentDate = new Date();
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
 
+		const entriesSet = new Set(entries);
+
 		// console.log('entries', entries);
 		for(let i = 0; i < this.settings.range; i++) {
-			cell = row.createEl('div', {
-				cls: `habit-cell habit-tick ${entries.includes(currentDate.toISOString().substring(0, 10)) ? 'habit-tick--true' : ''}`,
-				text: entries.includes(currentDate.toISOString().substring(0, 10)) ? 'x' : '',
+			const dateString = currentDate.toISOString().substring(0, 10);
+			const entryExists = entriesSet.has(dateString);
+
+			const habitCell = row.createEl('div', {
+				cls: `habit-cell habit-tick ${entryExists ? 'habit-tick--true' : ''}`,
+				text: entryExists ? 'x' : '',
 			});
-			cell.setAttribute('date', currentDate.toISOString().substring(0, 10));
-			cell.setAttribute('habit', path);
+
+			habitCell.setAttribute('date', dateString);
+			habitCell.setAttribute('habit', path);
 			currentDate.setDate(currentDate.getDate() + 1);
 		}
 	}
@@ -173,69 +223,74 @@ export default class HabitTracker {
 
 
 	async toggleHabit(el) {
-		const file = this.app.vault.getAbstractFileByPath(el.getAttribute('habit'));
-		const currentValue = el.innerHTML.trim();
-		const date = el.getAttribute('date');
+    const habit = el.getAttribute('habit');
+    const date = el.getAttribute('date');
+    const file = this.app.vault.getAbstractFileByPath(habit);
+    const currentValue = el.innerHTML.trim();
 
-		if(!file) {
-			return;
-		}
+    if(!file) {
+        new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`);
+        return;
+    }
 
-		const fm = await this.getFrontmatter(file.path) || {};
-		let entries = fm.entries || [];
+    try {
+        const fm = await this.getFrontmatter(file.path);
+        let entries = fm.entries || [];
 
-		if(currentValue === 'x') {
-			entries = entries.filter((e) => {
-				// console.log(e, date, e !== date);
-				return e !== date;
-			});
-		} else {
-			// console.log('entries');
-			entries.push(date);
-			entries = entries.sort();
-		}
+        if(currentValue === 'x') {
+            entries = entries.filter((e) => e !== date);
+        } else {
+            entries.push(date);
+            entries.sort();
+        }
 
-		fm.entries = entries;
-		let fileContent = await this.app.vault.read(file).then(result => {
-			return result.replace('---\n','').split('---\n')[1];
-		});
-		if(fileContent == undefined)
-		fileContent = "";
+        fm.entries = entries;
+        let fileContent = await this.app.vault.read(file);
+        fileContent = fileContent.replace('---\n','').split('---\n')[1] || "";
 
-		this.writeFile(file, this.makeFrontmatter(fm) + '\n' + fileContent);
-	}
+        await this.writeFile(file, this.makeFrontmatter(fm) + '\n' + fileContent);
+        this.renderHabit(file.path, await this.getHabitEntries(file.path));
+
+    } catch(e) {
+        new Notice(`${PLUGIN_NAME}: could not change habit on that day`);
+        throw e;
+    }
+}
 
 
 
 	makeFrontmatter(fm) {
 		// console.log('raw frontmatter', fm)
-		let result = "---\n"
-		Object.keys(fm).forEach(f => {
-			if(Array.isArray(fm[f])) {
-				let fmArray = `${f}:\n`;
-				fm[f].forEach((el) => {
-					fmArray += `  - ${el}\n`
-				});
-				result +=fmArray;
-			} else {
-				result += `${f}: ${fm[f]}\n`;
-			}
-		});
-		result+="---"
+		const result = ["---"];
+
+    for (let [key, value] of Object.entries(fm)) {
+        if (Array.isArray(value)) {
+            const fmArray = value.map(el => `  - ${el}`);
+            result.push(`${key}:\n${fmArray.join('\n')}`);
+        } else {
+            result.push(`${key}: ${value}`);
+        }
+    }
+
+    result.push("---");
 
 		// console.log('rendered frontmatter', result)
-		return result;
+    return result.join('\n');
 	}
 
 
 
 	writeFile(file:TAbstractFile, content:string) {
-		if(!content) return null;
+		if(!content) {
+			new Notice(`${PLUGIN_NAME}: could not save changes due to missing content`)
+			return null;
+		}
 
-		this.app.vault.modify(file, content).then(async () => {
-			this.renderHabit(
-				file.path,
-				await this.getHabitEntries(file.path))
-			})
+		try {
+			return this.app.vault.modify(file, content);
+		} catch(error) {
+			new Notice(`${PLUGIN_NAME}: could not save changes`)
+			return Promise.reject(error);
+		}
 	}
 }
