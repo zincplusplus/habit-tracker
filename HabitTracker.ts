@@ -190,7 +190,7 @@ export default class HabitTracker {
 			});
 			row.setAttribute("id", path);
 		} else {
-			row.innerHTML = '';
+			this.removeAllChildNodes(row);
 		}
 
 
@@ -207,12 +207,13 @@ export default class HabitTracker {
 		// console.log('entries', entries);
 		for(let i = 0; i < this.settings.range; i++) {
 			const dateString = currentDate.toISOString().substring(0, 10);
-			const entryExists = entriesSet.has(dateString);
+			const isTicked = entriesSet.has(dateString);
 
 			const habitCell = row.createEl('div', {
-				cls: `habit-cell habit-tick ${entryExists ? 'habit-tick--true' : ''}`,
-				text: entryExists ? 'x' : '',
+				cls: `habit-cell habit-tick ${isTicked ? 'habit-tick--true' : ''}`,
 			});
+
+			habitCell.setAttribute('ticked', isTicked.toString() )
 
 			habitCell.setAttribute('date', dateString);
 			habitCell.setAttribute('habit', path);
@@ -226,7 +227,7 @@ export default class HabitTracker {
     const habit = el.getAttribute('habit');
     const date = el.getAttribute('date');
     const file = this.app.vault.getAbstractFileByPath(habit);
-    const currentValue = el.innerHTML.trim();
+    const isTicked = el.getAttribute('ticked');
 
     if(!file) {
         new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`);
@@ -237,7 +238,7 @@ export default class HabitTracker {
         const fm = await this.getFrontmatter(file.path);
         let entries = fm.entries || [];
 
-        if(currentValue === 'x') {
+        if(isTicked === 'true') {
             entries = entries.filter((e) => e !== date);
         } else {
             entries.push(date);
@@ -293,4 +294,11 @@ export default class HabitTracker {
 			return Promise.reject(error);
 		}
 	}
+
+
+	removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
 }
