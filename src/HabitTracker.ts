@@ -235,12 +235,14 @@ export default class HabitTracker {
 			}
 
 			this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-				if(isTicked === 'true') {
-					frontmatter['entries'] = frontmatter['entries'].filter((e) => e !== date);
+				let entries = frontmatter["entries"] || [];
+				if (isTicked === "true") {
+					entries = entries.filter((e) => e !== date);
 				} else {
-					frontmatter['entries'].push(date);
-					frontmatter['entries'].sort();
+					entries.push(date);
+					entries.sort();
 				}
+				frontmatter["entries"] = entries;
 			});
 
 			this.renderHabit(file.path, await this.getHabitEntries(file.path));
