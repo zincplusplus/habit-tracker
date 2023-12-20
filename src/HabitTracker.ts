@@ -9,7 +9,9 @@
 import { App, parseYaml, Notice, TAbstractFile } from 'obsidian';
 
 const PLUGIN_NAME = "Habit Tracker 21"
-const DAYS_TO_SHOW = 21;
+/* i want to show that a streak is already ongoing even if the previous dates are not rendered
+  so I load an extra date in the range, but never display it in the UI */
+const DAYS_TO_LOAD = 22;
 
 interface HabitTrackerSettings {
 	path: string;
@@ -20,7 +22,7 @@ interface HabitTrackerSettings {
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
-	range: DAYS_TO_SHOW,
+	range: DAYS_TO_LOAD,
 	rootElement: undefined,
 	habitsGoHere: undefined,
 }

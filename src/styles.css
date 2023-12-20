@@ -123,3 +123,9 @@ If your plugin does not need CSS, delete this file.
   border-bottom-right-radius: 0;
   width: 100%;
 }
+
+.habit-cell__name + * {
+  /* i want to show that a streak is already ongoing even if the previous dates are not rendered
+  so I load an extra date in the range, but never display it in the UI */
+  display: none;
+}

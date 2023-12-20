@@ -1,4 +1,5 @@
 ## Now
+- show streak even if it's starting from before the 21(displayed days)
 
 ## Next
 - pass Today as a variable
@@ -8,7 +9,6 @@
 - allow user to create a habit from the tracker
 - show only habits that have activity in the past 21 days
 - settings page
-- show streak even if it's starting from before the 21(displayed days)
 - add dashboard for each habit with stats (current streak, avg streak, best streak, avg completion rate etc)
 
 ## Done
