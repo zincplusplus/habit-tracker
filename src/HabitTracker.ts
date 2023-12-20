@@ -178,17 +178,18 @@ export default class HabitTracker {
 				new Notice(`${PLUGIN_NAME}: missing div that holds all habits`);
 				return null;
 			}
+			const parent = this.settings.habitsGoHere;
 
 			const name = path.split('/').pop()?.replace('.md','');
 
 			// no. this needs to be queried inside this.settings.rootElement;
-			let row = document.getElementById(path);
+			let row = parent.querySelector(`#${this.pathToId(path)}`)
 
 			if(!row) {
 				row = this.settings.habitsGoHere.createEl('div',{
 					cls: 'habit-tracker__row',
 				});
-				row.setAttribute("id", path);
+				row.setAttribute("id", this.pathToId(path));
 			} else {
 				this.removeAllChildNodes(row);
 			}
@@ -269,5 +270,12 @@ export default class HabitTracker {
 			while (parent.firstChild) {
 				parent.removeChild(parent.firstChild);
 			}
+		}
+
+		pathToId(path) {
+			return path
+				.replaceAll('/', '_')
+				.replaceAll('.', '__')
+				.replaceAll(' ', '___')
 		}
 	}

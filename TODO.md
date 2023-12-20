@@ -12,6 +12,7 @@
 - add dashboard for each habit with stats (current streak, avg streak, best streak, avg completion rate etc)
 
 ## Done
+- make it work in reading mode
 - publish it
 - readme/tutorial
 - allow user to specify the path
