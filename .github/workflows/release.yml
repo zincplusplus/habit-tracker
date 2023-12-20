@@ -16,8 +16,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Build plugin
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}} # Add this line
         run: |
           npm install
           npm run build
