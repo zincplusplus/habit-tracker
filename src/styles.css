@@ -11,6 +11,7 @@ If your plugin does not need CSS, delete this file.
   container-name: habit_tracker;
   min-width: 200px;
 }
+
 .block-language-habittracker {
   font-family: monospace;
   font-size: 14px;
@@ -21,10 +22,12 @@ If your plugin does not need CSS, delete this file.
   display: flex;
   width: 100%
 }
+
 .habit-tracker__row:hover {
   background-color: var(--color-base-10);
 }
-.habit-tracker__row + .habit-tracker__row {
+
+.habit-tracker__row+.habit-tracker__row {
   border-top: 1px solid var(--color-base-50);
 }
 
@@ -39,12 +42,15 @@ If your plugin does not need CSS, delete this file.
   text-align: center;
   width: 16px;
 }
-.habit-cell + .habit-cell {
+
+.habit-cell+.habit-cell {
   border-left: 1px solid var(--color-base-30);
 }
+
 .habit-tracker__header .habit-cell {
   text-align: end;
 }
+
 /* today */
 .habit-cell:last-child {
   background-color: var(--color-base-20);
@@ -62,31 +68,38 @@ If your plugin does not need CSS, delete this file.
 
 
 
+.habit-cell__name:hover,
 .habit-tick:hover {
   background-color: var(--color-base-30);
   cursor: pointer;
 }
+
 @container habit_tracker (min-width:461px) and (max-width: 640px) {
-  .habit-cell__name ~ .habit-cell {
+  .habit-cell__name~.habit-cell {
     display: none;
   }
-  .habit-cell__name ~ .habit-cell:nth-child(n + 9) {
+
+  .habit-cell__name~.habit-cell:nth-child(n + 9) {
     display: block;
   }
 }
+
 @container habit_tracker (min-width:281px) and (max-width: 460px) {
-  .habit-cell__name ~ .habit-cell {
+  .habit-cell__name~.habit-cell {
     display: none;
   }
-  .habit-cell__name ~ .habit-cell:nth-child(n + 16) {
+
+  .habit-cell__name~.habit-cell:nth-child(n + 16) {
     display: block;
   }
 }
+
 @container habit_tracker (max-width: 280px) {
-  .habit-cell__name ~ .habit-cell {
+  .habit-cell__name~.habit-cell {
     display: none;
   }
-  .habit-cell__name ~ .habit-cell:nth-child(n + 20) {
+
+  .habit-cell__name~.habit-cell:nth-child(n + 20) {
     display: block;
   }
 }
@@ -98,6 +111,7 @@ If your plugin does not need CSS, delete this file.
   padding-right: 0;
   width: 24px;
 }
+
 .habit-tick--true:before {
   background: var(--checkbox-color);
   border-radius: 10px;
@@ -111,7 +125,7 @@ If your plugin does not need CSS, delete this file.
   transition: all .3s ease;
 }
 
-.habit-tick--true + .habit-tick--true:before {
+.habit-tick--true+.habit-tick--true:before {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   margin-left: 0;
@@ -124,7 +138,7 @@ If your plugin does not need CSS, delete this file.
   width: 100%;
 }
 
-.habit-cell__name + * {
+.habit-cell__name+* {
   /* i want to show that a streak is already ongoing even if the previous dates are not rendered
   so I load an extra date in the range, but never display it in the UI */
   display: none;
