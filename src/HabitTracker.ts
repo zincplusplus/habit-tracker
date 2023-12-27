@@ -15,6 +15,7 @@ const DAYS_TO_LOAD = 22
 
 interface HabitTrackerSettings {
 	path: string
+	lastDisplayedDate: string
 	range: number
 	rootElement: HTMLDivElement | undefined
 	habitsGoHere: HTMLDivElement | undefined
@@ -22,9 +23,19 @@ interface HabitTrackerSettings {
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
+	lastDisplayedDate: getTodayDate(), // today
 	range: DAYS_TO_LOAD,
 	rootElement: undefined,
 	habitsGoHere: undefined,
+}
+
+function getTodayDate() {
+	const today = new Date()
+	const year = today.getFullYear()
+	const month = String(today.getMonth() + 1).padStart(2, '0')
+	const day = String(today.getDate()).padStart(2, '0')
+
+	return `${year}-${month}-${day}`
 }
 
 export default class HabitTracker {
@@ -35,9 +46,11 @@ export default class HabitTracker {
 		this.app = app
 		this.settings = this.loadSettings(src)
 		this.settings.rootElement = el
-		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings);
-
 		this.settings.path = JSON.parse(src).path
+		this.settings.lastDisplayedDate =
+			JSON.parse(src).lastDisplayedDate || this.settings.lastDisplayedDate
+
+		console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
 
 		// 1. get all the habits
 		const files = this.loadFiles()
@@ -119,7 +132,7 @@ export default class HabitTracker {
 			cls: 'habit-cell__name habit-cell',
 		})
 
-		const currentDate = new Date()
+		const currentDate = new Date(this.settings.lastDisplayedDate)
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
 		for (let i = 0; i < this.settings.range; i++) {
 			const day = currentDate.getDate().toString()
@@ -189,7 +202,7 @@ export default class HabitTracker {
 			this.app.workspace.openLinkText('', path, false)
 		})
 
-		const currentDate = new Date()
+		const currentDate = new Date(this.settings.lastDisplayedDate)
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
 
 		const entriesSet = new Set(entries)
