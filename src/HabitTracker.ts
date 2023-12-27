@@ -46,11 +46,12 @@ export default class HabitTracker {
 		this.app = app
 		this.settings = this.loadSettings(src)
 		this.settings.rootElement = el
+		// these should be moved to loadSettings
 		this.settings.path = JSON.parse(src).path
 		this.settings.lastDisplayedDate =
 			JSON.parse(src).lastDisplayedDate || this.settings.lastDisplayedDate
 
-		console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
+		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
 
 		// 1. get all the habits
 		const files = this.loadFiles()
