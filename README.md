@@ -10,7 +10,7 @@ Introducing "Habit Tracker 21," an innovative plugin designed specifically for O
 
 1. Create a folder for all your habits, e.g. `Habits`
 2. Create empty files inside that folder for each habit you want to track
-3. Enable the habit tracker UI. I like to past the following in by daily todo template
+3. Enable the habit tracker UI by pasting the following code in your `.md` file:
 
 ````markdown
 ```habittracker
@@ -21,6 +21,18 @@ Introducing "Habit Tracker 21," an innovative plugin designed specifically for O
 ````
 
 Make sure to specify the path you're using. You can point to one habit, or all habits that contain that path (including subfolders);
+
+## Parameters
+
+- path [mandatory]: a string containing a path to a folder or specific habit (aka .md file)
+- lastDisplayedDate [optional]: the date that is displayed in the chart
+  - format: `"YYYY-MM-DD"`
+  - default to today
+  - example settings
+    `{
+	"path": "Habits/",
+	"lastDisplayedDate": "2023-12-27"
+}`
 
 ## Example
 
