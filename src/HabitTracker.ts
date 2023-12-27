@@ -194,13 +194,11 @@ export default class HabitTracker {
 
 		const habitTitle = row.createEl('div', {
 			text: name,
-			cls: 'habit-cell__name habit-cell',
+			cls: 'habit-cell__name habit-cell internal-link',
 		})
 
-		habitTitle.addEventListener('click', (e) => {
-			// When the habit title is clicked, open the corresponding file in the editor
-			this.app.workspace.openLinkText('', path, false)
-		})
+		habitTitle.setAttribute('href', path)
+		habitTitle.setAttribute('aria-label', path)
 
 		const currentDate = new Date(this.settings.lastDisplayedDate)
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
