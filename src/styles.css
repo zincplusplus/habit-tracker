@@ -7,139 +7,134 @@ If your plugin does not need CSS, delete this file.
 
 */
 .habit_tracker {
-  container-type: inline-size;
-  container-name: habit_tracker;
-  min-width: 200px;
+	container-type: inline-size;
+	container-name: habit_tracker;
+	min-width: 200px;
 }
 
 .block-language-habittracker {
-  font-family: monospace;
-  font-size: 14px;
-  line-height: var(--checkbox-size);
+	font-family: monospace;
+	font-size: 14px;
+	line-height: var(--checkbox-size);
 }
 
 .habit-tracker__row {
-  display: flex;
-  width: 100%
+	display: flex;
+	width: 100%;
 }
 
 .habit-tracker__row:hover {
-  background-color: var(--color-base-10);
+	background-color: var(--color-base-10);
 }
 
-.habit-tracker__row+.habit-tracker__row {
-  border-top: 1px solid var(--color-base-50);
+.habit-tracker__row + .habit-tracker__row {
+	border-top: 1px solid var(--color-base-50);
 }
-
 
 .habit-cell {
-  box-sizing: content-box;
-  display: inline-block;
-  font-size: 11px;
-  height: 16px;
-  overflow: hidden;
-  padding: 8px 4px;
-  text-align: center;
-  width: 16px;
+	box-sizing: content-box;
+	display: inline-block;
+	font-size: 11px;
+	height: 16px;
+	overflow: hidden;
+	padding: 8px 4px;
+	text-align: center;
+	width: 16px;
 }
 
-.habit-cell+.habit-cell {
-  border-left: 1px solid var(--color-base-30);
+.habit-cell + .habit-cell {
+	border-left: 1px solid var(--color-base-30);
 }
 
 .habit-tracker__header .habit-cell {
-  text-align: end;
+	text-align: end;
 }
 
 /* today */
 .habit-cell:last-child {
-  background-color: var(--color-base-20);
+	background-color: var(--color-base-20);
 }
-
-
 
 .habit-cell__name {
-  flex: auto 1 0;
-  text-align: start !important;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+	flex: auto 1 0;
+	text-align: start !important;
+	letter-spacing: 0.05em;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
-
-
 
 .habit-cell__name:hover,
 .habit-tick:hover {
-  background-color: var(--color-base-30);
-  cursor: pointer;
+	background-color: var(--color-base-30);
+	cursor: pointer;
 }
 
 @container habit_tracker (min-width:461px) and (max-width: 640px) {
-  .habit-cell__name~.habit-cell {
-    display: none;
-  }
+	.habit-cell__name ~ .habit-cell {
+		display: none;
+	}
 
-  .habit-cell__name~.habit-cell:nth-child(n + 9) {
-    display: block;
-  }
+	.habit-cell__name ~ .habit-cell:nth-child(n + 9) {
+		display: block;
+	}
 }
 
 @container habit_tracker (min-width:281px) and (max-width: 460px) {
-  .habit-cell__name~.habit-cell {
-    display: none;
-  }
+	.habit-cell__name ~ .habit-cell {
+		display: none;
+	}
 
-  .habit-cell__name~.habit-cell:nth-child(n + 16) {
-    display: block;
-  }
+	.habit-cell__name ~ .habit-cell:nth-child(n + 16) {
+		display: block;
+	}
 }
 
 @container habit_tracker (max-width: 280px) {
-  .habit-cell__name~.habit-cell {
-    display: none;
-  }
+	.habit-cell__name ~ .habit-cell {
+		display: none;
+	}
 
-  .habit-cell__name~.habit-cell:nth-child(n + 20) {
-    display: block;
-  }
+	.habit-cell__name ~ .habit-cell:nth-child(n + 20) {
+		display: block;
+	}
 }
 
 .habit-tick--true {
-  overflow: hidden;
-  white-space: nowrap;
-  padding-left: 0;
-  padding-right: 0;
-  width: 24px;
+	overflow: hidden;
+	white-space: nowrap;
+	padding-left: 0;
+	padding-right: 0;
+	width: 24px;
 }
 
 .habit-tick--true:before {
-  background: var(--checkbox-color);
-  border-radius: 10px;
-  content: "";
-  display: inline-block;
-  height: 16px;
-  margin-bottom: 100px;
-  margin-left: 4px;
-  margin-right: 100px;
-  width: 16px;
-  transition: all .3s ease;
+	background: var(--checkbox-color);
+	border-radius: 10px;
+	content: "";
+	display: inline-block;
+	height: 16px;
+	margin-bottom: 100px;
+	margin-left: 4px;
+	margin-right: 100px;
+	width: 16px;
+	transition: all 0.3s ease;
 }
 
-.habit-tick--true+.habit-tick--true:before {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin-left: 0;
-  width: 20px;
+.habit-tick--true + .habit-tick--true:before {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	margin-left: 0;
+	width: 20px;
 }
 
 .habit-tick--true:has(+ .habit-tick--true):before {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  width: 100%;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	width: 100%;
 }
 
-.habit-cell__name+* {
-  /* i want to show that a streak is already ongoing even if the previous dates are not rendered
-  so I load an extra date in the range, but never display it in the UI */
-  display: none;
+.habit-cell__name + * {
+	/* i want to show that a streak is already ongoing even if the previous dates are not rendered
+	so I load an extra date in the range, but never display it in the UI */
+	display: none;
 }
