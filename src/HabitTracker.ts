@@ -6,18 +6,18 @@
 // https://ourgreenstory.com/nl/sticky-whiteboard/habit-tracker/
 // listen to file change https://github.com/obsidianmd/obsidian-api/blob/c01fc3074deeb3dfc6ee02546d113b448735b294/obsidian.d.ts#L3724
 
-import { App, parseYaml, Notice, TAbstractFile } from 'obsidian';
+import {App, parseYaml, Notice, TAbstractFile} from 'obsidian'
 
-const PLUGIN_NAME = "Habit Tracker 21"
+const PLUGIN_NAME = 'Habit Tracker 21'
 /* i want to show that a streak is already ongoing even if the previous dates are not rendered
   so I load an extra date in the range, but never display it in the UI */
-const DAYS_TO_LOAD = 22;
+const DAYS_TO_LOAD = 22
 
 interface HabitTrackerSettings {
-	path: string;
-	range: number;
-	rootElement: HTMLDivElement | undefined,
-	habitsGoHere: HTMLDivElement | undefined,
+	path: string
+	range: number
+	rootElement: HTMLDivElement | undefined
+	habitsGoHere: HTMLDivElement | undefined
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
@@ -28,161 +28,144 @@ const DEFAULT_SETTINGS: HabitTrackerSettings = {
 }
 
 export default class HabitTracker {
-	settings: HabitTrackerSettings;
-	app: App;
-
-
+	settings: HabitTrackerSettings
+	app: App
 
 	constructor(src, el, ctx, app) {
-		this.app = app;
-		this.settings = this.loadSettings(src);
-		this.settings.rootElement = el;
+		this.app = app
+		this.settings = this.loadSettings(src)
+		this.settings.rootElement = el
 		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings);
 
-		this.settings.path = JSON.parse(src).path;
+		this.settings.path = JSON.parse(src).path
 
 		// 1. get all the habits
-		const files = this.loadFiles();
+		const files = this.loadFiles()
 
 		if (files.length === 0) {
-			this.renderNoHabitsFoundMessage();
-			return;
+			this.renderNoHabitsFoundMessage()
+			return
 		}
 
-		console.log(`${PLUGIN_NAME} loaded successfully ${files.length} file(s) from ${this.settings.path}`);
+		console.log(
+			`${PLUGIN_NAME} loaded successfully ${files.length} file(s) from ${this.settings.path}`,
+		)
 
 		// 2.1 render the element that holds all habits
-		this.settings.habitsGoHere = this.renderRoot(el);
+		this.settings.habitsGoHere = this.renderRoot(el)
 
 		// 2.2 render the header
-		this.renderHeader(this.settings.habitsGoHere);
+		this.renderHeader(this.settings.habitsGoHere)
 
 		// 2.3 render each habit
-		files.forEach(async f => {
-			this.renderHabit(
-				f.path,
-				await this.getHabitEntries(f.path))
+		files.forEach(async (f) => {
+			this.renderHabit(f.path, await this.getHabitEntries(f.path))
 		})
 	}
 
-
-
 	loadFiles() {
-		return this.app.vault.getMarkdownFiles()
-			.filter(file => {
+		return this.app.vault
+			.getMarkdownFiles()
+			.filter((file) => {
 				// only habits
 				if (!file.path.includes(this.settings.path)) {
 					// console.log(`${file.path} doesn't match ${this.settings.path}`);
-					return false;
+					return false
 				}
 
-				return true;
+				return true
 			})
-			.sort((a, b) => a.name.localeCompare(b.name));
+			.sort((a, b) => a.name.localeCompare(b.name))
 	}
-
-
 
 	loadSettings(rawSettings) {
 		try {
 			return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(rawSettings))
 		} catch (error) {
-			new Notice(`${PLUGIN_NAME}: received invalid settings. continuing with default settings`)
-			return DEFAULT_SETTINGS;
+			new Notice(
+				`${PLUGIN_NAME}: received invalid settings. continuing with default settings`,
+			)
+			return DEFAULT_SETTINGS
 		}
 	}
-
-
 
 	renderNoHabitsFoundMessage() {
 		this.settings.rootElement.createEl('div', {
-			text: `No habits found under ${this.settings.path}`
-		});
+			text: `No habits found under ${this.settings.path}`,
+		})
 	}
-
-
 
 	renderRoot(parent) {
 		const rootElement = parent.createEl('div', {
-			cls: 'habit_tracker'
-		});
-		rootElement.addEventListener('click', e => {
-			const target = e.target as HTMLDivElement;
+			cls: 'habit_tracker',
+		})
+		rootElement.addEventListener('click', (e) => {
+			const target = e.target as HTMLDivElement
 			if (target?.classList.contains('habit-tick')) {
-				this.toggleHabit(target);
+				this.toggleHabit(target)
 			}
-		});
+		})
 
-		return rootElement;
+		return rootElement
 	}
-
-
 
 	renderHeader(parent) {
 		const header = parent.createEl('div', {
-			cls: 'habit-tracker__header habit-tracker__row'
-		});
+			cls: 'habit-tracker__header habit-tracker__row',
+		})
 
 		header.createEl('div', {
 			text: '',
-			cls: 'habit-cell__name habit-cell'
+			cls: 'habit-cell__name habit-cell',
 		})
 
-		const currentDate = new Date();
-		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
+		const currentDate = new Date()
+		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
 		for (let i = 0; i < this.settings.range; i++) {
-			const day = currentDate.getDate().toString();
+			const day = currentDate.getDate().toString()
 			header.createEl('span', {
 				cls: 'habit-cell',
-				text: day
-			});
-			currentDate.setDate(currentDate.getDate() + 1);
+				text: day,
+			})
+			currentDate.setDate(currentDate.getDate() + 1)
 		}
 	}
 
-
-
 	async getFrontmatter(path: string) {
-		const file = this.app.vault.getAbstractFileByPath(path);
+		const file = this.app.vault.getAbstractFileByPath(path)
 		if (!file) {
-			new Notice(`${PLUGIN_NAME}: No file found for path: ${path}`);
-			return {};
+			new Notice(`${PLUGIN_NAME}: No file found for path: ${path}`)
+			return {}
 		}
 
 		try {
 			return await this.app.vault.read(file).then((result) => {
-				const frontmatter = result.split('---')[1];
+				const frontmatter = result.split('---')[1]
 
-				if (!frontmatter) return {};
+				if (!frontmatter) return {}
 
-				return parseYaml(frontmatter);
-			});
+				return parseYaml(frontmatter)
+			})
 		} catch (error) {
-			return {};
+			return {}
 		}
-
-
 	}
-
-
 
 	async getHabitEntries(path: string) {
 		// let entries = await this.getFrontmatter(path)?.entries || [];
-		const fm = await this.getFrontmatter(path);
+		const fm = await this.getFrontmatter(path)
 		// console.log(`Found ${fm.entries} for ${path}`);
-		return fm.entries || [];
+		return fm.entries || []
 	}
-
-
 
 	renderHabit(path: string, entries: string[]) {
 		if (!this.settings.habitsGoHere) {
-			new Notice(`${PLUGIN_NAME}: missing div that holds all habits`);
-			return null;
+			new Notice(`${PLUGIN_NAME}: missing div that holds all habits`)
+			return null
 		}
-		const parent = this.settings.habitsGoHere;
+		const parent = this.settings.habitsGoHere
 
-		const name = path.split('/').pop()?.replace('.md', '');
+		const name = path.split('/').pop()?.replace('.md', '')
 
 		// no. this needs to be queried inside this.settings.rootElement;
 		let row = parent.querySelector(`#${this.pathToId(path)}`)
@@ -190,92 +173,88 @@ export default class HabitTracker {
 		if (!row) {
 			row = this.settings.habitsGoHere.createEl('div', {
 				cls: 'habit-tracker__row',
-			});
-			row.setAttribute("id", this.pathToId(path));
+			})
+			row.setAttribute('id', this.pathToId(path))
 		} else {
-			this.removeAllChildNodes(row);
+			this.removeAllChildNodes(row)
 		}
-
 
 		const habitTitle = row.createEl('div', {
 			text: name,
 			cls: 'habit-cell__name habit-cell',
-		});
-
-		habitTitle.addEventListener('click', e => {
-			// When the habit title is clicked, open the corresponding file in the editor
-			this.app.workspace.openLinkText('', path, false);
 		})
 
-		const currentDate = new Date();
-		currentDate.setDate(currentDate.getDate() - this.settings.range + 1);
+		habitTitle.addEventListener('click', (e) => {
+			// When the habit title is clicked, open the corresponding file in the editor
+			this.app.workspace.openLinkText('', path, false)
+		})
 
-		const entriesSet = new Set(entries);
+		const currentDate = new Date()
+		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
+
+		const entriesSet = new Set(entries)
 
 		// console.log('entries', entries);
 		for (let i = 0; i < this.settings.range; i++) {
-			const dateString = currentDate.toISOString().substring(0, 10);
-			const isTicked = entriesSet.has(dateString);
+			const dateString = currentDate.toISOString().substring(0, 10)
+			const isTicked = entriesSet.has(dateString)
 
 			const habitCell = row.createEl('div', {
 				cls: `habit-cell habit-tick ${isTicked ? 'habit-tick--true' : ''}`,
-			});
+			})
 
 			habitCell.setAttribute('ticked', isTicked.toString())
 
-			habitCell.setAttribute('date', dateString);
-			habitCell.setAttribute('habit', path);
-			currentDate.setDate(currentDate.getDate() + 1);
+			habitCell.setAttribute('date', dateString)
+			habitCell.setAttribute('habit', path)
+			currentDate.setDate(currentDate.getDate() + 1)
 		}
 	}
 
-
-
 	async toggleHabit(el) {
-		const habit = el.getAttribute('habit');
-		const date = el.getAttribute('date');
-		const file = this.app.vault.getAbstractFileByPath(habit);
-		const isTicked = el.getAttribute('ticked');
+		const habit = el.getAttribute('habit')
+		const date = el.getAttribute('date')
+		const file = this.app.vault.getAbstractFileByPath(habit)
+		const isTicked = el.getAttribute('ticked')
 
 		if (!file) {
-			new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`);
-			return;
+			new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`)
+			return
 		}
 
 		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			let entries = frontmatter["entries"] || [];
-			if (isTicked === "true") {
-				entries = entries.filter((e) => e !== date);
+			let entries = frontmatter['entries'] || []
+			if (isTicked === 'true') {
+				entries = entries.filter((e) => e !== date)
 			} else {
-				entries.push(date);
-				entries.sort();
+				entries.push(date)
+				entries.sort()
 			}
-			frontmatter["entries"] = entries;
-		});
+			frontmatter['entries'] = entries
+		})
 
-		this.renderHabit(file.path, await this.getHabitEntries(file.path));
+		this.renderHabit(file.path, await this.getHabitEntries(file.path))
 	}
-
-
 
 	writeFile(file: TAbstractFile, content: string) {
 		if (!content) {
-			new Notice(`${PLUGIN_NAME}: could not save changes due to missing content`)
-			return null;
+			new Notice(
+				`${PLUGIN_NAME}: could not save changes due to missing content`,
+			)
+			return null
 		}
 
 		try {
-			return this.app.vault.modify(file, content);
+			return this.app.vault.modify(file, content)
 		} catch (error) {
 			new Notice(`${PLUGIN_NAME}: could not save changes`)
-			return Promise.reject(error);
+			return Promise.reject(error)
 		}
 	}
 
-
 	removeAllChildNodes(parent) {
 		while (parent.firstChild) {
-			parent.removeChild(parent.firstChild);
+			parent.removeChild(parent.firstChild)
 		}
 	}
 

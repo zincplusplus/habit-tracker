@@ -110,7 +110,7 @@ If your plugin does not need CSS, delete this file.
 .habit-tick--true:before {
 	background: var(--checkbox-color);
 	border-radius: 10px;
-	content: "";
+	content: '';
 	display: inline-block;
 	height: 16px;
 	margin-bottom: 100px;
