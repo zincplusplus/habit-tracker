@@ -193,7 +193,7 @@ export default class HabitTracker {
 			this.removeAllChildNodes(row)
 		}
 
-		const habitTitle = row.createEl('div', {
+		const habitTitle = row.createEl('a', {
 			text: name,
 			cls: 'habit-cell__name habit-cell internal-link',
 		})
