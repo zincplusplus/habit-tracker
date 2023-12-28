@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+fix: allow path to start with number
+fix: allow filename to contain `,` or `&`
+fix: make habit title an anchor
+
 ## 1.1.0
 
 - feat: Implement navigation to document on habit name click
