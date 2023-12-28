@@ -182,13 +182,13 @@ export default class HabitTracker {
 		const name = path.split('/').pop()?.replace('.md', '')
 
 		// no. this needs to be queried inside this.settings.rootElement;
-		let row = parent.querySelector(`#${this.pathToId(path)}`)
+		let row = parent.querySelector(`*[data-id="${this.pathToId(path)}"]`)
 
 		if (!row) {
 			row = this.settings.habitsGoHere.createEl('div', {
 				cls: 'habit-tracker__row',
 			})
-			row.setAttribute('id', this.pathToId(path))
+			row.setAttribute('data-id', this.pathToId(path))
 		} else {
 			this.removeAllChildNodes(row)
 		}
