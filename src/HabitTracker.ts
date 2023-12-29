@@ -133,7 +133,9 @@ export default class HabitTracker {
 			cls: 'habit-cell__name habit-cell',
 		})
 
-		const currentDate = new Date(this.settings.lastDisplayedDate)
+		const currentDate = this.createDateFromFormat(
+			this.settings.lastDisplayedDate,
+		)
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
 		for (let i = 0; i < this.settings.range; i++) {
 			const day = currentDate.getDate().toString()
@@ -201,7 +203,9 @@ export default class HabitTracker {
 		habitTitle.setAttribute('href', path)
 		habitTitle.setAttribute('aria-label', path)
 
-		const currentDate = new Date(this.settings.lastDisplayedDate)
+		const currentDate = this.createDateFromFormat(
+			this.settings.lastDisplayedDate,
+		)
 		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
 
 		const entriesSet = new Set(entries)
@@ -275,5 +279,12 @@ export default class HabitTracker {
 			.replaceAll('/', '_')
 			.replaceAll('.', '__')
 			.replaceAll(' ', '___')
+	}
+
+	createDateFromFormat(dateString) {
+		const [year, month, day] = dateString.split('-').map(Number)
+		const date = new Date(year, month - 1, day) // Months are 0-indexed in JavaScript
+
+		return date
 	}
 }
