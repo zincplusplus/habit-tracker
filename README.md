@@ -1,3 +1,5 @@
+[![image](https://img.shields.io/github/release/zoreet/habit-tracker.svg)](https://github.com/zoreet/habit-tracker/releases)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 # Habit Tracker 21
