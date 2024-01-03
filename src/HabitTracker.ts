@@ -140,7 +140,7 @@ export default class HabitTracker {
 		for (let i = 0; i < this.settings.range; i++) {
 			const day = currentDate.getDate().toString()
 			header.createEl('span', {
-				cls: 'habit-cell',
+				cls: `habit-cell habit-cell--${this.getDayOfWeek(currentDate)}`,
 				text: day,
 			})
 			currentDate.setDate(currentDate.getDate() + 1)
@@ -216,7 +216,9 @@ export default class HabitTracker {
 			const isTicked = entriesSet.has(dateString)
 
 			const habitCell = row.createEl('div', {
-				cls: `habit-cell habit-tick ${isTicked ? 'habit-tick--true' : ''}`,
+				cls: `habit-cell
+				habit-tick habit-tick--${isTicked}
+				habit-cell--${this.getDayOfWeek(currentDate)}`,
 			})
 
 			habitCell.setAttribute('ticked', isTicked.toString())
@@ -286,5 +288,20 @@ export default class HabitTracker {
 		const date = new Date(year, month - 1, day) // Months are 0-indexed in JavaScript
 
 		return date
+	}
+
+	getDayOfWeek(date) {
+		const daysOfWeek = [
+			'sunday',
+			'monday',
+			'tuesday',
+			'wednesday',
+			'thursday',
+			'friday',
+			'saturday',
+		]
+		const dayIndex = date.getDay()
+		const dayName = daysOfWeek[dayIndex]
+		return dayName.toLowerCase()
 	}
 }

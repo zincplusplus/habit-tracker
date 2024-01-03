@@ -138,3 +138,8 @@ If your plugin does not need CSS, delete this file.
 	so I load an extra date in the range, but never display it in the UI */
 	display: none;
 }
+
+.habit-cell--saturday,
+.habit-cell--sunday {
+	background-color: var(--color-base-10);
+}
