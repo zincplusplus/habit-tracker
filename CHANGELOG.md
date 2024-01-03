@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4
+
+fix: create date with user's timezone
+
 ## 1.1.3
 
 feat: highlight weekend dates
