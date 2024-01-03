@@ -1,5 +1,6 @@
 # vscode
 .vscode
+release
 
 # Intellij
 *.iml
