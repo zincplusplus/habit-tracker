@@ -54,11 +54,6 @@ If your plugin does not need CSS, delete this file.
 	user-select: none;
 }
 
-/* today */
-.habit-cell:last-child {
-	background-color: var(--color-base-20);
-}
-
 .habit-cell__name {
 	flex: auto 1 0;
 	text-align: start !important;
