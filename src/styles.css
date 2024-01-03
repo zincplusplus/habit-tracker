@@ -46,8 +46,12 @@ If your plugin does not need CSS, delete this file.
 	border-left: 1px solid var(--color-base-30);
 }
 
+.habit-tracker__header {
+	pointer-events: none;
+}
 .habit-tracker__header .habit-cell {
 	text-align: end;
+	user-select: none;
 }
 
 /* today */
@@ -66,6 +70,9 @@ If your plugin does not need CSS, delete this file.
 .habit-cell__name:hover,
 .habit-tick:hover {
 	background-color: var(--color-base-30);
+}
+
+.habit-tick:hover {
 	cursor: pointer;
 }
 
