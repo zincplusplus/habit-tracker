@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.5
+
+fix: user's timezone is considered when creating date ids for ticks
+
 ## 1.1.4
 
 fix: create date with user's timezone
