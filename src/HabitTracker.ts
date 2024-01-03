@@ -285,7 +285,11 @@ export default class HabitTracker {
 
 	createDateFromFormat(dateString) {
 		const [year, month, day] = dateString.split('-').map(Number)
-		const date = new Date(year, month - 1, day) // Months are 0-indexed in JavaScript
+		const date = new Date()
+
+		date.setFullYear(year)
+		date.setMonth(month - 1)
+		date.setDate(day)
 
 		return date
 	}
