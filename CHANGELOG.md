@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.3
+
+feat: highlight weekend dates
+fix: no hover for header
+
+## 1.1.2 - not working
+
+fix: create date with user's timezone
+
 ## 1.1.1
 
 fix: allow path to start with number
