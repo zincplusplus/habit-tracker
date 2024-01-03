@@ -212,13 +212,14 @@ export default class HabitTracker {
 
 		// console.log('entries', entries);
 		for (let i = 0; i < this.settings.range; i++) {
-			const dateString = currentDate.toISOString().substring(0, 10)
+			const dateString = this.getDateId(currentDate)
 			const isTicked = entriesSet.has(dateString)
 
 			const habitCell = row.createEl('div', {
 				cls: `habit-cell
 				habit-tick habit-tick--${isTicked}
 				habit-cell--${this.getDayOfWeek(currentDate)}`,
+				text: dateString.slice(-2),
 			})
 
 			habitCell.setAttribute('ticked', isTicked.toString())
@@ -292,6 +293,16 @@ export default class HabitTracker {
 		date.setDate(day)
 
 		return date
+	}
+
+	getDateId(date) {
+		const year = date.getFullYear()
+		const month = String(date.getMonth() + 1).padStart(2, '0')
+		const day = String(date.getDate()).padStart(2, '0')
+
+		let dateId = `${year}-${month}-${day}`
+
+		return dateId
 	}
 
 	getDayOfWeek(date) {
