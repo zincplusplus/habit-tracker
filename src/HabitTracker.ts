@@ -219,7 +219,6 @@ export default class HabitTracker {
 				cls: `habit-cell
 				habit-tick habit-tick--${isTicked}
 				habit-cell--${this.getDayOfWeek(currentDate)}`,
-				text: dateString.slice(-2),
 			})
 
 			habitCell.setAttribute('ticked', isTicked.toString())
