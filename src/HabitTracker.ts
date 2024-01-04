@@ -11,12 +11,15 @@ import {App, parseYaml, Notice, TAbstractFile} from 'obsidian'
 const PLUGIN_NAME = 'Habit Tracker 21'
 /* i want to show that a streak is already ongoing even if the previous dates are not rendered
   so I load an extra date in the range, but never display it in the UI */
-const DAYS_TO_LOAD = 22
+const DAYS_TO_SHOW = 21
+const PLUGIN_RELEASE_DATE = '2023-11-01'
+const DAYS_TO_LOAD = getDaysDifference(getTodayDate(), PLUGIN_RELEASE_DATE)
 
 interface HabitTrackerSettings {
 	path: string
 	lastDisplayedDate: string
-	range: number
+	daysToShow: number
+	daysToLoad: number
 	rootElement: HTMLDivElement | undefined
 	habitsGoHere: HTMLDivElement | undefined
 }
@@ -24,7 +27,8 @@ interface HabitTrackerSettings {
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
 	lastDisplayedDate: getTodayDate(), // today
-	range: DAYS_TO_LOAD,
+	daysToShow: DAYS_TO_SHOW,
+	daysToLoad: DAYS_TO_LOAD,
 	rootElement: undefined,
 	habitsGoHere: undefined,
 }
@@ -36,6 +40,17 @@ function getTodayDate() {
 	const day = String(today.getDate()).padStart(2, '0')
 
 	return `${year}-${month}-${day}`
+}
+
+function getDaysDifference(startDateId, endDateId) {
+	const start = new Date(startDateId)
+	const end = new Date(endDateId)
+	const oneDay = 24 * 60 * 60 * 1000 // hours * minutes * seconds * milliseconds
+
+	const diffInTime = Math.abs(end - start)
+	const diffInDays = Math.round(diffInTime / oneDay)
+
+	return diffInDays
 }
 
 export default class HabitTracker {
@@ -74,6 +89,16 @@ export default class HabitTracker {
 		// 2.3 render each habit
 		files.forEach(async (f) => {
 			this.renderHabit(f.path, await this.getHabitEntries(f.path))
+		})
+
+		// 2.4 show only the configured number of days
+		this.settings.habitsGoHere?.createEl('style', {
+			text: `/* i want to show that a streak is already ongoing even if the previous dates are not rendered
+							so I load an extra date in the range, but never display it in the UI */
+							.habit-cell__name,
+							.habit-cell:nth-last-child(-n + ${this.settings.daysToShow}) {
+								display: inline-block;
+							}`,
 		})
 	}
 
@@ -136,8 +161,8 @@ export default class HabitTracker {
 		const currentDate = this.createDateFromFormat(
 			this.settings.lastDisplayedDate,
 		)
-		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
-		for (let i = 0; i < this.settings.range; i++) {
+		currentDate.setDate(currentDate.getDate() - this.settings.daysToLoad + 1)
+		for (let i = 0; i < this.settings.daysToLoad; i++) {
 			const day = currentDate.getDate().toString()
 			header.createEl('span', {
 				cls: `habit-cell habit-cell--${this.getDayOfWeek(currentDate)}`,
@@ -206,12 +231,12 @@ export default class HabitTracker {
 		const currentDate = this.createDateFromFormat(
 			this.settings.lastDisplayedDate,
 		)
-		currentDate.setDate(currentDate.getDate() - this.settings.range + 1)
+		currentDate.setDate(currentDate.getDate() - this.settings.daysToLoad + 1) // todo, why +1?
 
 		const entriesSet = new Set(entries)
 
 		// console.log('entries', entries);
-		for (let i = 0; i < this.settings.range; i++) {
+		for (let i = 0; i < this.settings.daysToLoad; i++) {
 			const dateString = this.getDateId(currentDate)
 			const isTicked = entriesSet.has(dateString)
 
