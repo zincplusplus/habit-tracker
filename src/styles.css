@@ -1,26 +1,31 @@
-.habit_tracker {
-	container-type: inline-size;
-	container-name: habit_tracker;
-	min-width: 200px;
-}
-
 .block-language-habittracker {
 	font-family: monospace;
 	font-size: 14px;
 	line-height: var(--checkbox-size);
 }
 
+.habit_tracker {
+	container-type: inline-size;
+	container-name: habit_tracker;
+	min-width: 200px;
+	display: grid;
+	--items-to-show: 21;
+	grid-template-columns:
+		minmax(min-content, max-content)
+		repeat(var(--items-to-show), 25px);
+}
+
 .habit-tracker__row {
-	display: flex;
+	display: contents;
 	width: 100%;
 }
 
-.habit-tracker__row:hover {
-	background-color: var(--color-base-10);
+.habit-tracker__row + .habit-tracker__row > .habit-cell {
+	border-top: 1px solid var(--color-base-50);
 }
 
-.habit-tracker__row + .habit-tracker__row {
-	border-top: 1px solid var(--color-base-50);
+.habit-tracker__row:hover > .habit-cell {
+	background-color: var(--color-base-10);
 }
 
 .habit-cell {
@@ -31,7 +36,6 @@
 	overflow: hidden;
 	padding: 8px 4px;
 	text-align: center;
-	width: 16px;
 }
 
 .habit-cell + .habit-cell {
@@ -41,13 +45,13 @@
 .habit-tracker__header {
 	pointer-events: none;
 }
+
 .habit-tracker__header .habit-cell {
-	text-align: end;
+	text-align: center;
 	user-select: none;
 }
 
 .habit-cell__name {
-	flex: auto 1 0;
 	text-align: start !important;
 	letter-spacing: 0.05em;
 	white-space: nowrap;
