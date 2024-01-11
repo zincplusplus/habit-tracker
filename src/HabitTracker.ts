@@ -12,8 +12,7 @@ const PLUGIN_NAME = 'Habit Tracker 21'
 /* i want to show that a streak is already ongoing even if the previous dates are not rendered
   so I load an extra date in the range, but never display it in the UI */
 const DAYS_TO_SHOW = 21
-const PLUGIN_RELEASE_DATE = '2023-11-01'
-const DAYS_TO_LOAD = getDaysDifference(getTodayDate(), PLUGIN_RELEASE_DATE)
+const DAYS_TO_LOAD = DAYS_TO_SHOW + 1
 
 interface HabitTrackerSettings {
 	path: string
