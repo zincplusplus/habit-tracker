@@ -25,7 +25,7 @@ interface HabitTrackerSettings {
 
 const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
 	path: '',
-	lastDisplayedDate: getTodayDate(), // today
+	lastDisplayedDate: getTodayDate(),
 	daysToShow: DAYS_TO_SHOW,
 	daysToLoad: DAYS_TO_LOAD,
 	rootElement: undefined,
@@ -55,15 +55,13 @@ function getDaysDifference(startDateId, endDateId) {
 export default class HabitTracker {
 	settings: HabitTrackerSettings
 	app: App
+	id: String
 
 	constructor(src, el, ctx, app) {
 		this.app = app
+		this.id = this.generateUniqueId()
 		this.settings = this.loadSettings(src)
 		this.settings.rootElement = el
-		// these should be moved to loadSettings
-		this.settings.path = JSON.parse(src).path
-		this.settings.lastDisplayedDate =
-			JSON.parse(src).lastDisplayedDate || this.settings.lastDisplayedDate
 
 		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
 
