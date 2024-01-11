@@ -135,6 +135,7 @@ export default class HabitTracker {
 		const rootElement = parent.createEl('div', {
 			cls: 'habit_tracker',
 		})
+		rootElement.setAttribute('id', this.id)
 		rootElement.addEventListener('click', (e) => {
 			const target = e.target as HTMLDivElement
 			if (target?.classList.contains('habit-tick')) {
@@ -339,5 +340,11 @@ export default class HabitTracker {
 		const dayIndex = date.getDay()
 		const dayName = daysOfWeek[dayIndex]
 		return dayName.toLowerCase()
+	}
+
+	generateUniqueId() {
+		const timestamp = Date.now()
+		const randomNum = Math.floor(Math.random() * 10000) // Adjust the range as needed
+		return `habittracker-${timestamp}-${randomNum}`
 	}
 }
