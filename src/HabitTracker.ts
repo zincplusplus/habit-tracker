@@ -92,12 +92,12 @@ export default class HabitTracker {
 		})
 
 		// 2.4 show only the configured number of days
-		this.settings.habitsGoHere?.createEl('style', {
+		this.settings.rootElement?.createEl('style', {
 			text: `/* i want to show that a streak is already ongoing even if the previous dates are not rendered
 							so I load an extra date in the range, but never display it in the UI */
-							.habit-cell__name,
-							.habit-cell:nth-last-child(-n + ${this.settings.daysToShow}) {
-								display: inline-block;
+							#${this.id} .habit-cell__name,
+							#${this.id} .habit-cell:nth-last-child(-n + ${this.settings.daysToShow}) {
+								display: block;
 							}`,
 		})
 	}
