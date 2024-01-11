@@ -126,7 +126,7 @@ export default class HabitTracker {
 	}
 
 	renderNoHabitsFoundMessage() {
-		this.settings.rootElement.createEl('div', {
+		this.settings.rootElement?.createEl('div', {
 			text: `No habits found under ${this.settings.path}`,
 		})
 	}
