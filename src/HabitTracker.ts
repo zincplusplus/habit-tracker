@@ -24,14 +24,14 @@ interface HabitTrackerSettings {
 	habitsGoHere: HTMLDivElement | undefined
 }
 
-const DEFAULT_SETTINGS: HabitTrackerSettings = {
+const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
 	path: '',
 	lastDisplayedDate: getTodayDate(), // today
 	daysToShow: DAYS_TO_SHOW,
 	daysToLoad: DAYS_TO_LOAD,
 	rootElement: undefined,
 	habitsGoHere: undefined,
-}
+})
 
 function getTodayDate() {
 	const today = new Date()
@@ -119,12 +119,12 @@ export default class HabitTracker {
 
 	loadSettings(rawSettings) {
 		try {
-			return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(rawSettings))
+			return Object.assign({}, DEFAULT_SETTINGS(), JSON.parse(rawSettings))
 		} catch (error) {
 			new Notice(
 				`${PLUGIN_NAME}: received invalid settings. continuing with default settings`,
 			)
-			return DEFAULT_SETTINGS
+			return DEFAULT_SETTINGS()
 		}
 	}
 
