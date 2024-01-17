@@ -116,7 +116,15 @@ export default class HabitTracker {
 
 	loadSettings(rawSettings) {
 		try {
-			return Object.assign({}, DEFAULT_SETTINGS(), JSON.parse(rawSettings))
+			let settings = Object.assign(
+				{},
+				DEFAULT_SETTINGS(),
+				JSON.parse(rawSettings),
+			)
+			/* i want to show that a streak is already ongoing even if the previous dates are not rendered
+  		so I load an extra date in the range, but never display it in the UI */
+			settings.daysToLoad = settings.daysToShow + 1
+			return settings
 		} catch (error) {
 			new Notice(
 				`${PLUGIN_NAME}: received invalid settings. continuing with default settings`,
