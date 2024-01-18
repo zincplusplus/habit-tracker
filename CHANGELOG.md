@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0
+
+feat: the new `daysToShow` parameter allows users to display as many dates as they want
+feat: Refresh default settings on each instantiation of the plugin to ensure `lastDisplayedDate` is updated to current time (
+#19)
+fix: habit names will take exactly as much space as they need
+
 ## 1.1.5
 
 fix: user's timezone is considered when creating date ids for ticks
