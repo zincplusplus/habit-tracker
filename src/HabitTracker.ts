@@ -32,6 +32,8 @@ const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
 	habitsGoHere: undefined,
 })
 
+const ALLOWED_USER_SETTINGS = ['path', 'lastDisplayedDate', 'daysToShow']
+
 function getTodayDate() {
 	const today = new Date()
 	const year = today.getFullYear()
@@ -62,7 +64,6 @@ export default class HabitTracker {
 		this.id = this.generateUniqueId()
 		this.settings = this.loadSettings(src)
 		this.settings.rootElement = el
-
 		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
 
 		// 1. get all the habits
@@ -109,7 +110,7 @@ export default class HabitTracker {
 			let settings = Object.assign(
 				{},
 				DEFAULT_SETTINGS(),
-				JSON.parse(rawSettings),
+				this.removePrivateSettings(JSON.parse(rawSettings)),
 			)
 			/* i want to show that a streak is already ongoing even if the previous dates are not rendered
   		so I load an extra date in the range, but never display it in the UI */
@@ -121,6 +122,17 @@ export default class HabitTracker {
 			)
 			return DEFAULT_SETTINGS()
 		}
+	}
+
+	removePrivateSettings(userSettings) {
+		const result = {}
+		ALLOWED_USER_SETTINGS.forEach((key) => {
+			if (userSettings[key]) {
+				result[key] = userSettings[key]
+			}
+		})
+
+		return result
 	}
 
 	renderNoHabitsFoundMessage() {
