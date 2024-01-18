@@ -26,14 +26,25 @@ Make sure to specify the path you're using. You can point to one habit, or all h
 
 ## Parameters
 
-- path [mandatory]: a string containing a path to a folder or specific habit (aka .md file)
-- lastDisplayedDate [optional]: the date that is displayed in the chart
+- **path** _[mandatory]_: a string containing a path to a folder or specific habit (aka .md file)
+
+- **lastDisplayedDate** _[optional]_: the date that is displayed in the chart
+
   - format: `"YYYY-MM-DD"`
-  - default to today
+  - defaults to today
   - example settings
     `{
 	"path": "Habits/",
 	"lastDisplayedDate": "2023-12-27"
+}`
+
+- **daysToShow** _[optional]_: how many dates to display in the chart
+
+  - default: `21`
+
+  `{
+	"path": "Habits/",
+	"daysToShow": "31"
 }`
 
 ## Example
