@@ -87,16 +87,6 @@ export default class HabitTracker {
 		files.forEach(async (f) => {
 			this.renderHabit(f.path, await this.getHabitEntries(f.path))
 		})
-
-		// 2.4 show only the configured number of days
-		this.settings.rootElement?.createEl('style', {
-			text: `/* i want to show that a streak is already ongoing even if the previous dates are not rendered
-							so I load an extra date in the range, but never display it in the UI */
-							#${this.id} .habit-cell__name,
-							#${this.id} .habit-cell:nth-last-child(-n + ${this.settings.daysToShow}) {
-								display: block;
-							}`,
-		})
 	}
 
 	loadFiles() {
@@ -141,7 +131,7 @@ export default class HabitTracker {
 
 	renderRoot(parent) {
 		const rootElement = parent.createEl('div', {
-			cls: 'habit_tracker',
+			cls: 'habit-tracker',
 		})
 		rootElement.setAttribute('id', this.id)
 		rootElement.addEventListener('click', (e) => {
@@ -161,7 +151,7 @@ export default class HabitTracker {
 
 		header.createEl('div', {
 			text: '',
-			cls: 'habit-cell__name habit-cell',
+			cls: 'habit-tracker__cell--name habit-tracker__cell',
 		})
 
 		const currentDate = this.createDateFromFormat(
@@ -170,8 +160,10 @@ export default class HabitTracker {
 		currentDate.setDate(currentDate.getDate() - this.settings.daysToLoad + 1)
 		for (let i = 0; i < this.settings.daysToLoad; i++) {
 			const day = currentDate.getDate().toString()
-			header.createEl('span', {
-				cls: `habit-cell habit-cell--${this.getDayOfWeek(currentDate)}`,
+			header.createEl('div', {
+				cls: `habit-tracker__cell habit-tracker__cell--${this.getDayOfWeek(
+					currentDate,
+				)}`,
 				text: day,
 			})
 			currentDate.setDate(currentDate.getDate() + 1)
@@ -206,6 +198,7 @@ export default class HabitTracker {
 	}
 
 	renderHabit(path: string, entries: string[]) {
+		// console.log('rendering a habit')
 		if (!this.settings.habitsGoHere) {
 			new Notice(`${PLUGIN_NAME}: missing div that holds all habits`)
 			return null
@@ -226,13 +219,17 @@ export default class HabitTracker {
 			this.removeAllChildNodes(row)
 		}
 
-		const habitTitle = row.createEl('a', {
-			text: name,
-			cls: 'habit-cell__name habit-cell internal-link',
+		const habitTitle = row.createEl('div', {
+			cls: 'habit-tracker__cell--name habit-tracker__cell',
 		})
 
-		habitTitle.setAttribute('href', path)
-		habitTitle.setAttribute('aria-label', path)
+		const habitTitleLink = habitTitle.createEl('a', {
+			text: name,
+			cls: 'internal-link',
+		})
+
+		habitTitleLink.setAttribute('href', path)
+		habitTitleLink.setAttribute('aria-label', path)
 
 		const currentDate = this.createDateFromFormat(
 			this.settings.lastDisplayedDate,
@@ -247,9 +244,9 @@ export default class HabitTracker {
 			const isTicked = entriesSet.has(dateString)
 
 			const habitCell = row.createEl('div', {
-				cls: `habit-cell
+				cls: `habit-tracker__cell
 				habit-tick habit-tick--${isTicked}
-				habit-cell--${this.getDayOfWeek(currentDate)}`,
+				habit-tracker__cell--${this.getDayOfWeek(currentDate)}`,
 			})
 
 			habitCell.setAttribute('ticked', isTicked.toString())
