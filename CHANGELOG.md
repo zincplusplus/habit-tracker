@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+fix: daysToShow is converted to a number if the user passes it as a string
+
 ## 1.2.0
 
 feat: the new `daysToShow` parameter allows users to display as many dates as they want
