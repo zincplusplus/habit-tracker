@@ -112,6 +112,7 @@ export default class HabitTracker {
 				DEFAULT_SETTINGS(),
 				this.removePrivateSettings(JSON.parse(rawSettings)),
 			)
+			settings.daysToShow = parseInt(settings.daysToShow)
 			/* i want to show that a streak is already ongoing even if the previous dates are not rendered
   		so I load an extra date in the range, but never display it in the UI */
 			settings.daysToLoad = settings.daysToShow + 1
