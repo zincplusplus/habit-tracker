@@ -6,7 +6,7 @@
 // https://ourgreenstory.com/nl/sticky-whiteboard/habit-tracker/
 // listen to file change https://github.com/obsidianmd/obsidian-api/blob/c01fc3074deeb3dfc6ee02546d113b448735b294/obsidian.d.ts#L3724
 
-import {App, parseYaml, Notice, TAbstractFile} from 'obsidian'
+import {App, parseYaml, Notice, TAbstractFile, TFile} from 'obsidian'
 
 const PLUGIN_NAME = 'Habit Tracker 21'
 /* i want to show that a streak is already ongoing even if the previous dates are not rendered
@@ -48,7 +48,7 @@ function getDaysDifference(startDateId, endDateId) {
 	const end = new Date(endDateId)
 	const oneDay = 24 * 60 * 60 * 1000 // hours * minutes * seconds * milliseconds
 
-	const diffInTime = Math.abs(end - start)
+	const diffInTime = Math.abs(end.getTime() - start.getTime())
 	const diffInDays = Math.round(diffInTime / oneDay)
 
 	return diffInDays
@@ -112,7 +112,6 @@ export default class HabitTracker {
 				DEFAULT_SETTINGS(),
 				this.removePrivateSettings(JSON.parse(rawSettings)),
 			)
-			settings.daysToShow = parseInt(settings.daysToShow)
 			/* i want to show that a streak is already ongoing even if the previous dates are not rendered
   		so I load an extra date in the range, but never display it in the UI */
 			settings.daysToLoad = settings.daysToShow + 1
@@ -184,8 +183,9 @@ export default class HabitTracker {
 	}
 
 	async getFrontmatter(path: string) {
-		const file = this.app.vault.getAbstractFileByPath(path)
-		if (!file) {
+		const file: TAbstractFile|null = this.app.vault.getAbstractFileByPath(path)
+
+		if (!file || !(file instanceof TFile) ) {
 			new Notice(`${PLUGIN_NAME}: No file found for path: ${path}`)
 			return {}
 		}
@@ -273,10 +273,10 @@ export default class HabitTracker {
 	async toggleHabit(el) {
 		const habit = el.getAttribute('habit')
 		const date = el.getAttribute('date')
-		const file = this.app.vault.getAbstractFileByPath(habit)
+		const file: TAbstractFile|null = this.app.vault.getAbstractFileByPath(habit)
 		const isTicked = el.getAttribute('ticked')
 
-		if (!file) {
+		if (!file ||!(file instanceof TFile)) {
 			new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`)
 			return
 		}
@@ -299,6 +299,13 @@ export default class HabitTracker {
 		if (!content) {
 			new Notice(
 				`${PLUGIN_NAME}: could not save changes due to missing content`,
+			)
+			return null
+		}
+
+		if (!file ||!(file instanceof TFile)) {
+			new Notice(
+				`${PLUGIN_NAME}: could not save changes due to missing file`,
 			)
 			return null
 		}
