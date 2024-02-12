@@ -1,3 +1,117 @@
+/* @settings
+
+name: Habit Tracker 21
+id: ht21
+settings:
+  -
+    id: ht21-cell
+    title: Table cell font
+    type: heading
+    level: 3
+  -
+    id: ht21-cell-fontfamily
+    title: Header font family
+    type: variable-text
+    description: Used for the header row
+    default: '"Source Code Pro", monospace'
+  -
+    id: ht21-cell-font-size
+    title: Header font size
+    type: variable-number
+    description: Used for the header row
+    default: 13
+    format: px
+  -
+    id: ht21-line
+    title: Line width and color
+    type: heading
+    level: 3
+  -
+    id: ht21-border-width
+    title: Line width
+    description: Width of line between rows
+    type: variable-number
+    default: 1
+    format: px
+  -
+    id: ht21-border-color
+    title: Line color
+    description: Color of line between rows
+    type: variable-color
+    format: hex
+    opacity: false
+    default: '#363636'
+  -
+    id: ht21-tick
+    title: Tick bar
+    type: heading
+    level: 3
+  -
+    id: ht21-tick-height
+    title: Height of tick element
+    type: variable-number
+    default: 16
+    format: px
+  -
+    id: ht21-tick-width
+    title: Height of tick element
+    type: variable-number
+    default: 20
+    format: px
+  -
+    id: ht21-tick-radius
+    title: Radius of tick endings
+    type: variable-number
+    default: 10
+    format: px
+  -
+    id: ht21-tick-color
+    title: Color
+    type: variable-color
+    opacity: false
+    format: hex
+    default: '#8a5cf5'
+  -
+    id: ht21-color
+    title: Background color
+    type: heading
+    level: 3
+  -
+    id: ht21-tick-hover-color
+    title: Background hover color on tick
+    type: variable-color
+    opacity: false
+    format: hex
+    default: '#363636'
+  -
+    id: ht21-row-hover-color
+    title: Background hover color on row
+    type: variable-color
+    opacity: false
+    format: hex
+    default: '#242424'
+  -
+    id: ht21-weekend-color
+    title: Background color on weekend columns
+    type: variable-color
+    opacity: false
+    format: hex
+    default: '#242424'
+*/
+:root {
+  --ht21-cell-fontfamily: "Source Code Pro", monospace;
+	--ht21-cell-font-size: 13px;
+	--ht21-border-width: 1px;
+	--ht21-border-color: #363636;
+	--ht21-tick-height: 16px;
+	--ht21-tick-width: 20px;
+	--ht21-tick-color: #8a5cf5;
+	--ht21-tick-radius: 10px;
+	--ht21-tick-hover-color: #363636;
+	--ht21-row-hover-color: #242424;
+  --ht21-weekend-color: #242424;
+}
+
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker),
 .block-language-habittracker {
 	width: fit-content;
@@ -14,24 +128,24 @@
 }
 
 .habit-tracker__row + .habit-tracker__row {
-	border-top: 1px solid var(--color-base-30);
+	border-top: var(--ht21-border-width) solid var(--ht21-border-color);
 }
 
 .habit-tracker__row:not(.habit-tracker__header):hover {
-	background-color: var(--color-base-10);
+	background-color: var(--ht21-row-hover-color);
 }
 
 .habit-tracker__cell {
 	box-sizing: border-box;
 	display: table-cell;
-	font-family: monospace;
-	font-size: 11px;
+	font-family: var(--ht21-cell-fontfamily);
+	font-size: var(--ht21-cell-font-size);
 	height: 32px;
 	min-width: 24px;
 	vertical-align: middle;
 }
 .habit-tracker__cell:not(:last-child) {
-	border-right: 1px solid var(--color-base-30);
+	border-right: var(--ht21-border-width) solid var(--ht21-border-color);
 }
 
 .habit-tracker__cell--name {
@@ -48,7 +162,7 @@
 
 .habit-tracker__cell--saturday,
 .habit-tracker__cell--sunday {
-	background-color: var(--color-base-10);
+	background-color: var(--ht21-weekend-color);
 }
 
 .habit-tracker__cell--name + .habit-tracker__cell {
@@ -67,16 +181,16 @@
 }
 .habit-tick:hover {
 	cursor: pointer;
-	background-color: var(--color-base-30);
+	background-color: var(--ht21-tick-hover-color);
 }
 
 .habit-tick--true:before {
-	background: var(--checkbox-color);
-	border-radius: 10px;
+	background: var(--ht21-tick-color);
+	border-radius: var(--ht21-tick-radius);
 	content: '';
 	display: inline-block;
-	height: 16px;
-	width: 16px;
+	height: var(--ht21-tick-height);
+	width: calc( var(--ht21-tick-width) * 80% );
 	transition: all 0.3s ease;
 }
 
@@ -87,7 +201,7 @@
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	margin-left: 0;
-	width: 20px;
+	width: var(--ht21-tick-width);
 }
 
 .habit-tick--true:has(+ .habit-tick--true):before {
@@ -97,7 +211,7 @@
 }
 
 .habit-tick--false + .habit-tick--true:has(+ .habit-tick--true):before {
-	width: 20px;
+	width: var(--ht21-tick-width);
 	margin-left: 4px;
 }
 
