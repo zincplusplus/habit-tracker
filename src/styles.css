@@ -40,7 +40,7 @@ settings:
     type: variable-color
     format: hex
     opacity: false
-    default: '#363636'
+    default: '#d0d7de'
   -
     id: ht21-tick
     title: Tick bar
@@ -70,7 +70,7 @@ settings:
     type: variable-color
     opacity: false
     format: hex
-    default: '#8a5cf5'
+    default: '#096CDC'
   -
     id: ht21-color
     title: Background color
@@ -82,34 +82,34 @@ settings:
     type: variable-color
     opacity: false
     format: hex
-    default: '#363636'
+    default: '#d0d7de'
   -
     id: ht21-row-hover-color
     title: Background hover color on row
     type: variable-color
     opacity: false
     format: hex
-    default: '#242424'
+    default: '#fafafa'
   -
     id: ht21-weekend-color
     title: Background color on weekend columns
     type: variable-color
     opacity: false
     format: hex
-    default: '#242424'
+    default: '#fafafa'
 */
-:root {
+body {
   --ht21-cell-fontfamily: "Source Code Pro", monospace;
 	--ht21-cell-font-size: 13px;
 	--ht21-border-width: 1px;
-	--ht21-border-color: #363636;
+	--ht21-border-color: var(--color-base-30);
 	--ht21-tick-height: 16px;
 	--ht21-tick-width: 20px;
-	--ht21-tick-color: #8a5cf5;
+	--ht21-tick-color: var(--checkbox-color);
 	--ht21-tick-radius: 10px;
-	--ht21-tick-hover-color: #363636;
-	--ht21-row-hover-color: #242424;
-  --ht21-weekend-color: #242424;
+	--ht21-tick-hover-color: var(--color-base-30);
+	--ht21-row-hover-color: var(--color-base-10);
+  --ht21-weekend-color: var(--color-base-10);
 }
 
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker),
@@ -190,7 +190,7 @@ settings:
 	content: '';
 	display: inline-block;
 	height: var(--ht21-tick-height);
-	width: calc( var(--ht21-tick-width) * 80% );
+	width: calc(var(--ht21-tick-width) * 0.8);
 	transition: all 0.3s ease;
 }
 
