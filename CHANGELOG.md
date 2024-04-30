@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.0
+feat: track how many times the plugin is loaded at every version; it's important to see that people actually stick with using it, and that they adopt new versions, so I can decide how much time to invest in this project. I'm using bit.ly for this and all I care about is page views
+
 ## 1.3.0
 
 feat: Streaks - track and display the number of consecutive days a habit has been completed
