@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+
+feat: Streaks - track and display the number of consecutive days a habit has been completed
+
 ## 1.2.1
 
 fix: daysToShow is converted to a number if the user passes it as a string

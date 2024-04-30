@@ -266,8 +266,28 @@ export default class HabitTracker {
 
 			habitCell.setAttribute('date', dateString)
 			habitCell.setAttribute('habit', path)
+
+			habitCell.setAttribute('streak', this.findStreak(entries, currentDate))
+
 			currentDate.setDate(currentDate.getDate() + 1)
 		}
+	}
+
+	// get streak
+	// based on an array of dates, get the current streak for the given date
+	findStreak(entries, date) {
+		let currentDate = new Date(date);
+		let streak = 0
+
+		// console.log('entries', entries)
+		// console.log('date', date)
+
+		while (entries.includes(this.getDateId(currentDate))) {
+			streak++
+			currentDate.setDate(currentDate.getDate() - 1)
+		}
+
+		return streak.toString();
 	}
 
 	async toggleHabit(el) {
