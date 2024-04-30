@@ -9,6 +9,9 @@ export default class HabitTracker21 extends Plugin {
 		this.registerMarkdownCodeBlockProcessor(
 			'habittracker',
 			async (src, el, ctx) => {
+				const trackingPixel = document.createElement('img');
+				trackingPixel.setAttribute('src', 'https://bit.ly/habitttracker21-140');
+				el.parentElement.appendChild(trackingPixel);
 				new HabitTracker(src, el, ctx, this.app)
 			},
 		)
