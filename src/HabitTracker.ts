@@ -15,12 +15,13 @@ const DAYS_TO_SHOW = 21
 const DAYS_TO_LOAD = DAYS_TO_SHOW + 1
 
 interface HabitTrackerSettings {
-	path: string
-	lastDisplayedDate: string
-	daysToShow: number
-	daysToLoad: number
-	rootElement: HTMLDivElement | undefined
-	habitsGoHere: HTMLDivElement | undefined
+	path: string;
+	lastDisplayedDate: string;
+	daysToShow: number;
+	daysToLoad: number;
+	titlePropertyName: string;
+	rootElement: HTMLDivElement | undefined;
+	habitsGoHere: HTMLDivElement | undefined;
 }
 
 const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
@@ -28,6 +29,7 @@ const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
 	lastDisplayedDate: getTodayDate(),
 	daysToShow: DAYS_TO_SHOW,
 	daysToLoad: DAYS_TO_LOAD,
+	titlePropertyName: "title",
 	rootElement: undefined,
 	habitsGoHere: undefined,
 })
@@ -74,9 +76,9 @@ export default class HabitTracker {
 			return
 		}
 
-		console.log(
-			`${PLUGIN_NAME} loaded successfully ${files.length} file(s) from ${this.settings.path}`,
-		)
+		// console.log(
+		// 	`${PLUGIN_NAME} loaded successfully ${files.length} file(s) from ${this.settings.path}`,
+		// )
 
 		// 2.1 render the element that holds all habits
 		this.settings.habitsGoHere = this.renderRoot(el)
@@ -210,7 +212,7 @@ export default class HabitTracker {
 		return fm.entries || []
 	}
 
-	renderHabit(path: string, entries: string[]) {
+	async renderHabit(path: string, entries: string[]) {
 		// console.log('rendering a habit')
 		if (!this.settings.habitsGoHere) {
 			new Notice(`${PLUGIN_NAME}: missing div that holds all habits`)
@@ -218,7 +220,13 @@ export default class HabitTracker {
 		}
 		const parent = this.settings.habitsGoHere
 
-		const name = path.split('/').pop()?.replace('.md', '')
+		let name = path.split('/').pop()?.replace('.md', '') || path;
+		if (this.settings.titlePropertyName) {
+			let habitFrontmatter = await this.getFrontmatter(path)
+			if (habitFrontmatter && habitFrontmatter[this.settings.titlePropertyName]) {
+				name = habitFrontmatter[this.settings.titlePropertyName] || name;
+			}
+		}
 
 		// no. this needs to be queried inside this.settings.rootElement;
 		let row = parent.querySelector(`*[data-id="${this.pathToId(path)}"]`)
