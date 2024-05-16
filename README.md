@@ -10,42 +10,53 @@ Introducing "Habit Tracker 21," an innovative plugin designed specifically for O
 
 ## How it works
 
-1. Create a folder for all your habits, e.g. `Habits`
+1. Create a `Habits` folder for all your habits (you can also configure the folder)
 2. Create empty files inside that folder for each habit you want to track
-3. Enable the habit tracker UI by pasting the following code in your `.md` file:
+3. Enable the habit tracker UI by pasting the following code fence into your `.md` file:
+
+````markdown
+```habittracker
+
+```
+````
+
+## Parameters
+
+All parameters are optional.
+
+They can be placed inside curly braces inside the habit tracker code fence like this:
 
 ````markdown
 ```habittracker
 {
-	"path": "Habits/"
+  "path": "CustomHabitsLocation/",
+  "daysToShow": 7,
+  "showEmptyHabits": false
 }
 ```
 ````
 
-Make sure to specify the path you're using. You can point to one habit, or all habits that contain that path (including subfolders);
-
-## Parameters
-
-- **path** _[mandatory]_: a string containing a path to a folder or specific habit (aka .md file)
-
-- **lastDisplayedDate** _[optional]_: the date that is displayed in the chart
-
-  - format: `"YYYY-MM-DD"`
-  - defaults to today
-  - example settings
-    `{
-	"path": "Habits/",
-	"lastDisplayedDate": "2023-12-27"
-}`
-
-- **daysToShow** _[optional]_: how many dates to display in the chart
-
+- `path: string`
+  - Path to where your habit files are (or where your habit file is) stored.
+  - default: `'Habits/'`
+- `lastDisplayedDate: string`
+  - Last date that is displayed in the table.
+  - default: `new Date()` (today)
+- `daysToShow: number`
+  - Number of dates to display in the chart.
   - default: `21`
-
-  `{
-	"path": "Habits/",
-	"daysToShow": "31"
-}`
+- `dateToHighlight: string | undefined`
+  - Date to highlight (e.g. the day of the current file)
+  - default: `undefined`
+- `showWeekdays: boolean`
+  - Show weekday letters instead of date numbers
+  - default: `false`
+- `showNewHabitButton: string`
+  - Show a button to add a new habit file
+  - default: `true`
+- `showEmptyHabits: string`
+  - Show habits that are not checked in the
+  - default: `true`
 
 ## Example
 

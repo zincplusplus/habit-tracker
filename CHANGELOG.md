@@ -1,6 +1,15 @@
 # Changelog
 
+## 2.0.0
+
+chore: UI was rewritten as a Svelte component
+feat: show current day as green and add the option to mark an additional day (e.g. the current journal files day)
+feat: add button that allows to add a new habit file
+feat: check for habit updates every 5 seconds (great for obsidian sync)
+feat: add option to hide habits that do not have activity in shown time frame
+
 ## 1.4.0
+
 feat: track how many times the plugin is loaded at every version; it's important to see that people actually stick with using it, and that they adopt new versions, so I can decide how much time to invest in this project. I'm using bit.ly for this and all I care about is page views
 
 ## 1.3.0
