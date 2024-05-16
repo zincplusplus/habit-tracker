@@ -38,9 +38,6 @@ async function makeRelease() {
 		await fs.copy(`./main.js`, `${destinationFolder}/main.js`)
 		console.log('main.js copied successfully')
 
-		await fs.copy(`./src/styles.css`, `${destinationFolder}/styles.css`)
-		console.log('styles.css copied successfully')
-
 		await fs.copy(`./manifest.json`, `${destinationFolder}/manifest.json`)
 		console.log('manifest.json copied successfully')
 
