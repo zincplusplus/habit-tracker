@@ -50,3 +50,10 @@ Make sure to specify the path you're using. You can point to one habit, or all h
 ## Example
 
 ![Example](docs/assets/ui-demo.png)
+
+
+## Tracking
+
+To determine how much time I should invest in this project I use Bitly.com to track how many people use it. This is what I see https://github.com/zoreet/habit-tracker/issues/32#issuecomment-2116918725
+
+This is the tracker that collects the least ammount of data that I could find, other than building a custom one. If you have any concerns please add a comment to the above ticket.
