@@ -59,7 +59,25 @@
 	text-align: center;
 }
 
-/* HABIT TICK */
+.habit-tracker__header .habit-tracker__cell[data-date] {
+	position: relative;
+}
+.habit-tracker__header .habit-tracker__cell[data-date]:hover {
+	cursor: pointer;
+	background: var(--color-base-100);
+	color: var(--color-base-00);
+}
+.habit-tracker__header .habit-tracker__cell[data-date]:hover:after {
+	background: var(--color-base-100);
+	color: var(--color-base-00);
+	content: attr(data-date);
+	left: -34px;
+	padding: 2px 4px;
+	position: absolute;
+	top: 100%;
+	white-space: nowrap;
+	width: 80px;
+}
 
 .habit-tick {
 	line-height: 0;

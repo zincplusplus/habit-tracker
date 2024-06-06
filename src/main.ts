@@ -10,10 +10,10 @@ export default class HabitTracker21 extends Plugin {
 			'habittracker',
 			async (src, el, ctx) => {
 				// track if people are using this version
-				const trackingPixel = document.createElement("img");
-				trackingPixel.src = "https://fireship-svelte-course-e89cd.web.app/api/track/habit-tracker-21/1.4.1";
-				trackingPixel.setAttribute("style", "height: 1px; width: 1px; border: none; opacity: 0; position: absolute; top: 0; left: 0;pointer-events: none;")
-				el.appendChild(trackingPixel);
+				const bitly = document.createElement('img');
+				bitly.setAttribute('src', 'https://bit.ly/habitttracker21-142');
+				bitly.setAttribute("style", "height: 1px; width: 1px; border: none; opacity: 0; position: absolute; top: 0; left: 0;pointer-events: none;")
+				el?.parentElement.appendChild(bitly);
 				new HabitTracker(src, el, ctx, this.app)
 			},
 		)

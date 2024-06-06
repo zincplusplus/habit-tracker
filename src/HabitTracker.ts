@@ -21,18 +21,20 @@ interface HabitTrackerSettings {
 	daysToLoad: number
 	rootElement: HTMLDivElement | undefined
 	habitsGoHere: HTMLDivElement | undefined
+	debug: number
 }
 
 const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
-	path: '',
+	path: 'Habits',
 	lastDisplayedDate: getTodayDate(),
 	daysToShow: DAYS_TO_SHOW,
 	daysToLoad: DAYS_TO_LOAD,
 	rootElement: undefined,
 	habitsGoHere: undefined,
+	debug: 0,
 })
 
-const ALLOWED_USER_SETTINGS = ['path', 'lastDisplayedDate', 'daysToShow']
+const ALLOWED_USER_SETTINGS = ['path', 'lastDisplayedDate', 'daysToShow', 'debug']
 
 function getTodayDate() {
 	const today = new Date()
@@ -88,6 +90,10 @@ export default class HabitTracker {
 		files.forEach(async (f) => {
 			this.renderHabit(f.path, await this.getHabitEntries(f.path))
 		})
+
+		if (this.settings.debug) {
+		this.renderDebugData();
+	}
 	}
 
 	loadFiles() {
@@ -117,6 +123,7 @@ export default class HabitTracker {
 			settings.daysToLoad = settings.daysToShow + 1
 			return settings
 		} catch (error) {
+			console.log(error);
 			new Notice(
 				`${PLUGIN_NAME}: received invalid settings. continuing with default settings`,
 			)
@@ -133,6 +140,13 @@ export default class HabitTracker {
 		})
 
 		return result
+	}
+
+	renderDebugData() {
+		this.settings.rootElement?.createEl('pre', {
+			// get the json printed with indentation
+			text: JSON.stringify(this.settings, null, 2),
+		})
 	}
 
 	renderNoHabitsFoundMessage() {
@@ -177,6 +191,9 @@ export default class HabitTracker {
 					currentDate,
 				)}`,
 				text: day,
+				attr: {
+					'data-date': this.getDateId(currentDate),
+				},
 			})
 			currentDate.setDate(currentDate.getDate() + 1)
 		}
