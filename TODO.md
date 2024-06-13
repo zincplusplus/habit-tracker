@@ -1,5 +1,6 @@
 ## Now
-
+- refactor the code so we can debug issues especially around dates
+- give a UI version to configure this
 - show streak even if it's starting from before the 21(displayed days)
 
 ## Next

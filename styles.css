@@ -1,12 +1,25 @@
+/* TODO make variables for all the common styles so they can be overriden */
+/* TODO make the font more legible, especially for the title */
+/* TODO add a border around it, maybe leave some space above for the Edit this block button to show up properly */
+/* TODO make it work in light mode */
+/* TODO make the title sticky if too many cells are displayed and there's not enough space */
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
+	box-shadow: var(--embed-block-shadow-hover);
+	border-radius: var(--radius-s);
+	padding: 8px;
+}
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker),
 .block-language-habittracker {
 	width: fit-content;
+	min-width: var(--file-line-width);
+	font-family: monospace;
 }
 
 .habit-tracker {
 	display: table;
 	table-layout: fixed;
 	border-collapse: collapse;
+	min-width: var(--file-line-width);
 }
 
 .habit-tracker__row {
@@ -24,11 +37,10 @@
 .habit-tracker__cell {
 	box-sizing: border-box;
 	display: table-cell;
-	font-family: monospace;
 	font-size: 11px;
 	height: 32px;
-	min-width: 24px;
 	vertical-align: middle;
+	white-space: nowrap;
 }
 .habit-tracker__cell:not(:last-child) {
 	border-right: 1px solid var(--color-base-30);
@@ -36,6 +48,8 @@
 
 .habit-tracker__cell--name {
 	padding: 0 4px;
+	width: 100%;
+	max-width: 100%;
 }
 .habit-tracker__cell--name a {
 	max-width: 100%;
@@ -49,10 +63,6 @@
 .habit-tracker__cell--saturday,
 .habit-tracker__cell--sunday {
 	background-color: var(--color-base-10);
-}
-
-.habit-tracker__cell--name + .habit-tracker__cell {
-	display: none;
 }
 
 .habit-tracker__header .habit-tracker__cell {
@@ -82,43 +92,63 @@
 .habit-tick {
 	line-height: 0;
 	text-align: center;
+	width: 25px;
+	max-width: 25px;
+	min-width: 25px;
 }
 .habit-tick:hover {
 	cursor: pointer;
 	background-color: var(--color-base-30);
 }
 
-.habit-tick--true:before {
-  background: var(--checkbox-color);
-	border-radius: 10px;
+.habit-tick--ticked:before {
+	background: var(--checkbox-color);
 	content: '';
 	display: inline-block;
 	height: 16px;
-	width: 16px;
-	transition: all 0.3s ease;
-}
-
-
-.habit-tick--true + .habit-tick--true {
-	text-align: left;
-}
-.habit-tick--true + .habit-tick--true:before {
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-	margin-left: 0;
-	width: 20px;
-}
-
-.habit-tick--true:has(+ .habit-tick--true):before {
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
 	width: 100%;
+	transition: all 0.3s ease;
+	line-height: 16px;
+	color: black; /*TODO put a color from the theme that will always work*/
 }
 
-.habit-tick--false + .habit-tick--true:has(+ .habit-tick--true):before {
-	width: 20px;
-	margin-left: 4px;
+.habit-tick--streak-start {
+	padding-left: 4px;
 }
+.habit-tick--streak-start:before {
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+.habit-tick--streak-end {
+	padding-right: 4px;
+}
+.habit-tick--streak-end:before {
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
+.habit-tick--streak + .habit-tick--streak-end:before {
+	content: attr(streak);
+}
+/* .habit-tick--ticked + .habit-tick--ticked {
+text-align: left;
+}
+.habit-tick--ticked + .habit-tick--ticked:before {
+border-top-left-radius: 0;
+border-bottom-left-radius: 0;
+margin-left: 0;
+width: 20px;
+}
+
+.habit-tick--ticked:has(+ .habit-tick--ticked):before {
+border-top-right-radius: 0;
+border-bottom-right-radius: 0;
+width: 100%;
+}
+
+.habit-tick--false + .habit-tick--ticked:has(+ .habit-tick--ticked):before {
+width: 20px;
+margin-left: 4px;
+} */
 
 @media (max-width: 399px) {
 	/* iPhone 14pro and lower, portrait */
@@ -133,9 +163,9 @@
 
 /* streaks */
 /* for every 2+ day streaks, show a counter on the most recent date */
-.habit-tick--true + .habit-tick--true:has(+ .habit-tick--false):before,
-.habit-tick--true + .habit-tick--true:last-child:before {
-	text-align: center;
-  content: attr(streak);
-  line-height: 15px;
-}
+/* .habit-tick--ticked + .habit-tick--ticked:has(+ .habit-tick--false):before,
+.habit-tick--ticked + .habit-tick--ticked:last-child:before {
+text-align: center;
+content: attr(streak);
+line-height: 15px;
+} */

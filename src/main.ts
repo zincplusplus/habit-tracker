@@ -1,21 +1,47 @@
-import {Plugin} from 'obsidian'
-import HabitTracker from './HabitTracker'
+// TODO Add integration tests with jest
+import {Notice, Plugin} from 'obsidian'
+import HabitTracker from './HabitTracker.svelte'
+import HabitTrackerError from './HabitTrackerError.svelte'
 
-const PLUGIN_NAME = 'Habit Tracker 21'
+export const PLUGIN_NAME = 'Habit Tracker 21'
 
 export default class HabitTracker21 extends Plugin {
-	async onload() {
-		console.log(`${PLUGIN_NAME}: loading...`)
-		this.registerMarkdownCodeBlockProcessor(
-			'habittracker',
-			async (src, el, ctx) => {
-				// track if people are using this version
-				const bitly = document.createElement('img');
-				bitly.setAttribute('src', 'https://bit.ly/habitttracker21-142');
-				bitly.setAttribute("style", "height: 1px; width: 1px; border: none; opacity: 0; position: absolute; top: 0; left: 0;pointer-events: none;")
-				el?.parentElement.appendChild(bitly);
-				new HabitTracker(src, el, ctx, this.app)
-			},
-		)
+
+	onload() {
+		this.registerMarkdownCodeBlockProcessor('habittracker', async (src, el) => {
+			// const trackingPixel = document.createElement('img')
+			// trackingPixel.setAttribute('src', 'https://bit.ly/habitttracker21-140')
+			// if (el.parentElement) el.parentElement.appendChild(trackingPixel)
+			// TODO make this dynamic and add it to HabitTracker.svelte
+
+			let userSettings = {}
+			try {
+				userSettings = JSON.parse(src);
+				// TODO figure out what to do about this error
+				new HabitTracker({
+						target: el,
+						props: {
+							app: this.app,
+							userSettings,
+						},
+					})
+			} catch(error) {
+				new HabitTrackerError({
+					target: el,
+					props: {
+						error,
+						src
+					}
+				})
+				console.error(`[${PLUGIN_NAME}] Received invalid settings. ${error}`)
+				new Notice(
+					`[${PLUGIN_NAME}] Received invalid settings!\nCheck the console for more details.\n(View > Toggle Developer Tools)`,
+				)
+			}
+		})
+	}
+
+	onunload() {
+		// window.location.reload();
 	}
 }
