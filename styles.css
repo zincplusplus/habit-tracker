@@ -1,17 +1,32 @@
-/* TODO make variables for all the common styles so they can be overriden */
-/* TODO make the font more legible, especially for the title */
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
+	--habit-bg-ticked: var(--checkbox-color);
+	--habit-text-ticked: var(--checkbox-marker-color);
+	--habit-min-width: var(--file-line-width);
+	--habit-border: 1px solid var(--color-base-30);
+	--habit-outer-border: var(--habit-border);
+	--habit-horizontal-border: var(--habit-border);
+	--habit-vertical-border: var(--habit-border);
+	--habit-row-bg-hover: var(--color-base-10);
+	--habit-highlight-weekend: var(--color-base-10);
+	--habit-tick-hover: var(--color-base-30);
+	--habit-name-text-color: var(--link-color);
+	--habit-header-bg-hover: var(--color-base-100);
+	--habit-header-text-hover: var(--color-base-00);;
+	--habit-header-font-size: 11px;
+	--habit-name-font-size: 13px;
+}
+
 /* TODO add a border around it, maybe leave some space above for the Edit this block button to show up properly */
-/* TODO make it work in light mode */
 /* TODO make the title sticky if too many cells are displayed and there's not enough space */
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
-	box-shadow: var(--embed-block-shadow-hover);
+	border: var(--habit-outer-border);
 	border-radius: var(--radius-s);
 	padding: 8px;
 }
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker),
 .block-language-habittracker {
 	width: fit-content;
-	min-width: var(--file-line-width);
+	min-width: var(--habit-min-width);
 	font-family: monospace;
 }
 
@@ -19,7 +34,7 @@
 	display: table;
 	table-layout: fixed;
 	border-collapse: collapse;
-	min-width: var(--file-line-width);
+	min-width: var(--habit-min-width);
 }
 
 .habit-tracker__row {
@@ -27,23 +42,23 @@
 }
 
 .habit-tracker__row + .habit-tracker__row {
-	border-top: 1px solid var(--color-base-30);
+	border-top: var(--habit-horizontal-border);
 }
 
 .habit-tracker__row:not(.habit-tracker__header):hover {
-	background-color: var(--color-base-10);
+	background-color: var(--habit-row-bg-hover);
 }
 
 .habit-tracker__cell {
 	box-sizing: border-box;
 	display: table-cell;
-	font-size: 11px;
+	font-size: var(--habit-header-font-size);
 	height: 32px;
 	vertical-align: middle;
 	white-space: nowrap;
 }
 .habit-tracker__cell:not(:last-child) {
-	border-right: 1px solid var(--color-base-30);
+	border-right: var(--habit-vertical-border);
 }
 
 .habit-tracker__cell--name {
@@ -51,42 +66,55 @@
 	width: 100%;
 	max-width: 100%;
 }
-.habit-tracker__cell--name a {
+.habit-tracker__cell--name .internal-link {
+	color: var(--habit-name-text-color);
 	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	width: fit-content;
 	display: inline-block;
+	font-size: var(--habit-name-font-size);
+	text-decoration: none;
 }
 
 .habit-tracker__cell--saturday,
 .habit-tracker__cell--sunday {
-	background-color: var(--color-base-10);
+	background-color: var(--habit-highlight-weekend);
 }
 
 .habit-tracker__header .habit-tracker__cell {
 	text-align: center;
 }
 
-.habit-tracker__header .habit-tracker__cell[data-date] {
+.habit-tracker__header .habit-tracker__cell[data-pretty-date] {
 	position: relative;
 }
-.habit-tracker__header .habit-tracker__cell[data-date]:hover {
+.habit-tracker__header .habit-tracker__cell[data-pretty-date]:hover {
 	cursor: pointer;
-	background: var(--color-base-100);
-	color: var(--color-base-00);
+	background: var(--habit-header-bg-hover);
+	color: var(--habit-header-text-hover);
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
 }
-.habit-tracker__header .habit-tracker__cell[data-date]:hover:after {
-	background: var(--color-base-100);
-	color: var(--color-base-00);
-	content: attr(data-date);
-	left: -34px;
-	padding: 2px 4px;
+
+.habit-tracker__header .habit-tracker__cell[data-pretty-date]:hover:after {
+	background: var(--habit-header-bg-hover);
+	color: var(--habit-header-text-hover);
+	content: attr(data-pretty-date);
+	left: 50%;
+	padding: 2px 6px;
 	position: absolute;
 	top: 100%;
 	white-space: nowrap;
-	width: 80px;
+	transform: translateX(-50%);
+	border-radius: 3px;
+}
+.habit-tracker__header .habit-tracker__cell[data-pretty-date]:last-child:hover:after {
+	left: auto;
+	right: 0;
+	transform: none;
+	border-top-right-radius: 0;
 }
 
 .habit-tick {
@@ -98,18 +126,18 @@
 }
 .habit-tick:hover {
 	cursor: pointer;
-	background-color: var(--color-base-30);
+	background-color: var(--habit-tick-hover);
 }
 
 .habit-tick--ticked:before {
-	background: var(--checkbox-color);
+	background: var(--habit-bg-ticked);
 	content: '';
 	display: inline-block;
 	height: 16px;
 	width: 100%;
 	transition: all 0.3s ease;
 	line-height: 16px;
-	color: black; /*TODO put a color from the theme that will always work*/
+	color: var(--habit-text-ticked);
 }
 
 .habit-tick--streak-start {
@@ -128,6 +156,7 @@
 }
 .habit-tick--streak + .habit-tick--streak-end:before {
 	content: attr(streak);
+	font-weight: bold;
 }
 /* .habit-tick--ticked + .habit-tick--ticked {
 text-align: left;

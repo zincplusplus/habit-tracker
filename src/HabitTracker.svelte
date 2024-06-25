@@ -7,9 +7,12 @@
 	import { getDateAsString, getDayOfTheWeek } from './utils.js'
 	import {
 		eachDayOfInterval,
+		format,
 		getDate,
+		isToday,
 		isValid,
 		parse,
+		parseISO,
 		subDays,
 	} from 'date-fns';
 
@@ -170,6 +173,20 @@
 		return [];
 	}
 
+	const renderPrettyDate = function(dateString) {
+		// Parse the input date string into a Date object
+    const date = parseISO(dateString);
+
+    // Format the date using date-fns
+    let prettyDate = format(date, 'MMMM d, yyyy');
+
+		if(isToday(date)) {
+			prettyDate = `Today, ${prettyDate}`;
+		}
+
+    return prettyDate;
+	}
+
 	init(userSettings, defaultSettings);
 </script>
 
@@ -189,7 +206,7 @@ No habits to show at "{path}"
 	<div class="habit-tracker__header habit-tracker__row">
 		<div class="habit-tracker__cell--name habit-tracker__cell"></div>
 		{#each dates as date}
-		<div class="habit-tracker__cell habit-tracker__cell--{getDayOfTheWeek(date)}" data-date="{date}">
+		<div class="habit-tracker__cell habit-tracker__cell--{getDayOfTheWeek(date)}" data-date="{date}" data-pretty-date="{renderPrettyDate(date)}">
 			{getDate(date)}
 		</div>
 		{/each}
