@@ -1,5 +1,5 @@
 // TODO Add integration tests with jest
-import {Notice, Plugin} from 'obsidian'
+import {Plugin} from 'obsidian'
 import HabitTracker from './HabitTracker.svelte'
 import HabitTrackerError from './HabitTrackerError.svelte'
 
@@ -34,9 +34,6 @@ export default class HabitTracker21 extends Plugin {
 					}
 				})
 				console.error(`[${PLUGIN_NAME}] Received invalid settings. ${error}`)
-				new Notice(
-					`[${PLUGIN_NAME}] Received invalid settings!\nCheck the console for more details.\n(View > Toggle Developer Tools)`,
-				)
 			}
 		})
 	}

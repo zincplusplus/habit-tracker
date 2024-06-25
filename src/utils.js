@@ -1,4 +1,3 @@
-import {App, parseYaml, Notice, TAbstractFile, TFile} from 'obsidian'
 import {
 	format,
 } from 'date-fns';
