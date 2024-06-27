@@ -202,7 +202,7 @@
 </div>
 No habits to show at "{path}"
 {:else}
-<div class="habit-tracker">
+<div class="habit-tracker" style="--date-columns: {dates.length}">
 	<div class="habit-tracker__header habit-tracker__row">
 		<div class="habit-tracker__cell--name habit-tracker__cell"></div>
 		{#each dates as date}
