@@ -1,7 +1,8 @@
 /* TODO check both in reading view and in editable view */
 div:has(.block-language-habittracker) {
+	--habit-bg: var(--background-primary);
 	--habit-bg-ticked: var(--checkbox-color);
-	--habit-text-ticked: var(--checkbox-marker-color);
+	--habit-icon-ticked: var(--checkbox-marker-color);
 	/* FIXME doesn't work well on mobile */
 	--habit-min-width: var(--file-line-width);
 	--habit-border: 1px solid var(--color-base-30);
@@ -10,6 +11,7 @@ div:has(.block-language-habittracker) {
 	--habit-vertical-border: var(--habit-border);
 	--habit-row-bg-hover: var(--color-base-10);
 	--habit-highlight-weekend: var(--color-base-10);
+	--habit-highlight-names: var(--color-base-10);
 	--habit-tick-hover: var(--color-base-30);
 	--habit-name-text-color: var(--link-color);
 	--habit-header-bg-hover: var(--color-base-100);
@@ -21,7 +23,6 @@ div:has(.block-language-habittracker) {
 /* TODO make the title sticky if too many cells are displayed and there's not enough space */
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
 	padding: 0;
-	min-width: var(--habit-min-width);
 	font-family: monospace;
 }
 
@@ -32,20 +33,21 @@ div:has(.block-language-habittracker) {
 	width: fit-content;
 	max-width: 100%;
 }
-.is-readable-line-width .block-language-habittracker {
+/* .is-readable-line-width .block-language-habittracker {
 	max-width: var(--habit-min-width);
-}
+} */
 .habit-tracker {
 	display: grid;
 	grid-template-columns: 1fr repeat(var(--date-columns), 25px);
 	width: fit-content;
+	background-color: var(--habit-bg);
 }
 
 .habit-tracker__row {
 	display: contents;
 }
 
-.habit-tracker__row:not(.habit-tracker__header):hover {
+.habit-tracker__row:has(.habit-tracker__cell:hover) > .habit-tracker__cell {
 	background-color: var(--habit-row-bg-hover);
 }
 
@@ -76,7 +78,7 @@ div:has(.block-language-habittracker) {
 	position: sticky;
 	left: 0;
 	z-index: 10;
-	background-color: var(--background-primary);
+	background-color: var(--habit-highlight-names);
 }
 .habit-tracker__cell--name .internal-link {
 	color: var(--habit-name-text-color);
@@ -93,6 +95,7 @@ div:has(.block-language-habittracker) {
 .habit-tracker__cell--saturday,
 .habit-tracker__cell--sunday {
 	background-color: var(--habit-highlight-weekend);
+	font-weight: bold;
 }
 
 .habit-tracker__header .habit-tracker__cell[data-pretty-date] {
@@ -134,7 +137,7 @@ div:has(.block-language-habittracker) {
 }
 .habit-tick:hover {
 	cursor: pointer;
-	background-color: var(--habit-tick-hover);
+	background-color: var(--habit-tick-hover) !important;
 }
 
 .habit-tick--ticked:before {
@@ -145,7 +148,7 @@ div:has(.block-language-habittracker) {
 	width: 100%;
 	transition: all 0.3s ease;
 	line-height: 16px;
-	color: var(--habit-text-ticked);
+	color: var(--habit-icon-ticked);
 }
 
 .habit-tick--streak-start {
@@ -166,43 +169,3 @@ div:has(.block-language-habittracker) {
 	content: attr(streak);
 	font-weight: bold;
 }
-/* .habit-tick--ticked + .habit-tick--ticked {
-text-align: left;
-}
-.habit-tick--ticked + .habit-tick--ticked:before {
-border-top-left-radius: 0;
-border-bottom-left-radius: 0;
-margin-left: 0;
-width: 20px;
-}
-
-.habit-tick--ticked:has(+ .habit-tick--ticked):before {
-border-top-right-radius: 0;
-border-bottom-right-radius: 0;
-width: 100%;
-}
-
-.habit-tick--false + .habit-tick--ticked:has(+ .habit-tick--ticked):before {
-width: 20px;
-margin-left: 4px;
-} */
-
-@media (max-width: 399px) {
-	/* iPhone 14pro and lower, portrait */
-	.habit-tracker__cell {
-		display: none;
-	}
-	.habit-tracker__cell--name,
-	.habit-tracker__cell:nth-last-child(-n + 7) {
-		display: table-cell;
-	}
-}
-
-/* streaks */
-/* for every 2+ day streaks, show a counter on the most recent date */
-/* .habit-tick--ticked + .habit-tick--ticked:has(+ .habit-tick--false):before,
-.habit-tick--ticked + .habit-tick--ticked:last-child:before {
-text-align: center;
-content: attr(streak);
-line-height: 15px;
-} */
