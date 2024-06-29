@@ -161,7 +161,6 @@
 	</div>
 	{#if Object.keys(entriesInRange).length}
 	{#each dates as date}
-	<!-- TODO make this a11y compliant -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div

@@ -1,9 +1,7 @@
-/* TODO check both in reading view and in editable view */
 div:has(.block-language-habittracker) {
 	--habit-bg: var(--background-primary);
 	--habit-bg-ticked: var(--checkbox-color);
 	--habit-icon-ticked: var(--checkbox-marker-color);
-	/* FIXME doesn't work well on mobile */
 	--habit-min-width: var(--file-line-width);
 	--habit-border: 1px solid var(--color-base-30);
 	--habit-outer-border: var(--habit-border);
@@ -12,6 +10,7 @@ div:has(.block-language-habittracker) {
 	--habit-row-bg-hover: var(--color-base-10);
 	--habit-highlight-weekend: var(--color-base-10);
 	--habit-highlight-names: var(--color-base-10);
+	--habit-container-hover: var(--color-base-10);
 	--habit-tick-hover: var(--color-base-30);
 	--habit-name-text-color: var(--link-color);
 	--habit-header-bg-hover: var(--color-base-100);
@@ -20,10 +19,19 @@ div:has(.block-language-habittracker) {
 	--habit-name-font-size: 13px;
 }
 
-/* TODO make the title sticky if too many cells are displayed and there's not enough space */
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
 	padding: 0;
 	font-family: monospace;
+}
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker):hover {
+	background-color: var(--habit-container-hover);
+}
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker):hover .edit-block-button {
+	background-color: var(--habit-container-hover);
+	z-index: 999;
+}
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) .edit-block-button:hover {
+	background-color: var(--habit-tick-hover) !important;
 }
 
 .block-language-habittracker {

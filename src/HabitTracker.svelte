@@ -17,6 +17,7 @@
 	} from 'date-fns';
 
 	import {PLUGIN_NAME} from './main'
+	import { onMount } from "svelte"
 	// import {onMount} from 'svelte'
 
 	export let app: Plugin['app']
@@ -48,6 +49,8 @@
 	let fatalError;
 
 	let habitSource;
+
+	let rootElement;
 
 	const init = async function(userSettings, defaultSettings) {
 		if(userSettings.path) {
@@ -96,6 +99,14 @@
 			return;
 		}
 
+		// scrollToEnd()
+
+	}
+
+	const scrollToEnd = function() {
+		const parent = rootElement.parentElement;
+		parent.scrollLeft = parent.scrollWidth;
+		console.log(rootElement, parent, parent.scrollLeft, parent.scrollWidth);
 	}
 
 	const validateUserSettings = async function(settings) {
@@ -175,17 +186,21 @@
 
 	const renderPrettyDate = function(dateString) {
 		// Parse the input date string into a Date object
-    const date = parseISO(dateString);
+		const date = parseISO(dateString);
 
-    // Format the date using date-fns
-    let prettyDate = format(date, 'MMMM d, yyyy');
+		// Format the date using date-fns
+		let prettyDate = format(date, 'MMMM d, yyyy');
 
 		if(isToday(date)) {
 			prettyDate = `Today, ${prettyDate}`;
 		}
 
-    return prettyDate;
+		return prettyDate;
 	}
+
+	$: if (rootElement) {
+    scrollToEnd();
+  }
 
 	init(userSettings, defaultSettings);
 </script>
@@ -202,7 +217,7 @@
 </div>
 No habits to show at "{path}"
 {:else}
-<div class="habit-tracker" style="--date-columns: {dates.length}">
+<div class="habit-tracker" style="--date-columns: {dates.length}" bind:this={rootElement}>
 	<div class="habit-tracker__header habit-tracker__row">
 		<div class="habit-tracker__cell--name habit-tracker__cell"></div>
 		{#each dates as date}
