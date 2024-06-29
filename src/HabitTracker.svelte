@@ -25,19 +25,22 @@
 		path: string
 		lastDisplayedDate: Date
 		daysToShow: number
-		debug: number
+		debug: number,
+		matchLineLength: boolean
 	}>
 
 	const defaultSettings = {
 		lastDisplayedDate: getDateAsString(new Date()),
 		daysToShow: 21,
-		debug: 0
+		debug: 0,
+		matchLineLength: false
 	}
 
 	// actuall settings
 	let path;
 	let lastDisplayedDate;
 	let daysToShow;
+	let matchLineLength;
 	let debug;
 	let habits: Array<{
 		[x: string]: any
@@ -70,6 +73,7 @@
 		path = userSettings.path;
 		daysToShow = userSettings.daysToShow || defaultSettings.daysToShow;
 		lastDisplayedDate = userSettings.lastDisplayedDate || defaultSettings.lastDisplayedDate;
+		matchLineLength = userSettings.matchLineLength || defaultSettings.matchLineLength;
 		debug = userSettings.debug || defaultSettings.debug;
 
 		firstDisplayedDate = getDateAsString(subDays(lastDisplayedDate, daysToShow - 1));
@@ -85,6 +89,7 @@
 			path,
 			daysToShow,
 			lastDisplayedDate,
+			matchLineLength,
 			debug,
 			firstDisplayedDate,
 			dates,
@@ -114,6 +119,7 @@
 			path,
 			lastDisplayedDate,
 			daysToShow,
+			matchLineLength,
 		} = settings;
 		if(!path) { // mandatory
 			fatalError = `path is a mandatory parameter, but you didn't provide it. Where should I load plugins from?`
@@ -153,6 +159,10 @@
 			if(!Number.isInteger(daysToShow) || daysToShow < 1) {
 				throw new Error(`daysToShow needs to be an integer bigger than 0. Instead I got the ${typeof daysToShow} "${daysToShow}"`);
 			}
+		}
+
+		if(matchLineLength && typeof matchLineLength !== 'boolean') {
+			throw new Error(`matchLineLength should be either true or false. Instead I got the ${typeof matchLineLength} ${matchLineLength}`);
 		}
 
 		debugLog(`[${PLUGIN_NAME}] User settings look good.`, debug);
@@ -217,7 +227,7 @@
 </div>
 No habits to show at "{path}"
 {:else}
-<div class="habit-tracker" style="--date-columns: {dates.length}" bind:this={rootElement}>
+<div class="habit-tracker {matchLineLength ? 'habit-tracker--match-line-length' : ''}" style="--date-columns: {dates.length}" bind:this={rootElement}>
 	<div class="habit-tracker__header habit-tracker__row">
 		<div class="habit-tracker__cell--name habit-tracker__cell"></div>
 		{#each dates as date}

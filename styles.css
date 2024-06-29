@@ -51,6 +51,10 @@ div:has(.block-language-habittracker) {
 	background-color: var(--habit-bg);
 }
 
+.is-readable-line-width .habit-tracker--match-line-length {
+	width: var(--file-line-width);
+}
+
 .habit-tracker__row {
 	display: contents;
 }
@@ -98,6 +102,9 @@ div:has(.block-language-habittracker) {
 	display: inline-block;
 	font-size: var(--habit-name-font-size);
 	text-decoration: none;
+}
+.is-readable-line-width .habit-tracker--match-line-length .habit-tracker__cell--name {
+	max-width: 100%;
 }
 
 .habit-tracker__cell--saturday,
