@@ -268,7 +268,6 @@ export default class HabitTracker {
 
 		const entriesSet = new Set(entries)
 
-		// console.log('entries', entries);
 		for (let i = 0; i < this.settings.daysToLoad; i++) {
 			const dateString = this.getDateId(currentDate)
 			const isTicked = entriesSet.has(dateString)

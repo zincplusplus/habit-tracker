@@ -82,6 +82,9 @@
 .habit-tick {
 	line-height: 0;
 	text-align: center;
+	width: 25px;
+	min-width: 25px;
+	max-width: 25px;
 }
 .habit-tick:hover {
 	cursor: pointer;
