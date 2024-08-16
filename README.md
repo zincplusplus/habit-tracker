@@ -2,6 +2,8 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
+<a href="https://buymeacoffee.com/zincplusplus" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
 # Habit Tracker 21
 
 Introducing "Habit Tracker 21," an innovative plugin designed specifically for Obsidian. Have you ever wanted to develop new habits but struggled to keep yourself accountable? This plugin is your perfect solution.
@@ -57,3 +59,8 @@ Make sure to specify the path you're using. You can point to one habit, or all h
 To determine how much time I should invest in this project I use Bitly.com to track how many people use it. This is what I see https://github.com/zoreet/habit-tracker/issues/32#issuecomment-2116918725
 
 This is the tracker that collects the least ammount of data that I could find, other than building a custom one. If you have any concerns please add a comment to the above ticket.
+
+
+## Support
+
+If you enjoy this plugin consider buying me a coffee at https://buymeacoffee.com/zincplusplus
