@@ -66,7 +66,13 @@ export default class HabitTracker {
 		this.id = this.generateUniqueId()
 		this.settings = this.loadSettings(src)
 		this.settings.rootElement = el
+		this.reload()
 		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
+	}
+
+	reload() {
+		this.settings.rootElement?.childNodes.forEach(node => node.remove())
+		this.settings.habitsGoHere = undefined
 
 		// 1. get all the habits
 		const files = this.loadFiles()
@@ -81,7 +87,7 @@ export default class HabitTracker {
 		)
 
 		// 2.1 render the element that holds all habits
-		this.settings.habitsGoHere = this.renderRoot(el)
+		this.settings.habitsGoHere = this.renderRoot(this.settings.rootElement)
 
 		// 2.2 render the header
 		this.renderHeader(this.settings.habitsGoHere)
@@ -92,8 +98,12 @@ export default class HabitTracker {
 		})
 
 		if (this.settings.debug) {
-		this.renderDebugData();
+			this.renderDebugData();
+		}
 	}
+
+	isTrackingPath(path: string) {
+		return path.includes(this.settings.path)
 	}
 
 	loadFiles() {
@@ -101,7 +111,7 @@ export default class HabitTracker {
 			.getMarkdownFiles()
 			.filter((file) => {
 				// only habits
-				if (!file.path.includes(this.settings.path)) {
+				if (!this.isTrackingPath(file.path)) {
 					// console.log(`${file.path} doesn't match ${this.settings.path}`);
 					return false
 				}
