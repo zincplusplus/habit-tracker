@@ -73,6 +73,7 @@ export default class HabitTracker {
 	reload() {
 		this.settings.rootElement?.childNodes.forEach(node => node.remove())
 		this.settings.habitsGoHere = undefined
+		this.settings.lastDisplayedDate = getTodayDate()
 
 		// 1. get all the habits
 		const files = this.loadFiles()
