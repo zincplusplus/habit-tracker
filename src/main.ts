@@ -6,7 +6,6 @@ const PLUGIN_NAME = 'Habit Tracker 21'
 export default class HabitTracker21 extends Plugin {
 
 	trackers: HabitTracker[] = []
-	dailyTimer?: NodeJS.Timeout
 
 	async onload() {
 		console.log(`${PLUGIN_NAME}: loading...`)
@@ -24,10 +23,6 @@ export default class HabitTracker21 extends Plugin {
 		this.setDailyTimer()
 	}
 
-	onunload(): void {
-		clearTimeout(this.dailyTimer)
-	}
-
 	reloadCorrespondingTracker = (file, oldPath?: string) => {
 		this.trackers.forEach(tracker => {
 			if (tracker.isTrackingPath(file.path) || (oldPath && tracker.isTrackingPath(oldPath))) {
@@ -37,18 +32,16 @@ export default class HabitTracker21 extends Plugin {
 	}
 
 	setDailyTimer() {
-		if (this.dailyTimer) {
-			clearTimeout(this.dailyTimer)
-			this.dailyTimer = undefined
-		}
+		let nextDay = moment().add(1, 'day').startOf('day')
 
-		const now = moment()
-		const nextDay = moment().add(1, 'day').startOf('day')
-		const delay = moment.duration(nextDay.diff(now))
-
-		this.dailyTimer = setTimeout(() => {
+		this.registerInterval(window.setInterval(() => {
+			if (moment().diff(nextDay) < 0) {
+				return  // still the same day
+			}
 			this.trackers.forEach(tracker => tracker.reload())
-			this.setDailyTimer()
-		}, delay.asMilliseconds())
+
+			// reset nextDay
+			nextDay = moment().add(1, 'day').startOf('day')
+		}, 1000))
 	}
 }
