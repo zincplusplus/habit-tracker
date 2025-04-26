@@ -1,10 +1,10 @@
 {
-	"id": "habit-tracker-21",
+	"id": "habit-tracker",
 	"name": "Habit Tracker 21",
-	"version": "1.4.5",
+	"version": "1.4.6",
 	"minAppVersion": "1.1.0",
 	"description": "Your 21-day journey to habit formation, simplified",
-	"author": "Zoreet",
+	"author": "Zoreet - A great guy",
 	"authorUrl": "https://github.com/zoreet",
 	"isDesktopOnly": false,
 	"fundingUrl": "https://buymeacoffee.com/zincplusplus"

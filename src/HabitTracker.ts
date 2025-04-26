@@ -6,21 +6,22 @@
 // https://ourgreenstory.com/nl/sticky-whiteboard/habit-tracker/
 // listen to file change https://github.com/obsidianmd/obsidian-api/blob/c01fc3074deeb3dfc6ee02546d113b448735b294/obsidian.d.ts#L3724
 
-import {App, parseYaml, Notice, TAbstractFile, TFile} from 'obsidian'
+import { App, parseYaml, Notice, TAbstractFile, TFile, Vault } from 'obsidian'
 
 const PLUGIN_NAME = 'Habit Tracker 21'
 /* i want to show that a streak is already ongoing even if the previous dates are not rendered
-  so I load an extra date in the range, but never display it in the UI */
+	so I load an extra date in the range, but never display it in the UI */
 const DAYS_TO_SHOW = 21
 const DAYS_TO_LOAD = DAYS_TO_SHOW + 1
+const TODAY = new Date()
 
 interface HabitTrackerSettings {
 	path: string
 	lastDisplayedDate: string
 	daysToShow: number
 	daysToLoad: number
-	rootElement: HTMLDivElement | undefined
-	habitsGoHere: HTMLDivElement | undefined
+	rootElement: HTMLElement | undefined
+	habitsContainer: HTMLDivElement | undefined
 	debug: number
 }
 
@@ -30,48 +31,42 @@ const DEFAULT_SETTINGS = (): HabitTrackerSettings => ({
 	daysToShow: DAYS_TO_SHOW,
 	daysToLoad: DAYS_TO_LOAD,
 	rootElement: undefined,
-	habitsGoHere: undefined,
+	habitsContainer: undefined,
 	debug: 0,
 })
 
-const ALLOWED_USER_SETTINGS = ['path', 'lastDisplayedDate', 'daysToShow', 'debug']
+const ALLOWED_USER_SETTINGS = [
+	'path',
+	'lastDisplayedDate',
+	'daysToShow',
+	'debug'
+]
 
 function getTodayDate() {
-	const today = new Date()
-	const year = today.getFullYear()
-	const month = String(today.getMonth() + 1).padStart(2, '0')
-	const day = String(today.getDate()).padStart(2, '0')
+	const year = TODAY.getFullYear()
+	const month = String(TODAY.getMonth() + 1).padStart(2, '0')
+	const day = String(TODAY.getDate()).padStart(2, '0')
 
 	return `${year}-${month}-${day}`
-}
-
-function getDaysDifference(startDateId, endDateId) {
-	const start = new Date(startDateId)
-	const end = new Date(endDateId)
-	const oneDay = 24 * 60 * 60 * 1000 // hours * minutes * seconds * milliseconds
-
-	const diffInTime = Math.abs(end.getTime() - start.getTime())
-	const diffInDays = Math.round(diffInTime / oneDay)
-
-	return diffInDays
 }
 
 export default class HabitTracker {
 	settings: HabitTrackerSettings
 	app: App
-	id: String
+	id: string
 
-	constructor(src, el, ctx, app) {
+	constructor(source: string, element: HTMLElement, context, app) {
 		this.app = app
 		this.id = this.generateUniqueId()
-		this.settings = this.loadSettings(src)
-		this.settings.rootElement = el
+		this.settings = this.loadSettings(source)
+		this.settings.rootElement = element
 		// console.log(`${PLUGIN_NAME} got with these settings:`, this.settings)
 
-		// 1. get all the habits
-		const files = this.loadFiles()
+		const files = this.getHabitsFiles(this.app.vault, this.settings.path)
 
-		if (files.length === 0) {
+		const noHabitsFiles = files.length === 0
+
+		if (noHabitsFiles) {
 			this.renderNoHabitsFoundMessage()
 			return
 		}
@@ -80,35 +75,31 @@ export default class HabitTracker {
 			`${PLUGIN_NAME} loaded successfully ${files.length} file(s) from ${this.settings.path}`,
 		)
 
-		// 2.1 render the element that holds all habits
-		this.settings.habitsGoHere = this.renderRoot(el)
+		this.settings.habitsContainer = this.renderRoot(element)
 
 		// 2.2 render the header
-		this.renderHeader(this.settings.habitsGoHere)
+		this.renderHeader(this.settings.habitsContainer)
 
 		// 2.3 render each habit
-		files.forEach(async (f) => {
-			this.renderHabit(f.path, await this.getHabitEntries(f.path))
-		})
+		this.renderHabits(files)
+	}
+
+	private async renderHabits(files: TFile[]) {
+		for (const file of files) {
+			const entries = await this.getHabitEntries(file.path);
+			this.renderHabit(file.path, entries);
+		}
 
 		if (this.settings.debug) {
-		this.renderDebugData();
-	}
+			this.renderDebugData();
+		}
 	}
 
-	loadFiles() {
-		return this.app.vault
+	getHabitsFiles(vault: Vault, path: string) {
+		return vault
 			.getMarkdownFiles()
-			.filter((file) => {
-				// only habits
-				if (!file.path.includes(this.settings.path)) {
-					// console.log(`${file.path} doesn't match ${this.settings.path}`);
-					return false
-				}
-
-				return true
-			})
-			.sort((a, b) => a.name.localeCompare(b.name))
+			.filter(file => file.path.includes(path))
+			.sort((a, b) => a.name.localeCompare(b.name));
 	}
 
 	loadSettings(rawSettings) {
@@ -119,7 +110,7 @@ export default class HabitTracker {
 				this.removePrivateSettings(JSON.parse(rawSettings)),
 			)
 			/* i want to show that a streak is already ongoing even if the previous dates are not rendered
-  		so I load an extra date in the range, but never display it in the UI */
+			so I load an extra date in the range, but never display it in the UI */
 			settings.daysToLoad = settings.daysToShow + 1
 			return settings
 		} catch (error) {
@@ -133,11 +124,11 @@ export default class HabitTracker {
 
 	removePrivateSettings(userSettings) {
 		const result = {}
-		ALLOWED_USER_SETTINGS.forEach((key) => {
+		for (const key of ALLOWED_USER_SETTINGS) {
 			if (userSettings[key]) {
 				result[key] = userSettings[key]
 			}
-		})
+		}
 
 		return result
 	}
@@ -145,7 +136,7 @@ export default class HabitTracker {
 	renderDebugData() {
 		this.settings.rootElement?.createEl('pre', {
 			// get the json printed with indentation
-			text: JSON.stringify(this.settings, null, 2),
+			text: JSON.stringify(this.settings, undefined, 2),
 		})
 	}
 
@@ -156,13 +147,18 @@ export default class HabitTracker {
 	}
 
 	renderRoot(parent) {
-		const rootElement = parent.createEl('div', {
+		const rootElement: HTMLDivElement = parent.createEl('div', {
 			cls: 'habit-tracker',
 		})
+
 		rootElement.setAttribute('id', this.id)
-		rootElement.addEventListener('click', (e) => {
-			const target = e.target as HTMLDivElement
-			if (target?.classList.contains('habit-tick')) {
+		// Todo: where is the unsubscribe from this event listener?
+
+		rootElement.addEventListener('click', (event) => {
+			const target = event.target
+			if (!(target instanceof HTMLElement)) return;
+
+			if (target.classList.contains('habit-tick')) {
 				this.toggleHabit(target)
 			}
 		})
@@ -184,7 +180,8 @@ export default class HabitTracker {
 			this.settings.lastDisplayedDate,
 		)
 		currentDate.setDate(currentDate.getDate() - this.settings.daysToLoad + 1)
-		for (let i = 0; i < this.settings.daysToLoad; i++) {
+
+		for (let index = 0; index < this.settings.daysToLoad; index++) {
 			const day = currentDate.getDate().toString()
 			header.createEl('div', {
 				cls: `habit-tracker__cell habit-tracker__cell--${this.getDayOfWeek(
@@ -200,9 +197,9 @@ export default class HabitTracker {
 	}
 
 	async getFrontmatter(path: string) {
-		const file: TAbstractFile|null = this.app.vault.getAbstractFileByPath(path)
+		const file: TAbstractFile | null = this.app.vault.getAbstractFileByPath(path)
 
-		if (!file || !(file instanceof TFile) ) {
+		if (!file || !(file instanceof TFile)) {
 			new Notice(`${PLUGIN_NAME}: No file found for path: ${path}`)
 			return {}
 		}
@@ -215,148 +212,156 @@ export default class HabitTracker {
 
 				return parseYaml(frontmatter)
 			})
-		} catch (error) {
+		} catch {
 			return {}
 		}
 	}
 
 	async getHabitEntries(path: string) {
-		// let entries = await this.getFrontmatter(path)?.entries || [];
-		const fm = await this.getFrontmatter(path)
-		// console.log(`Found ${fm.entries} for ${path}`);
-		return fm.entries || []
+		const frontMatter = await this.getFrontmatter(path)
+		return frontMatter.entries ?? []
 	}
 
 	renderHabit(path: string, entries: string[]) {
 		// console.log('rendering a habit')
-		if (!this.settings.habitsGoHere) {
+		if (!this.settings.habitsContainer) {
 			new Notice(`${PLUGIN_NAME}: missing div that holds all habits`)
-			return null
+			return
 		}
-		const parent = this.settings.habitsGoHere
+
+		const parent = this.settings.habitsContainer
 
 		const name = path.split('/').pop()?.replace('.md', '')
 
 		// no. this needs to be queried inside this.settings.rootElement;
-		let row = parent.querySelector(`*[data-id="${this.pathToId(path)}"]`)
+		let row = parent.querySelector(`*[data-id="${this.pathToId(path)}"]`) as HTMLElement
 
-		if (!row) {
-			row = this.settings.habitsGoHere.createEl('div', {
+		if (row) {
+			this.removeAllChildNodes(row)
+		} else {
+			row = this.settings.habitsContainer.createEl('div', {
 				cls: 'habit-tracker__row',
 			})
-			row.setAttribute('data-id', this.pathToId(path))
-		} else {
-			this.removeAllChildNodes(row)
+			row.dataset.id = this.pathToId(path)
 		}
 
 		const habitTitle = row.createEl('div', {
 			cls: 'habit-tracker__cell--name habit-tracker__cell',
 		})
 
-		const habitTitleLink = habitTitle.createEl('a', {
+		habitTitle.createEl('a', {
 			text: name,
 			cls: 'internal-link',
+			href: path,
+			attr: {
+				'aria-label': path
+			}
 		})
-
-		habitTitleLink.setAttribute('href', path)
-		habitTitleLink.setAttribute('aria-label', path)
 
 		const currentDate = this.createDateFromFormat(
 			this.settings.lastDisplayedDate,
 		)
-		currentDate.setDate(currentDate.getDate() - this.settings.daysToLoad + 1) // todo, why +1?
+		currentDate.setDate(currentDate.getDate() - this.settings.daysToLoad + 1) // TODO: why +1? Because you show all previous days + today
 
 		const entriesSet = new Set(entries)
 
-		for (let i = 0; i < this.settings.daysToLoad; i++) {
-			const dateString = this.getDateId(currentDate)
-			const isTicked = entriesSet.has(dateString)
-
-			const habitCell = row.createEl('div', {
-				cls: `habit-tracker__cell
-				habit-tick habit-tick--${isTicked}
-				habit-tracker__cell--${this.getDayOfWeek(currentDate)}`,
-			})
-
-			habitCell.setAttribute('ticked', isTicked.toString())
-
-			habitCell.setAttribute('date', dateString)
-			habitCell.setAttribute('habit', path)
-
-			habitCell.setAttribute('streak', this.findStreak(entries, currentDate))
-
-			currentDate.setDate(currentDate.getDate() + 1)
+		for (const date of this.dateRange(currentDate, this.settings.daysToLoad)) {
+			this.createHabitCell(row, date, path, entriesSet, entries);
 		}
 	}
 
-	// get streak
-	// based on an array of dates, get the current streak for the given date
-	findStreak(entries, date) {
-		let currentDate = new Date(date);
-		let streak = 0
+	private *dateRange(startDate: Date, days: number) {
+		const currentDate = new Date(startDate);
+		for (let index = 0; index < days; index++) {
+			yield currentDate;
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+	}
 
-		// console.log('entries', entries)
-		// console.log('date', date)
+	private createHabitCell(row: Element, currentDate: Date, path: string, entriesSet: Set<string>, entries: string[]) {
+		const dateString = this.getDateId(currentDate);
+		const isTicked = entriesSet.has(dateString);
+		const dayOfWeek = this.getDayOfWeek(currentDate);
+
+		const habitCell = row.createEl('div', {
+			cls: [
+				'habit-tracker__cell',
+				'habit-tick',
+				`habit-tick--${isTicked}`,
+				`habit-tracker__cell--${dayOfWeek}`
+			].join(' '),
+			attr: {
+				ticked: isTicked.toString(),
+				date: dateString,
+				habit: path,
+				streak: this.getStreak(entries, currentDate)
+			}
+		});
+
+		return habitCell;
+	}
+
+	/**
+		* Calculates the consecutive streak of habits up to a given date
+		* @param entries - Array of date strings in YYYY-MM-DD format representing completed habits
+		* @param date - The date up to which to calculate the streak
+		* @returns The number of consecutive days the habit was completed as a string
+		* @example
+		* // Returns "3" if habit was completed on 2024-04-24, 2024-04-23, and 2024-04-22
+		* getStreak(["2024-04-24", "2024-04-23", "2024-04-22"], new Date("2024-04-24"))
+		*/
+	getStreak(entries: string[], date: Date): string {
+		let streak = 0;
+		const currentDate = new Date(date);
 
 		while (entries.includes(this.getDateId(currentDate))) {
-			streak++
-			currentDate.setDate(currentDate.getDate() - 1)
+			streak++;
+			currentDate.setDate(currentDate.getDate() - 1);
 		}
 
 		return streak.toString();
 	}
 
-	async toggleHabit(el) {
-		const habit = el.getAttribute('habit')
-		const date = el.getAttribute('date')
-		const file: TAbstractFile|null = this.app.vault.getAbstractFileByPath(habit)
-		const isTicked = el.getAttribute('ticked')
+	async toggleHabit(element) {
+		const habit = element.getAttribute('habit')
+		const date = element.getAttribute('date')
+		const file: TAbstractFile | null = this.app.vault.getAbstractFileByPath(habit)
+		const isTicked = element.getAttribute('ticked') === 'true'
 
-		if (!file ||!(file instanceof TFile)) {
+		if (!file || !(file instanceof TFile)) {
 			new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`)
 			return
 		}
 
-		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			let entries = frontmatter['entries'] || []
-			if (isTicked === 'true') {
-				entries = entries.filter((e) => e !== date)
-			} else {
-				entries.push(date)
-				entries.sort()
-			}
-			frontmatter['entries'] = entries
-		})
+		this.updateHabitEntry(file, isTicked, date)
 
-		this.renderHabit(file.path, await this.getHabitEntries(file.path))
+		const entries = await this.getHabitEntries(file.path)
+		this.renderHabit(file.path, entries)
 	}
 
-	writeFile(file: TAbstractFile, content: string) {
-		if (!content) {
-			new Notice(
-				`${PLUGIN_NAME}: could not save changes due to missing content`,
-			)
-			return null
-		}
+	private updateHabitEntry(file: TFile, isTicked: any, date: any) {
+		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			let entries = frontmatter['entries'] || []
+			if (!isTicked) {
+				entries.push(date)
+				entries.sort()
+				frontmatter['entries'] = entries
+				return true
+			}
 
-		if (!file ||!(file instanceof TFile)) {
-			new Notice(
-				`${PLUGIN_NAME}: could not save changes due to missing file`,
-			)
-			return null
-		}
+			if (isTicked) {
+				entries = entries.filter((entry) => entry !== date)
+				frontmatter['entries'] = entries
+				return true
+			}
 
-		try {
-			return this.app.vault.modify(file, content)
-		} catch (error) {
-			new Notice(`${PLUGIN_NAME}: could not save changes`)
-			return Promise.reject(error)
-		}
+			return false
+		})
 	}
 
 	removeAllChildNodes(parent) {
 		while (parent.firstChild) {
-			parent.removeChild(parent.firstChild)
+			parent.firstChild.remove()
 		}
 	}
 
@@ -405,7 +410,7 @@ export default class HabitTracker {
 
 	generateUniqueId() {
 		const timestamp = Date.now()
-		const randomNum = Math.floor(Math.random() * 10000) // Adjust the range as needed
-		return `habittracker-${timestamp}-${randomNum}`
+		const randomNumber = Math.floor(Math.random() * 10_000) // Adjust the range as needed
+		return `habittracker-${timestamp}-${randomNumber}`
 	}
 }

@@ -1,3 +1,4 @@
+
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker),
 .block-language-habittracker {
 	width: fit-content;
@@ -5,12 +6,14 @@
 
 .habit-tracker {
 	display: table;
+	background-color: "red";
 	table-layout: fixed;
 	border-collapse: collapse;
 }
 
 .habit-tracker__row {
 	display: table-row;
+	background-color: "red";
 }
 
 .habit-tracker__row + .habit-tracker__row {

@@ -1,26 +1,31 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "habit-tracker",
 	"version": "1.4.4",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Habit tracking plugin for obsidian",
 	"main": "main.js",
+	"type": "module",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"lint": "eslint src",
+		"lint:fix": "eslint --fix src",
 		"version": "node make-release.mjs"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "5.29.0",
-		"@typescript-eslint/parser": "5.29.0",
-		"builtin-modules": "3.3.0",
-		"esbuild": "0.17.3",
-		"fs-extra": "^11.2.0",
+		"@types/node": "^22.15.2",
+		"@typescript-eslint/eslint-plugin": "8.31.0",
+		"@typescript-eslint/parser": "^8.31.0",
+		"builtin-modules": "5.0.0",
+		"esbuild": "0.25.3",
+		"eslint": "^9.25.1",
+		"eslint-plugin-unicorn": "^58.0.0",
+		"fs-extra": "^11.3.0",
 		"obsidian": "latest",
-		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"tslib": "2.8.1",
+		"typescript": "5.8.3"
 	},
 	"dependencies": {
 		"js-yaml": "^4.1.0"
