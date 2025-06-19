@@ -46,7 +46,7 @@ Make sure to specify the path you're using. You can point to one habit, or all h
 
   `{
 	"path": "Habits/",
-	"daysToShow": "31"
+	"daysToShow": 31
 }`
 
 ## Example
