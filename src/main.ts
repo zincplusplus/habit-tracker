@@ -1,13 +1,29 @@
 // TODO Add integration tests with jest
-import {Plugin, Notice, setIcon} from 'obsidian'
+import {Plugin, Notice, setIcon, App, PluginSettingTab, Setting} from 'obsidian'
 import HabitTracker from './HabitTracker.svelte'
 import HabitTrackerError from './HabitTrackerError.svelte'
 
-export const PLUGIN_NAME = 'Habit Tracker 21'
+
+interface HabitTrackerSettings {
+	path: string;
+	daysToShow: number;
+	debug: number;
+	matchLineLength: boolean;
+}
+
+const DEFAULT_SETTINGS: HabitTrackerSettings = {
+	path: '',
+	daysToShow: 21,
+	debug: 0,
+	matchLineLength: false
+}
 
 export default class HabitTracker21 extends Plugin {
+	settings: HabitTrackerSettings;
 
-	onload() {
+	async onload() {
+		await this.loadSettings();
+
 		this.registerMarkdownCodeBlockProcessor('habittracker', async (src, el) => {
 			// const trackingPixel = document.createElement('img')
 			// trackingPixel.setAttribute('src', 'https://bit.ly/habitttracker21-140')
@@ -23,6 +39,8 @@ export default class HabitTracker21 extends Plugin {
 						props: {
 							app: this.app,
 							userSettings,
+							globalSettings: this.settings,
+							pluginName: this.manifest.name,
 						},
 					})
 			} catch(error) {
@@ -30,10 +48,11 @@ export default class HabitTracker21 extends Plugin {
 					target: el,
 					props: {
 						error,
-						src
+						src,
+						pluginName: this.manifest.name
 					}
 				})
-				console.error(`[${PLUGIN_NAME}] Received invalid settings. ${error}`)
+				console.error(`[${this.manifest.name}] Received invalid settings. ${error}`)
 			}
 		})
 
@@ -42,6 +61,30 @@ export default class HabitTracker21 extends Plugin {
 
 		// Check for updates in background (after a short delay)
 		setTimeout(() => this.checkForUpdatesBackground(), 5000)
+
+		// Add the settings tab
+		this.addSettingTab(new HabitTrackerSettingTab(this.app, this));
+	}
+
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
+
+	async saveSettings() {
+		console.log('[HabitTracker] Saving settings:', this.settings);
+		await this.saveData(this.settings);
+		// Refresh all habit tracker instances when settings change
+		this.refreshAllHabitTrackers();
+	}
+
+	refreshAllHabitTrackers() {
+		// Dispatch a single event at the document level that all components can listen to
+		console.log('[HabitTracker] Dispatching refresh event with settings:', this.settings);
+		const refreshEvent = new CustomEvent('habit-tracker-refresh', {
+			detail: { settings: this.settings }
+		});
+		document.dispatchEvent(refreshEvent);
+		console.log('[HabitTracker] Refresh event dispatched');
 	}
 
 	addHoverActionBars() {
@@ -80,6 +123,7 @@ export default class HabitTracker21 extends Plugin {
 		})
 	}
 
+	// TODO could we do this with Svelte?
 	createActionBar(codeBlock) {
 		const actionBar = document.createElement('div')
 		actionBar.className = 'ht21-action-bar'
@@ -87,19 +131,16 @@ export default class HabitTracker21 extends Plugin {
 		// Check for version mismatch between manifest and localStorage
 		const storedVersion = localStorage.getItem('habit-tracker-update-available')
 		const currentVersion = this.manifest.version
-
-		console.log('Debug - storedVersion from localStorage:', storedVersion)
-		console.log('Debug - currentVersion from manifest:', currentVersion)
+		// TODO add some debugging code here too
 
 		// Show dot if there's a stored version that's different from current
 		const hasUpdate = storedVersion && storedVersion !== currentVersion
-		console.log('Debug - hasUpdate (mismatch):', hasUpdate)
 
 		const updateDot = hasUpdate ? '<span class="ht21-update-dot"></span>' : ''
 		const tooltipText = hasUpdate ? 'New version available' : 'Check for updates'
 
 		actionBar.innerHTML = `
-			<span class="ht21-action-bar__title">Habit Tracker 21</span>
+			<span class="ht21-action-bar__title">${this.manifest.name}</span>
 			<div class="ht21-action-bar__buttons">
 				<button class="clickable-icon ht21-action-bar__btn--update" aria-label="${tooltipText}" style="position: relative;"><span class="ht21-btn-text">Updates</span>${updateDot}</button>
 				<button class="clickable-icon ht21-action-bar__btn--edit" aria-label="Edit this block"><span class="ht21-btn-text">Edit this block</span></button>
@@ -135,9 +176,9 @@ export default class HabitTracker21 extends Plugin {
 	}
 
 	openSettings() {
-		// Open settings and navigate to the open-vscode plugin settings
+		// Open settings and navigate to this plugin's settings page
 		(this.app as any).setting.open();
-		(this.app as any).setting.openTabById('open-vscode');
+		(this.app as any).setting.openTabById(this.manifest.id);
 	}
 
 	openCommunityPlugins() {
@@ -219,5 +260,100 @@ export default class HabitTracker21 extends Plugin {
 
 	onunload() {
 		// window.location.reload();
+	}
+}
+
+class HabitTrackerSettingTab extends PluginSettingTab {
+	plugin: HabitTracker21;
+
+	constructor(app: App, plugin: HabitTracker21) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		const {containerEl} = this;
+
+		containerEl.empty();
+
+		containerEl.createEl('h3', {text: `${this.plugin.manifest.name} Settings`});
+
+		// Add explanation text
+		const descEl = containerEl.createEl('div', {
+			cls: 'setting-item-description',
+			text: 'These are the global default settings. You can override any of these settings in individual habit tracker code blocks by specifying them in the JSON configuration.'
+		});
+		descEl.style.marginBottom = '20px';
+		descEl.style.padding = '10px';
+		descEl.style.backgroundColor = 'var(--background-secondary)';
+		descEl.style.borderRadius = '6px';
+		descEl.style.fontSize = '0.9em';
+
+		new Setting(containerEl)
+			.setName('Default path')
+			.setDesc('Default path for habits (folder or file). Can be overridden with "path" in code blocks.')
+			.addText(text => text
+				.setPlaceholder('e.g., Habits or Habits/Daily')
+				.setValue(this.plugin.settings.path)
+				.onChange(async (value) => {
+					this.plugin.settings.path = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Days to show')
+			.setDesc('Number of days to display in the habit tracker. Can be overridden with "daysToShow" in code blocks.')
+			.addText(text => text
+				.setValue(this.plugin.settings.daysToShow.toString())
+				.onChange(async (value) => {
+					const numValue = parseInt(value);
+					if (!isNaN(numValue) && numValue > 0) {
+						this.plugin.settings.daysToShow = numValue;
+						await this.plugin.saveSettings();
+					}
+				}))
+			.then(setting => {
+				// Add number input attributes
+				const inputEl = setting.controlEl.querySelector('input') as HTMLInputElement;
+				if (inputEl) {
+					inputEl.type = 'number';
+					inputEl.min = '1';
+					inputEl.step = '1';
+				}
+			});
+
+		new Setting(containerEl)
+			.setName('Debug mode')
+			.setDesc('Enable debug output to console. Can be overridden with "debug" in code blocks.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.debug > 0)
+				.onChange(async (value) => {
+					this.plugin.settings.debug = value ? 1 : 0;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Match line length')
+			.setDesc('Make habit tracker match the width of the readable line length. Can be overridden with "matchLineLength" in code blocks.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.matchLineLength)
+				.onChange(async (value) => {
+					this.plugin.settings.matchLineLength = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Reset settings')
+			.setDesc('Reset all settings to their default values')
+			.addButton(button => button
+				.setButtonText('Reset to defaults')
+				.setWarning()
+				.onClick(async () => {
+					// Reset to default settings
+					this.plugin.settings = Object.assign({}, DEFAULT_SETTINGS);
+					await this.plugin.saveSettings();
+					// Refresh the settings display
+					this.display();
+				}));
 	}
 }

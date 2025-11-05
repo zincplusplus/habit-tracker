@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {debugLog, pluralize} from './utils'
+	import {onMount, onDestroy} from 'svelte'
 
 	import Habit from './Habit.svelte'
 
@@ -13,13 +14,6 @@
 		parseISO,
 		subDays,
 	} from 'date-fns'
-
-	import {PLUGIN_NAME} from './main'
-	// import {onMount} from 'svelte'
-
-	// Constants to avoid magic numbers
-	const DEFAULT_DAYS_TO_SHOW = 21
-	const DEFAULT_DEBUG_LEVEL = 0
 
 	// TypeScript interfaces for better state management
 	interface HabitTrackerSettings {
@@ -54,6 +48,13 @@
 	}
 
 	export let app: Plugin['app']
+	export let pluginName: string
+	export let globalSettings: {
+		path: string
+		daysToShow: number
+		debug: number
+		matchLineLength: boolean
+	}
 	// TODO: I don't like the name "matchLineLenghth", rename it to something better
 	// TODO: Why is matchLineLenght a boolean and debug a number? Make them consistent
 	export let userSettings: Partial<{
@@ -64,13 +65,13 @@
 		matchLineLength: boolean
 	}>
 
-	// Default settings
+	// Default settings - use global settings as defaults
 	const createDefaultSettings = (): HabitTrackerSettings => ({
-		path: '',
+		path: globalSettings.path,
 		lastDisplayedDate: getDateAsString(new Date()),
-		daysToShow: DEFAULT_DAYS_TO_SHOW,
-		debug: DEFAULT_DEBUG_LEVEL,
-		matchLineLength: false,
+		daysToShow: globalSettings.daysToShow,
+		debug: globalSettings.debug,
+		matchLineLength: globalSettings.matchLineLength,
 	})
 
 	// Initialize unified state
@@ -95,7 +96,7 @@
 
 		// Merge user settings with defaults first (let TypeScript handle type safety)
 		state.settings = {
-			path: userSettings.path || '',
+			path: userSettings.path || state.settings.path,
 			daysToShow: userSettings.daysToShow || state.settings.daysToShow,
 			lastDisplayedDate:
 				userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
@@ -109,7 +110,7 @@
 			await validateEssentials(state.settings)
 		} catch (error) {
 			state.ui.fatalError = `Could not start: ${error.message}`
-			console.error(`[${PLUGIN_NAME}] ${state.ui.fatalError}`)
+			console.error(`[${pluginName}] ${state.ui.fatalError}`)
 			return
 		}
 		debugLog(`Merged settings:`, state.settings.debug)
@@ -134,16 +135,22 @@
 			debugLog(
 				`Found ${count} ${pluralize(count, 'habit')} at ${state.settings.path}`,
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 			debugLog(
 				state.computed.habits.map((habit) => habit.path),
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 		} else {
 			state.ui.fatalError = `No habits found at "${state.settings.path}"`
 			debugLog(
 				`No habits found at ${state.settings.path}`,
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 			return
 		}
@@ -156,6 +163,8 @@
 			debugLog(
 				`scrollToEnd: rootElement is null, cannot scroll`,
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 			return
 		}
@@ -165,6 +174,8 @@
 			debugLog(
 				`scrollToEnd: parentElement is null, cannot scroll`,
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 			return
 		}
@@ -173,6 +184,8 @@
 		debugLog(
 			`scrollToEnd completed: element=${state.ui.rootElement}, parent=${parent}, scrollLeft=${parent.scrollLeft}, scrollWidth=${parent.scrollWidth}`,
 			state.settings.debug,
+			undefined,
+			pluginName,
 		)
 	}
 
@@ -195,7 +208,7 @@
 		}
 
 		debugLog(
-			`[${PLUGIN_NAME}] Essential validation passed for path: ${settings.path}`,
+			`[${pluginName}] Essential validation passed for path: ${settings.path}`,
 			state.settings.debug,
 		)
 		return true
@@ -210,6 +223,8 @@
 			debugLog(
 				`${path} points to a folder with ${count} ${pluralize(count, 'item')} inside`,
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 			return state.ui.habitSource.children as HabitData[]
 		}
@@ -224,6 +239,8 @@
 			debugLog(
 				`Adjusted ${path} to ${path}.md and found a file`,
 				state.settings.debug,
+				undefined,
+				pluginName,
 			)
 			return [state.ui.habitSource as HabitData]
 		}
@@ -250,18 +267,47 @@
 		scrollToEnd()
 	}
 
+	// Listen for settings refresh events
+	let refreshEventListener: (event: CustomEvent) => void
+
+	onMount(() => {
+		console.log('[HabitTracker] Component mounted, setting up refresh listener');
+		refreshEventListener = (event: CustomEvent) => {
+			console.log('[HabitTracker] Refresh event received:', event.detail.settings);
+			// Update global settings and reset state to use new defaults
+			globalSettings = event.detail.settings
+
+			// Reset state with new global settings as defaults
+			state.settings = createDefaultSettings()
+			console.log('[HabitTracker] Reset state with new defaults:', state.settings);
+
+			console.log('[HabitTracker] Calling init with updated settings');
+			init(userSettings)
+		}
+
+		// Listen for refresh events at the document level
+		document.addEventListener('habit-tracker-refresh', refreshEventListener)
+		console.log('[HabitTracker] Refresh event listener added to document');
+	})
+
+	onDestroy(() => {
+		if (refreshEventListener) {
+			document.removeEventListener('habit-tracker-refresh', refreshEventListener)
+		}
+	})
+
 	init(userSettings)
 </script>
 
 <!-- <svelte:window bind:innerWidth /> -->
 {#if state.ui.fatalError}
 	<div>
-		<strong>🛑 {PLUGIN_NAME}</strong>
+		<strong>🛑 {pluginName}</strong>
 	</div>
 	{state.ui.fatalError}
 {:else if !state.computed.habits.length}
 	<div>
-		<strong>😕 {PLUGIN_NAME}</strong>
+		<strong>😕 {pluginName}</strong>
 	</div>
 	No habits to show at "{state.settings.path}"
 {:else}
@@ -293,6 +339,7 @@
 				dates={state.computed.dates}
 				debug={state.settings.debug}
 				{app}
+				{pluginName}
 			></Habit>
 		{/each}
 	</div>
