@@ -1,19 +1,18 @@
-# Habit Tracker 21
+# Habit Tracker 21 [![GitHub release](https://img.shields.io/github/release/zincplusplus/habit-tracker.svg)](https://github.com/zincplusplus/habit-tracker/releases) [![Downloads](https://img.shields.io/github/downloads/zincplusplus/habit-tracker/total.svg)](https://github.com/zincplusplus/habit-tracker/releases) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 
 A minimalist, elegant habit tracker for [Obsidian](https://obsidian.md) that helps you build lasting habits with clear progress visualization.
-
-[![GitHub release](https://img.shields.io/github/release/zincplusplus/habit-tracker.svg)](https://github.com/zincplusplus/habit-tracker/releases)
-[![Downloads](https://img.shields.io/github/downloads/zincplusplus/habit-tracker/total.svg)](https://github.com/zincplusplus/habit-tracker/releases)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 
 Transform your [Obsidian](https://obsidian.md) vault into a habit-building powerhouse. Track daily habits with an intuitive grid interface, customize your tracking experience, and watch your consistency streaks grow over time.
 
 ![Habit Tracker Demo](screenshots/ui-demo.png)
 
+<a href="https://www.buymeacoffee.com/zincplusplus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## ✨ Features
 
 - **Minimalist Look** - Elegant, clean interface with nothing but essential functionality. Matches your theme effortlessly using Obsidian CSS variables
 - **Maximum configurability** - You can tweak and customize pretty much every aspect of Habit Tracker 21 to make it just right for you
+- **Easy to setup** - Matches your theme effortlessly using Obsidian CSS variables and includes sensible defaults for all tracker properties
 - **Smart Folder Support** - Track individual files or entire habit folders
 - **Debug Mode** - Comprehensive debugging gives you all the info you need to figure it out
 
@@ -60,6 +59,16 @@ Override global settings in individual code blocks:
 }
 ```
 ````
+
+## 🔧 All Settings
+
+| Setting             | Type    | Default | Description                                                                      |
+| ------------------- | ------- | ------- | -------------------------------------------------------------------------------- |
+| `path`              | string  | "/"     | Path to habit folder or file. Defaults to root folder if left empty              |
+| `daysToShow`        | number  | 21      | Number of days to display                                                        |
+| `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
+| `debug`             | boolean | false   | Enable debug console output                                                      |
+| `matchLineLength`   | boolean | false   | Match readable line width                                                        |
 
 ## 📖 Usage Examples
 
@@ -127,16 +136,6 @@ Enable detailed logging:
 ```
 ````
 
-## 🔧 All Settings
-
-| Setting             | Type    | Default | Description                                                                      |
-| ------------------- | ------- | ------- | -------------------------------------------------------------------------------- |
-| `path`              | string  | ""      | Path to habit folder or file                                                     |
-| `daysToShow`        | number  | 21      | Number of days to display                                                        |
-| `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
-| `debug`             | boolean | false   | Enable debug console output                                                      |
-| `matchLineLength`   | boolean | false   | Match readable line width                                                        |
-
 ## 🆘 Troubleshooting
 
 ### Common Issues
@@ -176,6 +175,8 @@ PRs welcome! Please:
 
 - Follow existing code style
 - Update documentation
+
+<a href="https://www.buymeacoffee.com/zincplusplus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## 📄 License
 
