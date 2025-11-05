@@ -292,13 +292,27 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Default path')
 			.setDesc('Default path for habits (folder or file). Can be overridden with "path" in code blocks.')
-			.addText(text => text
-				.setPlaceholder('e.g., Habits or Habits/Daily')
-				.setValue(this.plugin.settings.path)
-				.onChange(async (value) => {
+			.addDropdown(dropdown => {
+				// Get all folders in the vault
+				const folders = this.app.vault.getAllLoadedFiles()
+					.filter(file => file.children !== undefined) // Only folders
+					.map(folder => folder.path)
+					.sort();
+
+				// Add each folder as an option
+				folders.forEach(folderPath => {
+					dropdown.addOption(folderPath, folderPath);
+				});
+
+				// Set current value
+				dropdown.setValue(this.plugin.settings.path);
+
+				// Handle changes
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.path = value;
 					await this.plugin.saveSettings();
-				}));
+				});
+			});
 
 		new Setting(containerEl)
 			.setName('Days to show')
