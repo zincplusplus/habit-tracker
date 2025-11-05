@@ -218,14 +218,17 @@
 		state.ui.habitSource = app.vault.getAbstractFileByPath(path)
 
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFolder) {
-			const count = state.ui.habitSource.children.length
+			// Filter to only include files, not subfolders
+			const allItems = state.ui.habitSource.children
+			const filesOnly = allItems.filter(item => item instanceof TFile)
+			const count = filesOnly.length
 			debugLog(
-				`${path} points to a folder with ${count} ${pluralize(count, 'item')} inside`,
+				`${path} points to a folder with ${count} ${pluralize(count, 'file')} inside (ignoring subfolders)`,
 				state.settings.debug,
 				undefined,
 				pluginName,
 			)
-			return state.ui.habitSource.children as HabitData[]
+			return filesOnly as HabitData[]
 		}
 
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFile) {
