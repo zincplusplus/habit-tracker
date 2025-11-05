@@ -1,243 +1,295 @@
 <script lang="ts">
-	import { debugLog } from "./utils";
+	import {debugLog, pluralize} from './utils'
 
 	import Habit from './Habit.svelte'
 
-	import { TFile, TFolder, type Plugin } from 'obsidian'
-	import { getDateAsString, getDayOfTheWeek } from './utils.js'
+	import {TFile, TFolder, type Plugin} from 'obsidian'
+	import {getDateAsString, getDayOfTheWeek} from './utils.js'
 	import {
 		eachDayOfInterval,
 		format,
 		getDate,
 		isToday,
-		isValid,
-		parse,
 		parseISO,
 		subDays,
-	} from 'date-fns';
+	} from 'date-fns'
 
 	import {PLUGIN_NAME} from './main'
-	import { onMount } from "svelte"
 	// import {onMount} from 'svelte'
 
+	// TypeScript interfaces for better state management
+	interface HabitTrackerSettings {
+		path: string
+		lastDisplayedDate: string
+		daysToShow: number
+		debug: number
+		matchLineLength: boolean
+	}
+
+	interface HabitData {
+		[x: string]: any
+		file: TFile
+		entries: string[]
+	}
+
+	interface ComputedState {
+		dates: string[]
+		habits: HabitData[]
+	}
+
+	interface UIState {
+		fatalError: string
+		rootElement: HTMLElement | null
+		habitSource: TFile | TFolder | null
+	}
+
+	interface HabitTrackerState {
+		settings: HabitTrackerSettings
+		computed: ComputedState
+		ui: UIState
+	}
+
 	export let app: Plugin['app']
+	// TODO: I don't like the name "matchLineLenghth", rename it to something better
+	// TODO: Why is matchLineLenght a boolean and debug a number? Make them consistent
 	export let userSettings: Partial<{
 		path: string
 		lastDisplayedDate: Date
 		daysToShow: number
-		debug: number,
+		debug: number
 		matchLineLength: boolean
 	}>
 
-	const defaultSettings = {
+	// Default settings
+	const createDefaultSettings = (): HabitTrackerSettings => ({
+		path: '',
 		lastDisplayedDate: getDateAsString(new Date()),
 		daysToShow: 21,
 		debug: 0,
-		matchLineLength: false
+		matchLineLength: false,
+	})
+
+	// Initialize unified state
+	let state: HabitTrackerState = {
+		settings: createDefaultSettings(),
+		computed: {
+			dates: [],
+			habits: [],
+		},
+		ui: {
+			fatalError: '',
+			rootElement: null,
+			habitSource: null,
+		},
 	}
 
-	// actuall settings
-	let path;
-	let lastDisplayedDate;
-	let daysToShow;
-	let matchLineLength;
-	let debug;
-	let habits: Array<{
-		[x: string]: any
-		file: TFile
-		entries: string[]
-	}> = []
-	let firstDisplayedDate;
-	let dates = [];
-	let fatalError;
-
-	let habitSource;
-
-	let rootElement;
-
-	const init = async function(userSettings, defaultSettings) {
-		if(userSettings.path) {
-			userSettings.path = userSettings.path.replace(/\/$/, ''); // remove trailing slash
+	const init = async function (userSettings: Partial<HabitTrackerSettings>) {
+		// Clean up path (remove trailing slash)
+		if (userSettings.path) {
+			userSettings.path = userSettings.path.replace(/\/$/, '')
 		}
 
+		// Merge user settings with defaults first (let TypeScript handle type safety)
+		state.settings = {
+			path: userSettings.path || '',
+			daysToShow: userSettings.daysToShow || state.settings.daysToShow,
+			lastDisplayedDate:
+				userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
+			matchLineLength:
+				userSettings.matchLineLength || state.settings.matchLineLength,
+			debug: userSettings.debug || state.settings.debug,
+		}
+
+		// Only validate essential business logic
 		try {
-			await validateUserSettings(userSettings);
-		} catch(error) {
-			fatalError = `Could not start due to this error: ` + error.message;
-			console.error(`[${PLUGIN_NAME}] ${fatalError}`);
-			return;
+			await validateEssentials(state.settings)
+		} catch (error) {
+			state.ui.fatalError = `Could not start: ${error.message}`
+			console.error(`[${PLUGIN_NAME}] ${state.ui.fatalError}`)
+			return
 		}
+		debugLog(`Merged settings:`, state.settings.debug)
+		debugLog(state.settings, state.settings.debug)
 
-		debugLog(`Applying default settings where you didn't provide anything:`, debug);
-		debugLog(defaultSettings, debug);
-		path = userSettings.path;
-		daysToShow = userSettings.daysToShow || defaultSettings.daysToShow;
-		lastDisplayedDate = userSettings.lastDisplayedDate || defaultSettings.lastDisplayedDate;
-		matchLineLength = userSettings.matchLineLength || defaultSettings.matchLineLength;
-		debug = userSettings.debug || defaultSettings.debug;
+		const firstDisplayedDate = getDateAsString(
+			subDays(state.settings.lastDisplayedDate, state.settings.daysToShow - 1),
+		)
 
-		firstDisplayedDate = getDateAsString(subDays(lastDisplayedDate, daysToShow - 1));
+		state.computed.dates = eachDayOfInterval({
+			start: firstDisplayedDate,
+			end: state.settings.lastDisplayedDate,
+		}).map((date) => getDateAsString(date))
 
-		dates = eachDayOfInterval({start: firstDisplayedDate, end:lastDisplayedDate}).map((date)=> getDateAsString(date));
-		debugLog(`Will show habits for the following dates:`,debug);
-		debugLog(dates,debug);
+		debugLog(`Will show habits for the following dates:`, state.settings.debug)
+		debugLog(state.computed.dates, state.settings.debug)
 
-		debugLog(`User settings:`,debug);
-		debugLog(userSettings,debug);
-		debugLog(`Final settings:`,debug);
-		debugLog({
-			path,
-			daysToShow,
-			lastDisplayedDate,
-			matchLineLength,
-			debug,
-			firstDisplayedDate,
-			dates,
-		}, debug);
-
-		habits = getHabits(path);
-		if(habits && habits.length) {
-			debugLog(`Found ${habits.length} habit(s) at ${path}`, debug);
-			debugLog(habits.map(habit=>habit.path), debug);
+		// Load habits
+		state.computed.habits = getHabits(state.settings.path)
+		if (state.computed.habits && state.computed.habits.length) {
+			const count = state.computed.habits.length
+			debugLog(
+				`Found ${count} ${pluralize(count, 'habit')} at ${state.settings.path}`,
+				state.settings.debug,
+			)
+			debugLog(
+				state.computed.habits.map((habit) => habit.path),
+				state.settings.debug,
+			)
 		} else {
-			debugLog(`Found no habits at ${path}`, debug);
-			return;
+			state.ui.fatalError = `No habits found at "${state.settings.path}"`
+			debugLog(
+				`No habits found at ${state.settings.path}`,
+				state.settings.debug,
+			)
+			return
 		}
 
-		// scrollToEnd()
-
+		debugLog(`Initialization completed successfully`, state.settings.debug)
 	}
 
-	const scrollToEnd = function() {
-		const parent = rootElement.parentElement;
-		parent.scrollLeft = parent.scrollWidth;
-		console.log(rootElement, parent, parent.scrollLeft, parent.scrollWidth);
+	const scrollToEnd = function () {
+		if (!state.ui.rootElement) {
+			debugLog(
+				`scrollToEnd: rootElement is null, cannot scroll`,
+				state.settings.debug,
+			)
+			return
+		}
+
+		const parent = state.ui.rootElement.parentElement
+		if (!parent) {
+			debugLog(
+				`scrollToEnd: parentElement is null, cannot scroll`,
+				state.settings.debug,
+			)
+			return
+		}
+
+		parent.scrollLeft = parent.scrollWidth
+		debugLog(
+			`scrollToEnd completed: element=${state.ui.rootElement}, parent=${parent}, scrollLeft=${parent.scrollLeft}, scrollWidth=${parent.scrollWidth}`,
+			state.settings.debug,
+		)
 	}
 
-	const validateUserSettings = async function(settings) {
-		const {
-			path,
-			lastDisplayedDate,
-			daysToShow,
-			matchLineLength,
-		} = settings;
-		if(!path) { // mandatory
-			fatalError = `path is a mandatory parameter, but you didn't provide it. Where should I load plugins from?`
-			throw new Error(fatalError);
+	const validateEssentials = async function (
+		settings: Partial<HabitTrackerSettings>,
+	) {
+		// Only validate critical business logic that TypeScript can't catch
+		if (!settings.path) {
+			throw new Error('path is required - where should I load habits from?')
 		}
 
-		let pathIsValid = false;
-		const folder = app.vault.getAbstractFileByPath(path);
-
-		if (folder && folder instanceof TFolder) {
-			pathIsValid = true;
-		} else if(folder && folder instanceof TFile) {
-			pathIsValid = true;
-		}
-
-		if(!pathIsValid) {
-			const file = app.vault.getAbstractFileByPath(`${path}.md`);
-			if(file) {
-				pathIsValid = true;
+		// Check if the path exists in the vault (Obsidian-specific validation)
+		const source = app.vault.getAbstractFileByPath(settings.path)
+		if (!source) {
+			// Try with .md extension as fallback
+			const mdSource = app.vault.getAbstractFileByPath(`${settings.path}.md`)
+			if (!mdSource) {
+				throw new Error(`"${settings.path}" doesn't exist in your vault`)
 			}
 		}
 
-		if(!pathIsValid) {
-			throw new Error(`path "${path}" is pointing to a file/folder that does not exist.`);
-		}
-
-		// check if date provided is valid
-		if(lastDisplayedDate) {
-			const parsed = parse(lastDisplayedDate, "yyyy-MM-dd", new Date());
-			if (!isValid(parsed)) {
-				throw new Error(`You provided "${settings.lastDisplayedDate}" for lastDisapleydDate, but this doesn't look like a valid date.`);
-			}
-		}
-
-		// check if daysToShow is an integer bigger than 0
-		if(daysToShow) {
-			if(!Number.isInteger(daysToShow) || daysToShow < 1) {
-				throw new Error(`daysToShow needs to be an integer bigger than 0. Instead I got the ${typeof daysToShow} "${daysToShow}"`);
-			}
-		}
-
-		if(matchLineLength && typeof matchLineLength !== 'boolean') {
-			throw new Error(`matchLineLength should be either true or false. Instead I got the ${typeof matchLineLength} ${matchLineLength}`);
-		}
-
-		debugLog(`[${PLUGIN_NAME}] User settings look good.`, debug);
-		return true;
+		debugLog(
+			`[${PLUGIN_NAME}] Essential validation passed for path: ${settings.path}`,
+			state.settings.debug,
+		)
+		return true
 	}
 
-	const getHabits = function(path:String) {
-		debugLog(`Loading habits`, debug);
-		habitSource = app.vault.getAbstractFileByPath(path);
+	const getHabits = function (path: string): HabitData[] {
+		debugLog(`Loading habits`, state.settings.debug)
+		state.ui.habitSource = app.vault.getAbstractFileByPath(path)
 
-		if (habitSource && habitSource instanceof TFolder) {
-			debugLog(`${path} points to a folder with ${habitSource.children.length} item(s) inside`, debug);
-			return habitSource.children;
+		if (state.ui.habitSource && state.ui.habitSource instanceof TFolder) {
+			const count = state.ui.habitSource.children.length
+			debugLog(
+				`${path} points to a folder with ${count} ${pluralize(count, 'item')} inside`,
+				state.settings.debug,
+			)
+			return state.ui.habitSource.children as HabitData[]
 		}
 
-		if(habitSource && habitSource instanceof TFile) {
-			debugLog(`${path} points to a file`, debug);
-			return [habitSource];
+		if (state.ui.habitSource && state.ui.habitSource instanceof TFile) {
+			debugLog(`${path} points to a file`, state.settings.debug)
+			return [state.ui.habitSource as HabitData]
 		}
 
-		habitSource = app.vault.getAbstractFileByPath(`${path}.md`);
-		// FIXME this needs to be visible outside of this function
-		if(habitSource) {
-			debugLog(`Adjusted ${path} to ${path}.md and found a file`, debug);
-			return [habitSource]
-		};
+		state.ui.habitSource = app.vault.getAbstractFileByPath(`${path}.md`)
+		if (state.ui.habitSource) {
+			debugLog(
+				`Adjusted ${path} to ${path}.md and found a file`,
+				state.settings.debug,
+			)
+			return [state.ui.habitSource as HabitData]
+		}
 
-		debugLog(`${path} is not found`, debug);
-		return [];
+		debugLog(`${path} is not found`, state.settings.debug)
+		return []
 	}
 
-	const renderPrettyDate = function(dateString) {
+	const renderPrettyDate = function (dateString) {
 		// Parse the input date string into a Date object
-		const date = parseISO(dateString);
+		const date = parseISO(dateString)
 
 		// Format the date using date-fns
-		let prettyDate = format(date, 'MMMM d, yyyy');
+		let prettyDate = format(date, 'MMMM d, yyyy')
 
-		if(isToday(date)) {
-			prettyDate = `Today, ${prettyDate}`;
+		if (isToday(date)) {
+			prettyDate = `Today, ${prettyDate}`
 		}
 
-		return prettyDate;
+		return prettyDate
 	}
 
-	$: if (rootElement) {
-    scrollToEnd();
-  }
+	$: if (state.ui.rootElement) {
+		scrollToEnd()
+	}
 
-	init(userSettings, defaultSettings);
+	init(userSettings)
 </script>
 
 <!-- <svelte:window bind:innerWidth /> -->
-{#if fatalError}
-<div>
-	<strong>🛑 {PLUGIN_NAME}</strong>
-</div>
-{fatalError}
-{:else if !habits.length}
-<div>
-	<strong>😕 {PLUGIN_NAME}</strong>
-</div>
-No habits to show at "{path}"
+{#if state.ui.fatalError}
+	<div>
+		<strong>🛑 {PLUGIN_NAME}</strong>
+	</div>
+	{state.ui.fatalError}
+{:else if !state.computed.habits.length}
+	<div>
+		<strong>😕 {PLUGIN_NAME}</strong>
+	</div>
+	No habits to show at "{state.settings.path}"
 {:else}
-<div class="habit-tracker {matchLineLength ? 'habit-tracker--match-line-length' : ''}" style="--date-columns: {dates.length}" bind:this={rootElement}>
-	<div class="habit-tracker__header habit-tracker__row">
-		<div class="habit-tracker__cell--name habit-tracker__cell"></div>
-		{#each dates as date}
-		<div class="habit-tracker__cell habit-tracker__cell--{getDayOfTheWeek(date)}" data-date="{date}" data-pretty-date="{renderPrettyDate(date)}">
-			{getDate(date)}
+	<div
+		class="habit-tracker {state.settings.matchLineLength
+			? 'habit-tracker--match-line-length'
+			: ''}"
+		style="--date-columns: {state.computed.dates.length}"
+		bind:this={state.ui.rootElement}
+	>
+		<div class="habit-tracker__header habit-tracker__row">
+			<div class="habit-tracker__cell--name habit-tracker__cell"></div>
+			{#each state.computed.dates as date}
+				<div
+					class="habit-tracker__cell habit-tracker__cell--{getDayOfTheWeek(
+						date,
+					)}"
+					data-date={date}
+					data-pretty-date={renderPrettyDate(date)}
+				>
+					{getDate(date)}
+				</div>
+			{/each}
 		</div>
+		{#each state.computed.habits as habit}
+			<Habit
+				name={habit.basename}
+				path={habit.path}
+				dates={state.computed.dates}
+				debug={state.settings.debug}
+				{app}
+			></Habit>
 		{/each}
 	</div>
-	{#each habits as habit}
-	<Habit name={habit.basename} path={habit.path} dates={dates} debug={debug} app={app}></Habit>
-	{/each}
-</div>
 {/if}
