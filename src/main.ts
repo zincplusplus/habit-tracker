@@ -7,14 +7,14 @@ import HabitTrackerError from './HabitTrackerError.svelte'
 interface HabitTrackerSettings {
 	path: string;
 	daysToShow: number;
-	debug: number;
+	debug: boolean;
 	matchLineLength: boolean;
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
 	daysToShow: 21,
-	debug: 0,
+	debug: false,
 	matchLineLength: false
 }
 
@@ -342,9 +342,9 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 			.setName('Debug mode')
 			.setDesc('Enable debug output to console. Can be overridden with "debug" in code blocks.')
 			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.debug > 0)
+				.setValue(this.plugin.settings.debug)
 				.onChange(async (value) => {
-					this.plugin.settings.debug = value ? 1 : 0;
+					this.plugin.settings.debug = value;
 					await this.plugin.saveSettings();
 				}));
 

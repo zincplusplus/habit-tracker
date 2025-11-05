@@ -20,7 +20,7 @@
 		path: string
 		lastDisplayedDate: string
 		daysToShow: number
-		debug: number
+		debug: boolean
 		matchLineLength: boolean
 	}
 
@@ -52,16 +52,14 @@
 	export let globalSettings: {
 		path: string
 		daysToShow: number
-		debug: number
+		debug: boolean
 		matchLineLength: boolean
 	}
-	// TODO: I don't like the name "matchLineLenghth", rename it to something better
-	// TODO: Why is matchLineLenght a boolean and debug a number? Make them consistent
 	export let userSettings: Partial<{
 		path: string
 		lastDisplayedDate: Date
 		daysToShow: number
-		debug: number
+		debug: boolean
 		matchLineLength: boolean
 	}>
 
@@ -101,8 +99,8 @@
 			lastDisplayedDate:
 				userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
 			matchLineLength:
-				userSettings.matchLineLength || state.settings.matchLineLength,
-			debug: userSettings.debug || state.settings.debug,
+				userSettings.matchLineLength !== undefined ? userSettings.matchLineLength : state.settings.matchLineLength,
+			debug: userSettings.debug !== undefined ? userSettings.debug : state.settings.debug,
 		}
 
 		// Only validate essential business logic

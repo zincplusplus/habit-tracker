@@ -1,5 +1,4 @@
 <script>
-	// TODO ADD TypeScript
 	import {debugLog} from './utils'
 
 	import {parseYaml, TFile} from 'obsidian'
@@ -24,7 +23,6 @@
 	}, {})
 
 	let savingChanges = false
-
 
 	$: getClasses = function (date) {
 		let classes = [
@@ -79,7 +77,12 @@
 			const file = this.app.vault.getAbstractFileByPath(path)
 
 			if (!file || !(file instanceof TFile)) {
-				debugLog(`No file found for path: ${path}`, debug, undefined, pluginName)
+				debugLog(
+					`No file found for path: ${path}`,
+					debug,
+					undefined,
+					pluginName,
+				)
 				return {}
 			}
 
@@ -92,7 +95,12 @@
 					return parseYaml(frontmatter)
 				})
 			} catch (error) {
-				debugLog(`Error in habit ${name}: error.message`, debug, undefined, pluginName)
+				debugLog(
+					`Error in habit ${name}: error.message`,
+					debug,
+					undefined,
+					pluginName,
+				)
 				return {}
 			}
 		}
@@ -104,7 +112,12 @@
 
 		entries = await getHabitEntries(path)
 
-		debugLog(`Habit "${name}": Found ${entries.length} entries`, debug, undefined, pluginName)
+		debugLog(
+			`Habit "${name}": Found ${entries.length} entries`,
+			debug,
+			undefined,
+			pluginName,
+		)
 		debugLog(entries, debug, undefined, pluginName)
 
 		// TODO though this looks to be performing ok, i think i should set the watchers more efficiently
