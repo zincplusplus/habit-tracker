@@ -156,9 +156,9 @@ export default class HabitTracker21 extends Plugin {
 		const editBtn = actionBar.querySelector('.ht21-action-bar__btn--edit')
 
 		// Add Obsidian icons
-		if (settingsBtn) setIcon(settingsBtn, 'settings')
-		if (updateBtn) setIcon(updateBtn, 'download')
-		if (editBtn) setIcon(editBtn, 'lucide-code-2')
+		if (settingsBtn) setIcon(settingsBtn as HTMLElement, 'settings')
+		if (updateBtn) setIcon(updateBtn as HTMLElement, 'download')
+		if (editBtn) setIcon(editBtn as HTMLElement, 'lucide-code-2')
 
 		settingsBtn?.addEventListener('click', () => this.openSettings())
 		updateBtn?.addEventListener('click', () => {
@@ -297,7 +297,7 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 			.addDropdown(dropdown => {
 				// Get all folders in the vault
 				const folders = this.app.vault.getAllLoadedFiles()
-					.filter(file => file.children !== undefined) // Only folders
+					.filter(file => 'children' in file && file.children !== undefined) // Only folders
 					.map(folder => folder.path)
 					.sort();
 
