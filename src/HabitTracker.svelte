@@ -17,6 +17,10 @@
 	import {PLUGIN_NAME} from './main'
 	// import {onMount} from 'svelte'
 
+	// Constants to avoid magic numbers
+	const DEFAULT_DAYS_TO_SHOW = 21
+	const DEFAULT_DEBUG_LEVEL = 0
+
 	// TypeScript interfaces for better state management
 	interface HabitTrackerSettings {
 		path: string
@@ -64,8 +68,8 @@
 	const createDefaultSettings = (): HabitTrackerSettings => ({
 		path: '',
 		lastDisplayedDate: getDateAsString(new Date()),
-		daysToShow: 21,
-		debug: 0,
+		daysToShow: DEFAULT_DAYS_TO_SHOW,
+		debug: DEFAULT_DEBUG_LEVEL,
 		matchLineLength: false,
 	})
 

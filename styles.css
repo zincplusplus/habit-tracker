@@ -1,4 +1,6 @@
+/* TODO configure most of these from a new settings page */
 div:has(.block-language-habittracker) {
+	/* Colors */
 	--habit-bg: var(--background-primary);
 	--habit-bg-ticked: var(--checkbox-color);
 	--habit-icon-ticked: var(--checkbox-marker-color);
@@ -14,24 +16,135 @@ div:has(.block-language-habittracker) {
 	--habit-tick-hover: var(--color-base-30);
 	--habit-name-text-color: var(--link-color);
 	--habit-header-bg-hover: var(--color-base-100);
-	--habit-header-text-hover: var(--color-base-00);;
+	--habit-header-text-hover: var(--color-base-00);
+
+	/* Typography */
 	--habit-header-font-size: 11px;
 	--habit-name-font-size: 13px;
+
+	/* Cell dimensions */
+	--habit-cell-width: 25px;
+	--habit-cell-height: 32px;
+	--habit-name-max-width: 173px;
+	--habit-name-padding: 8px;
+
+	/* Tick size */
+	--habit-tick-size: 16px;
+
+	/* Border radius */
+	--habit-streak-radius: calc(var(--habit-tick-size) / 2);
+	--habit-tooltip-radius: 3px;
+
+	/* Spacing */
+	--habit-streak-padding: 4px;
+	--habit-tooltip-padding: 2px 6px;
+}
+
+/* Action bar for habit tracker code blocks */
+.ht21-action-bar {
+	display: flex;
+	position: absolute;
+	top: 90%;
+	left: var(--habit-name-padding);
+	right: var(--habit-name-padding);
+	background: var(--background-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: 0 0 var(--radius-s) var(--radius-s);
+	padding: var(--habit-name-padding);
+	justify-content: space-between;
+	align-items: center;
+	z-index: 100;
+	font-size: 12px;
+	opacity: 0;
+	transition: all 0.2s ease;
+	box-shadow: var(--shadow-s);
+	pointer-events: none;
+}
+
+/* Show action bar on hover of the code block or its parent container */
+.markdown-source-view.mod-cm6 .cm-content > .cm-lang-habittracker:hover {
+	overflow: visible;
+	contain: none !important;
+}
+.cm-lang-habittracker:hover .ht21-action-bar,
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker):hover
+	.ht21-action-bar {
+	opacity: 1;
+	pointer-events: all;
+	top: calc(100% + 1px);
+}
+
+.ht21-action-bar__title {
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+.ht21-update-dot {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 8px;
+	height: 8px;
+	background: var(--color-purple);
+	border-radius: 50%;
+	border: 1px solid var(--background-secondary);
+}
+
+.ht21-action-bar__buttons {
+	display: flex;
+	gap: 8px;
+}
+
+.ht21-action-bar__btn {
+	background: var(--interactive-normal);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	padding: 4px 8px;
+	font-size: 11px;
+	cursor: pointer;
+	color: var(--text-normal);
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.ht21-btn-text {
+	font-size: 11px;
+}
+
+.ht21-action-bar__btn .svg-icon {
+	width: 14px;
+	height: 14px;
+}
+
+.ht21-action-bar__btn:hover {
+	background: var(--interactive-hover);
+	border-color: var(--border-color-hover);
+}
+
+.ht21-action-bar__btn:active {
+	background: var(--interactive-active);
 }
 
 .cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
 	padding: 0;
 	font-family: monospace;
+	position: relative;
 }
-.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker):hover {
+
+/* Ensure code blocks in source view also support the action bar */
+.cm-lang-habittracker {
+	position: relative;
+}
+.cm-preview-code-block.markdown-rendered:has(
+		.block-language-habittracker
+	):hover {
 	background-color: var(--habit-container-hover);
 }
-.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker):hover .edit-block-button {
-	background-color: var(--habit-container-hover);
-	z-index: 999;
-}
-.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) .edit-block-button:hover {
-	background-color: var(--habit-tick-hover) !important;
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker):hover
+	.edit-block-button {
+	display: none !important;
 }
 
 .block-language-habittracker {
@@ -41,12 +154,13 @@ div:has(.block-language-habittracker) {
 	width: fit-content;
 	max-width: 100%;
 }
-/* .is-readable-line-width .block-language-habittracker {
-	max-width: var(--habit-min-width);
-} */
+
 .habit-tracker {
 	display: grid;
-	grid-template-columns: 1fr repeat(var(--date-columns), 25px);
+	grid-template-columns: 1fr repeat(
+			var(--date-columns),
+			var(--habit-cell-width)
+		);
 	width: fit-content;
 	background-color: var(--habit-bg);
 }
@@ -64,9 +178,9 @@ div:has(.block-language-habittracker) {
 }
 
 .habit-tracker__cell {
-	width: 25px;
+	width: var(--habit-cell-width);
 	font-size: var(--habit-header-font-size);
-	height: 32px;
+	height: var(--habit-cell-height);
 	white-space: nowrap;
 	display: flex;
 	align-items: center;
@@ -83,9 +197,9 @@ div:has(.block-language-habittracker) {
 */
 
 .habit-tracker__cell--name {
-	padding: 0 8px;
+	padding: 0 var(--habit-name-padding);
 	width: 100%;
-	max-width: 173px;
+	max-width: var(--habit-name-max-width);
 	justify-content: start;
 	position: sticky;
 	left: 0;
@@ -103,7 +217,9 @@ div:has(.block-language-habittracker) {
 	font-size: var(--habit-name-font-size);
 	text-decoration: none;
 }
-.is-readable-line-width .habit-tracker--match-line-length .habit-tracker__cell--name {
+.is-readable-line-width
+	.habit-tracker--match-line-length
+	.habit-tracker__cell--name {
 	max-width: 100%;
 }
 
@@ -120,8 +236,8 @@ div:has(.block-language-habittracker) {
 	cursor: pointer;
 	background: var(--habit-header-bg-hover);
 	color: var(--habit-header-text-hover);
-	border-top-left-radius: 3px;
-	border-top-right-radius: 3px;
+	border-top-left-radius: var(--habit-tooltip-radius);
+	border-top-right-radius: var(--habit-tooltip-radius);
 }
 
 .habit-tracker__header .habit-tracker__cell[data-pretty-date]:hover:after {
@@ -129,14 +245,15 @@ div:has(.block-language-habittracker) {
 	color: var(--habit-header-text-hover);
 	content: attr(data-pretty-date);
 	left: 50%;
-	padding: 2px 6px;
+	padding: var(--habit-tooltip-padding);
 	position: absolute;
 	top: 100%;
 	white-space: nowrap;
 	transform: translateX(-50%);
-	border-radius: 3px;
+	border-radius: var(--habit-tooltip-radius);
 }
-.habit-tracker__header .habit-tracker__cell[data-pretty-date]:last-child:hover:after {
+.habit-tracker__header
+	.habit-tracker__cell[data-pretty-date]:last-child:hover:after {
 	left: auto;
 	right: 0;
 	transform: none;
@@ -146,9 +263,9 @@ div:has(.block-language-habittracker) {
 .habit-tick {
 	line-height: 0;
 	text-align: center;
-	width: 25px;
-	max-width: 25px;
-	min-width: 25px;
+	width: var(--habit-cell-width);
+	max-width: var(--habit-cell-width);
+	min-width: var(--habit-cell-width);
 }
 .habit-tick:hover {
 	cursor: pointer;
@@ -159,26 +276,26 @@ div:has(.block-language-habittracker) {
 	background: var(--habit-bg-ticked);
 	content: '';
 	display: inline-block;
-	height: 16px;
+	height: var(--habit-tick-size);
 	width: 100%;
 	transition: all 0.3s ease;
-	line-height: 16px;
+	line-height: var(--habit-tick-size);
 	color: var(--habit-icon-ticked);
 }
 
 .habit-tick--streak-start {
-	padding-left: 4px;
+	padding-left: var(--habit-streak-padding);
 }
 .habit-tick--streak-start:before {
-	border-top-left-radius: 10px;
-	border-bottom-left-radius: 10px;
+	border-top-left-radius: var(--habit-streak-radius);
+	border-bottom-left-radius: var(--habit-streak-radius);
 }
 .habit-tick--streak-end {
-	padding-right: 4px;
+	padding-right: var(--habit-streak-padding);
 }
 .habit-tick--streak-end:before {
-	border-top-right-radius: 10px;
-	border-bottom-right-radius: 10px;
+	border-top-right-radius: var(--habit-streak-radius);
+	border-bottom-right-radius: var(--habit-streak-radius);
 }
 .habit-tick--streak + .habit-tick--streak-end:before {
 	content: attr(streak);
