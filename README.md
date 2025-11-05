@@ -8,7 +8,7 @@ Transform your [Obsidian](https://obsidian.md) vault into a habit-building power
 
 <a href="https://www.buymeacoffee.com/zincplusplus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-## ✨ Features
+## Features
 
 - **Minimalist Look** - Elegant, clean interface with nothing but essential functionality. Matches your theme effortlessly using Obsidian CSS variables
 - **Maximum configurability** - You can tweak and customize pretty much every aspect of Habit Tracker 21 to make it just right for you
@@ -16,7 +16,7 @@ Transform your [Obsidian](https://obsidian.md) vault into a habit-building power
 - **Smart Folder Support** - Track individual files or entire habit folders
 - **Debug Mode** - Comprehensive debugging gives you all the info you need to figure it out
 
-## 🚀 Quick Start
+## Quick Start
 
 1. Install the plugin from **[Obsidian's Community Plugins](obsidian://show-plugin?id=habit-tracker-21)**
 2. **Create your habits folder** (e.g., `Habits/`)
@@ -33,7 +33,7 @@ Transform your [Obsidian](https://obsidian.md) vault into a habit-building power
 
 That's it! Click the grid to log your daily habits.
 
-## ⚙️ Configuration
+## Configuration
 
 ### Global Settings
 
@@ -60,7 +60,7 @@ Override global settings in individual code blocks:
 ```
 ````
 
-## 🔧 All Settings
+## All Settings
 
 | Setting             | Type    | Default | Description                                                                      |
 | ------------------- | ------- | ------- | -------------------------------------------------------------------------------- |
@@ -70,7 +70,7 @@ Override global settings in individual code blocks:
 | `debug`             | boolean | false   | Enable debug console output                                                      |
 | `matchLineLength`   | boolean | false   | Match readable line width                                                        |
 
-## 📖 Usage Examples
+## Usage Examples
 
 ### Multiple Habits (Most popular)
 
@@ -136,7 +136,7 @@ Enable detailed logging:
 ```
 ````
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -158,7 +158,7 @@ Enable detailed logging:
 **Debug Output**
 Enable debug mode to see detailed logging in the browser console (F12).
 
-## 🛠️ Development
+## Development
 
 ### Installation
 
@@ -178,7 +178,7 @@ PRs welcome! Please:
 
 <a href="https://www.buymeacoffee.com/zincplusplus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
