@@ -1,59 +1,186 @@
-[![image](https://img.shields.io/github/release/zoreet/habit-tracker.svg)](https://github.com/zoreet/habit-tracker/releases)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-
 # Habit Tracker 21
 
-Introducing "Habit Tracker 21," an innovative plugin designed specifically for Obsidian. Have you ever wanted to develop new habits but struggled to keep yourself accountable? This plugin is your perfect solution.
+A minimalist, elegant habit tracker for [Obsidian](https://obsidian.md) that helps you build lasting habits with clear progress visualization.
 
-"Habit Tracker 21" is built on the principle that it takes 21 days to form a new habit. With this tool, tracking your habits becomes a seamless process. It allows you to monitor your progress, providing a clear visualization of your commitment and consistency. It's a great way to motivate yourself as you see the habits you're forming over time.
+[![GitHub release](https://img.shields.io/github/release/zincplusplus/habit-tracker.svg)](https://github.com/zincplusplus/habit-tracker/releases)
+[![Downloads](https://img.shields.io/github/downloads/zincplusplus/habit-tracker/total.svg)](https://github.com/zincplusplus/habit-tracker/releases)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 
-## How it works
+Transform your [Obsidian](https://obsidian.md) vault into a habit-building powerhouse. Track daily habits with an intuitive grid interface, customize your tracking experience, and watch your consistency streaks grow over time.
 
-1. Create a folder for all your habits, e.g. `Habits`
-2. Create empty files inside that folder for each habit you want to track
-3. Enable the habit tracker UI by pasting the following code in your `.md` file:
+![Habit Tracker Demo](screenshots/ui-demo.png)
+
+## ✨ Features
+
+- **Minimalist Look** - Elegant, clean interface with nothing but essential functionality. Matches your theme effortlessly using Obsidian CSS variables
+- **Maximum configurability** - You can tweak and customize pretty much every aspect of Habit Tracker 21 to make it just right for you
+- **Smart Folder Support** - Track individual files or entire habit folders
+- **Debug Mode** - Comprehensive debugging gives you all the info you need to figure it out
+
+## 🚀 Quick Start
+
+1. Install the plugin from **[Obsidian's Community Plugins](obsidian://show-plugin?id=habit-tracker-21)**
+2. **Create your habits folder** (e.g., `Habits/`)
+3. **Add habit files** like `Exercise.md`, `Reading.md` for each habit you want to track
+4. **Insert tracker** in your Daily notes template, or any other file:
 
 ````markdown
 ```habittracker
 {
-	"path": "Habits/"
+  "path": "Habits"
 }
 ```
 ````
 
-Make sure to specify the path you're using. You can point to one habit, or all habits that contain that path (including subfolders);
+That's it! Click the grid to log your daily habits.
 
-## Parameters
+## ⚙️ Configuration
 
-- **path** _[mandatory]_: a string containing a path to a folder or specific habit (aka .md file)
+### Global Settings
 
-- **lastDisplayedDate** _[optional]_: the date that is displayed in the chart
+Access via **Settings > Community plugins > Habit Tracker** to set defaults for all trackers:
 
-  - format: `"YYYY-MM-DD"`
-  - defaults to today
-  - example settings
-    `{
-	"path": "Habits/",
-	"lastDisplayedDate": "2023-12-27"
-}`
+- **Default Path** - Choose from dropdown of vault folders
+- **Days to Show** - Number input (default: 21)
+- **Debug Mode** - Toggle debug output on/off
+- **Match Line Length** - Fit tracker to readable line width
 
-- **daysToShow** _[optional]_: how many dates to display in the chart
+### Per-Tracker Settings
 
-  - default: `21`
+Override global settings in individual code blocks:
 
-  `{
-	"path": "Habits/",
-	"daysToShow": "31"
-}`
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "daysToShow": 30,
+  "lastDisplayedDate": "2024-01-15",
+  "debug": true,
+  "matchLineLength": false
+}
+```
+````
 
-## Example
+## 📖 Usage Examples
 
-![Example](docs/assets/ui-demo.png)
+### Multiple Habits (Most popular)
 
+Track all habits in a folder:
 
-## Tracking
+````markdown
+```habittracker
+{
+  "path": "Habits"
+}
+```
+````
 
-To determine how much time I should invest in this project I use Bitly.com to track how many people use it. This is what I see https://github.com/zoreet/habit-tracker/issues/32#issuecomment-2116918725
+### Single Habit
 
-This is the tracker that collects the least ammount of data that I could find, other than building a custom one. If you have any concerns please add a comment to the above ticket.
+Track one specific habit file:
+
+````markdown
+```habittracker
+{
+  "path": "Habits/Exercise.md"
+}
+```
+````
+
+### Custom Time Range
+
+Show last 30 days:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "daysToShow": 30
+}
+```
+````
+
+### View Past Date Range
+
+Show habits ending on a specific date:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "lastDisplayedDate": "2024-01-15",
+  "daysToShow": 30
+}
+```
+````
+
+### Debug Mode
+
+Enable detailed logging:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "debug": true
+}
+```
+````
+
+## 🔧 All Settings
+
+| Setting             | Type    | Default | Description                                                                      |
+| ------------------- | ------- | ------- | -------------------------------------------------------------------------------- |
+| `path`              | string  | ""      | Path to habit folder or file                                                     |
+| `daysToShow`        | number  | 21      | Number of days to display                                                        |
+| `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
+| `debug`             | boolean | false   | Enable debug console output                                                      |
+| `matchLineLength`   | boolean | false   | Match readable line width                                                        |
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**"Path is required" error**
+
+- Set a default path in plugin settings, or specify `"path"` in your tracker
+
+**Tracker shows "No habits found"**
+
+- Check the path exists in your vault
+- Ensure folder contains `.md` files (subfolders are ignored)
+
+**Settings not updating**
+
+- Trackers auto-refresh when global settings change
+- For JSON errors, check syntax (commas, quotes, braces)
+- If issues persist, try force reload (Ctrl+R) or restart Obsidian
+
+**Debug Output**
+Enable debug mode to see detailed logging in the browser console (F12).
+
+## 🛠️ Development
+
+### Installation
+
+```bash
+git clone https://github.com/zincplusplus/habit-tracker
+cd habit-tracker
+npm install
+npm run dev
+```
+
+### Contributing
+
+PRs welcome! Please:
+
+- Follow existing code style
+- Update documentation
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Made with ❤️ for the Obsidian community**
