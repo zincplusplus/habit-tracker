@@ -1,6 +1,6 @@
 {
-	"id": "habit-tracker-21-devel",
-	"name": "Habit Tracker 21 Dev",
+	"id": "habit-tracker-21",
+	"name": "Habit Tracker 21",
 	"version": "2.0.0",
 	"minAppVersion": "1.1.0",
 	"description": "A minimalist, elegant habit tracker for Obsidian that helps you build lasting habits with clear progress visualization.",
