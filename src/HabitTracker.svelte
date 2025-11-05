@@ -145,6 +145,7 @@
 				pluginName,
 			)
 		} else {
+			// TODO add a button so they can create a habit
 			state.ui.fatalError = `No habits found at "${state.settings.path}"`
 			debugLog(
 				`No habits found at ${state.settings.path}`,
@@ -271,28 +272,37 @@
 	let refreshEventListener: (event: CustomEvent) => void
 
 	onMount(() => {
-		console.log('[HabitTracker] Component mounted, setting up refresh listener');
+		console.log('[HabitTracker] Component mounted, setting up refresh listener')
 		refreshEventListener = (event: CustomEvent) => {
-			console.log('[HabitTracker] Refresh event received:', event.detail.settings);
+			console.log(
+				'[HabitTracker] Refresh event received:',
+				event.detail.settings,
+			)
 			// Update global settings and reset state to use new defaults
 			globalSettings = event.detail.settings
 
 			// Reset state with new global settings as defaults
 			state.settings = createDefaultSettings()
-			console.log('[HabitTracker] Reset state with new defaults:', state.settings);
+			console.log(
+				'[HabitTracker] Reset state with new defaults:',
+				state.settings,
+			)
 
-			console.log('[HabitTracker] Calling init with updated settings');
+			console.log('[HabitTracker] Calling init with updated settings')
 			init(userSettings)
 		}
 
 		// Listen for refresh events at the document level
 		document.addEventListener('habit-tracker-refresh', refreshEventListener)
-		console.log('[HabitTracker] Refresh event listener added to document');
+		console.log('[HabitTracker] Refresh event listener added to document')
 	})
 
 	onDestroy(() => {
 		if (refreshEventListener) {
-			document.removeEventListener('habit-tracker-refresh', refreshEventListener)
+			document.removeEventListener(
+				'habit-tracker-refresh',
+				refreshEventListener,
+			)
 		}
 	})
 

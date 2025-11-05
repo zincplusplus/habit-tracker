@@ -49,7 +49,9 @@ export default class HabitTracker21 extends Plugin {
 					props: {
 						error,
 						src,
-						pluginName: this.manifest.name
+						pluginName: this.manifest.name,
+						app: this.app,
+						globalSettings: this.settings
 					}
 				})
 				console.error(`[${this.manifest.name}] Received invalid settings. ${error}`)

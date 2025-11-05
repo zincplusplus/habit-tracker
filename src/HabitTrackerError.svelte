@@ -1,9 +1,16 @@
 <script lang="ts">
+	import {onMount, onDestroy} from 'svelte'
+	import HabitTracker from './HabitTracker.svelte'
+
 	export let error
 	export let src
 	export let pluginName
+	export let app
+	export let globalSettings
 
 	let prettyError = ''
+	let componentContainer: HTMLElement
+	let refreshEventListener: (event: CustomEvent) => void
 
 	// TODO show the action bar when there's an error
 	function init() {
@@ -74,10 +81,65 @@
 		return `${errorMessage}<pre><code>user settings: ${beforeError}${highlightedErrorChar}${afterError}</code></pre>`
 	}
 
+	function attemptRecovery(updatedGlobalSettings) {
+		console.log('[HabitTrackerError] Attempting recovery with new settings:', updatedGlobalSettings);
+
+		try {
+			// Parse the user settings again with the updated global settings
+			const userSettings = JSON.parse(src);
+
+			// Try to create a new HabitTracker component
+			const habitTracker = new HabitTracker({
+				target: componentContainer,
+				props: {
+					app,
+					userSettings,
+					globalSettings: updatedGlobalSettings,
+					pluginName,
+				},
+			});
+
+			console.log('[HabitTrackerError] Recovery successful! Replacing error component.');
+			// If we get here, the component was created successfully
+			// The new component will replace this error component in the DOM
+
+		} catch (newError) {
+			console.log('[HabitTrackerError] Recovery failed, still have error:', newError.message);
+			// Still have an error, update the display with new error if different
+			if (newError.message !== error.message) {
+				error = newError;
+				init(); // Re-render error display with new error
+			}
+		}
+	}
+
+	onMount(() => {
+		console.log('[HabitTrackerError] Error component mounted, setting up refresh listener');
+
+		refreshEventListener = (event: CustomEvent) => {
+			console.log('[HabitTrackerError] Refresh event received, attempting recovery');
+			globalSettings = event.detail.settings;
+			attemptRecovery(globalSettings);
+		};
+
+		// Listen for refresh events at the document level
+		document.addEventListener('habit-tracker-refresh', refreshEventListener);
+		console.log('[HabitTrackerError] Refresh event listener added to document');
+	});
+
+	onDestroy(() => {
+		if (refreshEventListener) {
+			document.removeEventListener('habit-tracker-refresh', refreshEventListener);
+			console.log('[HabitTrackerError] Refresh event listener removed');
+		}
+	});
+
 	init()
 </script>
 
-<div>
-	<strong>🛑 {pluginName}</strong>
+<div bind:this={componentContainer}>
+	<div>
+		<strong>🛑 {pluginName}</strong>
+	</div>
+	{@html prettyError}
 </div>
-{@html prettyError}
