@@ -3,8 +3,9 @@
 	"name": "Habit Tracker 21",
 	"version": "2.0.0",
 	"minAppVersion": "1.1.0",
-	"description": "A minimalist, elegant habit tracker for Obsidian that helps you build lasting habits with clear progress visualization.",
-	"author": "zinc++",
+	"description": "Your 21-day journey to habit formation, simplified",
+	"author": "zincplusplus",
 	"authorUrl": "https://github.com/zincplusplus",
-	"isDesktopOnly": false
+	"isDesktopOnly": false,
+	"fundingUrl": "https://buymeacoffee.com/zincplusplus"
 }
