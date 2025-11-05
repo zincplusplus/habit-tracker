@@ -1,7 +1,7 @@
 {
   "name": "habit-tracker-21-dev",
-  "version": "1.5.0",
-  "description": "Your 21-day journey to habit formation, simplified. Obsidian plugin.",
+  "version": "2.0.0",
+  "description": "A minimalist, elegant habit tracker for Obsidian that helps you build lasting habits with clear progress visualization.",
   "main": "index.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

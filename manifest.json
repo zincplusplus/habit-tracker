@@ -1,10 +1,10 @@
 {
 	"id": "habit-tracker-21-devel",
 	"name": "Habit Tracker 21 Dev",
-	"version": "1.4.5",
+	"version": "2.0.0",
 	"minAppVersion": "1.1.0",
-	"description": "Your 21-day journey to habit formation, simplified",
-	"author": "Zoreet",
-	"authorUrl": "https://github.com/zoreet",
+	"description": "A minimalist, elegant habit tracker for Obsidian that helps you build lasting habits with clear progress visualization.",
+	"author": "zinc++",
+	"authorUrl": "https://github.com/zincplusplus",
 	"isDesktopOnly": false
 }
