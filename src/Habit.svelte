@@ -1,6 +1,5 @@
 <script>
 	// TODO ADD TypeScript
-	import {PLUGIN_NAME} from './main'
 	import {debugLog} from './utils'
 
 	import {parseYaml, TFile} from 'obsidian'
@@ -12,6 +11,7 @@
 	export let path
 	export let dates
 	export let debug
+	export let pluginName
 
 	let entries = []
 	$: entriesInRange = dates.reduce((acc, date) => {
@@ -73,13 +73,13 @@
 	}
 
 	const init = async function () {
-		debugLog(`Loading habit ${name}`, debug)
+		debugLog(`Loading habit ${name}`, debug, undefined, pluginName)
 
 		const getFrontmatter = async function (path) {
 			const file = this.app.vault.getAbstractFileByPath(path)
 
 			if (!file || !(file instanceof TFile)) {
-				debugLog(`No file found for path: ${path}`, debug)
+				debugLog(`No file found for path: ${path}`, debug, undefined, pluginName)
 				return {}
 			}
 
@@ -92,7 +92,7 @@
 					return parseYaml(frontmatter)
 				})
 			} catch (error) {
-				debugLog(`Error in habit ${name}: error.message`, debug)
+				debugLog(`Error in habit ${name}: error.message`, debug, undefined, pluginName)
 				return {}
 			}
 		}
@@ -104,8 +104,8 @@
 
 		entries = await getHabitEntries(path)
 
-		debugLog(`Habit "${name}": Found ${entries.length} entries`, debug)
-		debugLog(entries, debug)
+		debugLog(`Habit "${name}": Found ${entries.length} entries`, debug, undefined, pluginName)
+		debugLog(entries, debug, undefined, pluginName)
 
 		// TODO though this looks to be performing ok, i think i should set the watchers more efficiently
 		app.vault.on('modify', (file) => {
@@ -122,7 +122,7 @@
 	const toggleHabit = function (date) {
 		const file = this.app.vault.getAbstractFileByPath(path)
 		if (!file || !(file instanceof TFile)) {
-			new Notice(`${PLUGIN_NAME}: file missing while trying to toggle habit`)
+			new Notice(`${pluginName}: file missing while trying to toggle habit`)
 			return
 		}
 

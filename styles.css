@@ -71,7 +71,7 @@ div:has(.block-language-habittracker) {
 	.ht21-action-bar {
 	opacity: 1;
 	pointer-events: all;
-	top: calc(100% + 1px);
+	top: 100%;
 }
 
 .ht21-action-bar__title {
