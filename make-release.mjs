@@ -2,6 +2,8 @@ import {readFileSync, writeFileSync} from 'fs'
 import fs from 'fs-extra'
 import {exec} from 'child_process'
 
+//TODO this should build the project first
+
 const targetVersion = process.argv[2]
 const targetVersionPattern = /^[0-9]+\.[0-9]+\.[0-9]+$/
 

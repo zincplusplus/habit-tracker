@@ -1,4 +1,5 @@
 /* TODO configure most of these from a new settings page */
+/* TODO test it with the default themes in Obsidian, light and dark */
 div:has(.block-language-habittracker) {
 	/* Colors */
 	--habit-bg: var(--background-primary);
