@@ -115,12 +115,12 @@
 		debugLog(state.settings, state.settings.debug)
 
 		const firstDisplayedDate = getDateAsString(
-			subDays(state.settings.lastDisplayedDate, state.settings.daysToShow - 1),
+			subDays(parseISO(state.settings.lastDisplayedDate), state.settings.daysToShow - 1),
 		)
 
 		state.computed.dates = eachDayOfInterval({
 			start: firstDisplayedDate,
-			end: state.settings.lastDisplayedDate,
+			end: parseISO(state.settings.lastDisplayedDate),
 		}).map((date) => getDateAsString(date))
 
 		debugLog(`Will show habits for the following dates:`, state.settings.debug)
