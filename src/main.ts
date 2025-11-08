@@ -2,7 +2,11 @@
 import {Plugin, Notice, setIcon, App, PluginSettingTab, Setting} from 'obsidian'
 import HabitTracker from './HabitTracker.svelte'
 import HabitTrackerError from './HabitTrackerError.svelte'
+import { debugLog, renderPrettyDate } from './utils'
 
+	import {
+		format,
+	} from 'date-fns'
 
 interface HabitTrackerSettings {
 	path: string;
@@ -30,10 +34,15 @@ export default class HabitTracker21 extends Plugin {
 			// if (el.parentElement) el.parentElement.appendChild(trackingPixel)
 			// TODO make this dynamic and add it to HabitTracker.svelte
 
+			debugLog('Loading', 1)
+
 			let userSettings = {}
 			try {
+				const debugMode = this.settings.debug || userSettings.debug;
 				userSettings = JSON.parse(src);
-				// TODO figure out what to do about this error
+				debugLog(`Global settings: ${JSON.stringify(this.settings)}`, debugMode);
+				debugLog(`Tracker settings: ${JSON.stringify(userSettings)}`, debugMode);
+				debugLog(`Today is ${format(new Date(), 'yyyy-MM-dd')}`, debugMode);
 				new HabitTracker({
 						target: el,
 						props: {

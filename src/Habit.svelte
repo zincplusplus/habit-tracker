@@ -3,7 +3,7 @@
 
 	import {parseYaml, TFile} from 'obsidian'
 	import {getDateAsString, getDayOfTheWeek} from './utils'
-	import {addDays} from 'date-fns'
+	import {addDays, parseISO} from 'date-fns'
 
 	export let app
 	export let name
@@ -43,7 +43,7 @@
 		}
 
 		let isNextDayTicked = false
-		const nextDate = getDateAsString(addDays(date, 1))
+		const nextDate = getDateAsString(addDays(parseISO(date), 1))
 		if (date === dates.at(-1)) {
 			// last in the dates in range
 			isNextDayTicked = entries.includes(nextDate)
@@ -59,7 +59,7 @@
 	}
 
 	const findStreak = function (date) {
-		let currentDate = new Date(date)
+		let currentDate = parseISO(date)
 		let streak = 0
 
 		while (entries.includes(getDateAsString(currentDate))) {
@@ -111,6 +111,7 @@
 		}
 
 		entries = await getHabitEntries(path)
+		entries = entries.sort()
 
 		debugLog(
 			`Habit "${name}": Found ${entries.length} entries`,
@@ -145,9 +146,10 @@
 		} else {
 			newEntries.push(date)
 		}
-		entries = newEntries
+		entries = newEntries.sort()
 
 		savingChanges = true
+
 		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 			frontmatter['entries'] = entries
 		})

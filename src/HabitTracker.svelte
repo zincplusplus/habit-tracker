@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {debugLog, pluralize} from './utils'
+	import {debugLog, pluralize, renderPrettyDate} from './utils'
 	import {onMount, onDestroy} from 'svelte'
 
 	import Habit from './Habit.svelte'
@@ -99,8 +99,13 @@
 			lastDisplayedDate:
 				userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
 			matchLineLength:
-				userSettings.matchLineLength !== undefined ? userSettings.matchLineLength : state.settings.matchLineLength,
-			debug: userSettings.debug !== undefined ? userSettings.debug : state.settings.debug,
+				userSettings.matchLineLength !== undefined
+					? userSettings.matchLineLength
+					: state.settings.matchLineLength,
+			debug:
+				userSettings.debug !== undefined
+					? userSettings.debug
+					: state.settings.debug,
 		}
 
 		// Only validate essential business logic
@@ -111,11 +116,13 @@
 			console.error(`[${pluginName}] ${state.ui.fatalError}`)
 			return
 		}
-		debugLog(`Merged settings:`, state.settings.debug)
 		debugLog(state.settings, state.settings.debug)
 
 		const firstDisplayedDate = getDateAsString(
-			subDays(parseISO(state.settings.lastDisplayedDate), state.settings.daysToShow - 1),
+			subDays(
+				parseISO(state.settings.lastDisplayedDate),
+				state.settings.daysToShow - 1,
+			),
 		)
 
 		state.computed.dates = eachDayOfInterval({
@@ -131,7 +138,7 @@
 		if (state.computed.habits && state.computed.habits.length) {
 			const count = state.computed.habits.length
 			debugLog(
-				`Found ${count} ${pluralize(count, 'habit')} at ${state.settings.path}`,
+				`Found ${count} ${pluralize(count, 'habit')} at "${state.settings.path}" ↴`,
 				state.settings.debug,
 				undefined,
 				pluginName,
@@ -180,11 +187,15 @@
 		}
 
 		parent.scrollLeft = parent.scrollWidth
+		debugLog(`scrollToEnd completed ↴`, state.settings.debug)
 		debugLog(
-			`scrollToEnd completed: element=${state.ui.rootElement}, parent=${parent}, scrollLeft=${parent.scrollLeft}, scrollWidth=${parent.scrollWidth}`,
+			{
+				element: state.ui.rootElement,
+				parent: parent,
+				scrollLeft: parent.scrollLeft,
+				scrollWidth: parent.scrollWidth,
+			},
 			state.settings.debug,
-			undefined,
-			pluginName,
 		)
 	}
 
@@ -206,10 +217,7 @@
 			}
 		}
 
-		debugLog(
-			`[${pluginName}] Essential validation passed for path: ${settings.path}`,
-			state.settings.debug,
-		)
+		debugLog(`Final settings are valid ↴`, state.settings.debug)
 		return true
 	}
 
@@ -220,10 +228,10 @@
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFolder) {
 			// Filter to only include files, not subfolders
 			const allItems = state.ui.habitSource.children
-			const filesOnly = allItems.filter(item => item instanceof TFile)
+			const filesOnly = allItems.filter((item) => item instanceof TFile)
 			const count = filesOnly.length
 			debugLog(
-				`${path} points to a folder with ${count} ${pluralize(count, 'file')} inside (ignoring subfolders)`,
+				`"${path}" points to a folder with ${count} ${pluralize(count, 'file')} inside (ignoring subfolders)`,
 				state.settings.debug,
 				undefined,
 				pluginName,
@@ -251,20 +259,6 @@
 		return []
 	}
 
-	const renderPrettyDate = function (dateString) {
-		// Parse the input date string into a Date object
-		const date = parseISO(dateString)
-
-		// Format the date using date-fns
-		let prettyDate = format(date, 'MMMM d, yyyy')
-
-		if (isToday(date)) {
-			prettyDate = `Today, ${prettyDate}`
-		}
-
-		return prettyDate
-	}
-
 	$: if (state.ui.rootElement) {
 		scrollToEnd()
 	}
@@ -273,7 +267,7 @@
 	let refreshEventListener: (event: CustomEvent) => void
 
 	onMount(() => {
-		console.log('[HabitTracker] Component mounted, setting up refresh listener')
+		debugLog('Component mounted, setting up refresh listener')
 		refreshEventListener = (event: CustomEvent) => {
 			console.log(
 				'[HabitTracker] Refresh event received:',
@@ -295,7 +289,7 @@
 
 		// Listen for refresh events at the document level
 		document.addEventListener('habit-tracker-refresh', refreshEventListener)
-		console.log('[HabitTracker] Refresh event listener added to document')
+		debugLog('Refresh event listener added to document')
 	})
 
 	onDestroy(() => {
@@ -339,7 +333,7 @@
 					data-date={date}
 					data-pretty-date={renderPrettyDate(date)}
 				>
-					{getDate(date)}
+					{getDate(parseISO(date))}
 				</div>
 			{/each}
 		</div>
