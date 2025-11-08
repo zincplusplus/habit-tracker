@@ -1,12 +1,10 @@
-# Habit Tracker 21 [![GitHub release](https://img.shields.io/github/release/zincplusplus/habit-tracker.svg)](https://github.com/zincplusplus/habit-tracker/releases) [![Downloads](https://img.shields.io/github/downloads/zincplusplus/habit-tracker/total.svg)](https://github.com/zincplusplus/habit-tracker/releases) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
+# Habit Tracker 21 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/zincplusplus) [![GitHub release](https://img.shields.io/github/release/zincplusplus/habit-tracker.svg)](https://github.com/zincplusplus/habit-tracker/releases) [![Downloads](https://img.shields.io/github/downloads/zincplusplus/habit-tracker/total.svg)](https://github.com/zincplusplus/habit-tracker/releases) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 
 A minimalist, elegant habit tracker for [Obsidian](https://obsidian.md) that helps you build lasting habits with clear progress visualization.
 
 Transform your [Obsidian](https://obsidian.md) vault into a habit-building powerhouse. Track daily habits with an intuitive grid interface, customize your tracking experience, and watch your consistency streaks grow over time.
 
 ![Habit Tracker Demo](screenshots/ui-demo.png)
-
-<a href="https://www.buymeacoffee.com/zincplusplus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Features
 
