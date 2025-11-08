@@ -1,5 +1,7 @@
 import {
 	format,
+	parseISO,
+	isToday,
 } from 'date-fns';
 
 const getDateAsString = function(date) {
@@ -12,7 +14,7 @@ const getDayOfTheWeek = function(date) {
 
 // TODO make it somehow that i don't have to pass the debug level every time?
 // TODO add different levels of debugging, store them in a object or something so they have labels maybe?
-const debugLog = function(message, currentDebugLevel, requiredLevel, pluginName = 'Habit Tracker') {
+const debugLog = function(message, currentDebugLevel, requiredLevel, pluginName = 'Habit Tracker 21') {
 	if(!currentDebugLevel) return null;
 
 	if(requiredLevel && requiredLevel!==currentDebugLevel) return null;
@@ -25,9 +27,24 @@ const pluralize = function(count, singular, plural) {
 	return plural || singular + 's'
 }
 
+const renderPrettyDate = function (dateString) {
+		// Parse the input date string into a Date object
+		const date = parseISO(dateString)
+
+		// Format the date using date-fns
+		let prettyDate = format(date, 'MMMM d, yyyy')
+
+		if (isToday(date)) {
+			prettyDate = `Today, ${prettyDate}`
+		}
+
+		return prettyDate
+	}
+
 export {
 	getDateAsString,
 	getDayOfTheWeek,
 	debugLog,
+	renderPrettyDate,
 	pluralize
 };
