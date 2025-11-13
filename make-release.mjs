@@ -1,8 +1,9 @@
 import {readFileSync, writeFileSync} from 'fs'
 import fs from 'fs-extra'
 import {exec} from 'child_process'
+import {promisify} from 'util'
 
-//TODO this should build the project first
+const execAsync = promisify(exec)
 
 const targetVersion = process.argv[2]
 const targetVersionPattern = /^[0-9]+\.[0-9]+\.[0-9]+$/
@@ -27,10 +28,15 @@ writeFileSync('versions.json', JSON.stringify(versions, null, '\t'))
 console.log(`bumped versions.json to version ${targetVersion}`)
 
 async function makeRelease() {
-	// make a folder with the files
-	const destinationFolder = './release'
-
 	try {
+		// Build the project first
+		console.log('Building project...')
+		await execAsync('npm run build')
+		console.log('Build completed successfully')
+
+		// make a folder with the files
+		const destinationFolder = './release'
+
 		await fs.remove(destinationFolder)
 		console.log(`Removed ${destinationFolder} folder`)
 
@@ -53,6 +59,7 @@ async function makeRelease() {
 		exec('open ./release')
 	} catch (err) {
 		console.error('Error:', err)
+		process.exit(1)
 	}
 }
 
