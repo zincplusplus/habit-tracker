@@ -13,6 +13,8 @@
 	export let pluginName
 
 	let entries = []
+	let frontmatter = {}
+	let habitName = name
 	$: entriesInRange = dates.reduce((acc, date) => {
 		const ticked = entries.includes(date)
 		acc[date] = {
@@ -71,7 +73,7 @@
 	}
 
 	const init = async function () {
-		debugLog(`Loading habit ${name}`, debug, undefined, pluginName)
+		debugLog(`Loading habit ${habitName}`, debug, undefined, pluginName)
 
 		const getFrontmatter = async function (path) {
 			const file = this.app.vault.getAbstractFileByPath(path)
@@ -96,7 +98,7 @@
 				})
 			} catch (error) {
 				debugLog(
-					`Error in habit ${name}: error.message`,
+					`Error in habit ${habitName}: error.message`,
 					debug,
 					undefined,
 					pluginName,
@@ -104,21 +106,15 @@
 				return {}
 			}
 		}
-		const getHabitEntries = async function (path) {
-			let fm = await getFrontmatter(path)
 
-			return fm.entries || []
-		}
-
-		entries = await getHabitEntries(path)
+		frontmatter = await getFrontmatter(path)
+		debugLog(`Frontmatter for ${path} ↴`, debug)
+		debugLog(frontmatter, debug)
+		entries = frontmatter.entries
 		entries = entries.sort()
+		habitName = frontmatter.title || habitName
 
-		debugLog(
-			`Habit "${name}": Found ${entries.length} entries`,
-			debug,
-			undefined,
-			pluginName,
-		)
+		debugLog(`Habit "${habitName}": Found ${entries.length} entries`, debug)
 		debugLog(entries, debug, undefined, pluginName)
 
 		// TODO though this looks to be performing ok, i think i should set the watchers more efficiently
@@ -164,7 +160,7 @@
 		<a
 			href={path}
 			aria-label={path}
-			class="internal-link">{name}</a
+			class="internal-link">{habitName}</a
 		>
 	</div>
 	{#if Object.keys(entriesInRange).length}

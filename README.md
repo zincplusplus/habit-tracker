@@ -31,6 +31,26 @@ Transform your [Obsidian](https://obsidian.md) vault into a habit-building power
 
 That's it! Click the grid to log your daily habits.
 
+## Customization
+
+### Custom Habit Titles
+
+By default, habit titles use the filename (e.g., `Exercise.md` → "Exercise"). Customize titles by adding frontmatter to your habit files:
+
+```markdown
+---
+title: "Morning Workout 💪"
+entries: []
+---
+```
+
+Examples:
+- `title: "📚 Daily Reading"`
+- `title: "Drink 8 glasses of water"`
+- `title: "Meditation & Mindfulness"`
+
+If no title is specified, the filename is used as before.
+
 ## Configuration
 
 ### Global Settings
