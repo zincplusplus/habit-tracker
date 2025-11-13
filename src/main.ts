@@ -40,10 +40,10 @@ export default class HabitTracker21 extends Plugin {
 
 			debugLog('Loading', 1)
 
-			let userSettings = {}
+			let userSettings: Partial<HabitTrackerSettings> = {}
 			try {
-				const debugMode = this.settings.debug || userSettings.debug;
 				userSettings = JSON.parse(src);
+				const debugMode = this.settings.debug || userSettings.debug;
 				debugLog(`Global settings: ${JSON.stringify(this.settings)}`, debugMode);
 				debugLog(`Tracker settings: ${JSON.stringify(userSettings)}`, debugMode);
 				debugLog(`Today is ${format(new Date(), 'yyyy-MM-dd')}`, debugMode);
