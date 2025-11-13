@@ -14,6 +14,7 @@ interface HabitTrackerSettings {
 	debug: boolean;
 	matchLineLength: boolean;
 	defaultColor: string;
+	showStreaks: boolean;
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
@@ -21,7 +22,8 @@ const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	daysToShow: 21,
 	debug: false,
 	matchLineLength: true,
-	defaultColor: ''
+	defaultColor: '',
+	showStreaks: true
 }
 
 export default class HabitTracker21 extends Plugin {
@@ -361,6 +363,16 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 						this.plugin.settings.defaultColor = value;
 						await this.plugin.saveSettings();
 					}
+				}));
+
+		new Setting(containerEl)
+			.setName('Show streaks')
+			.setDesc('Display streak indicators and counts. Can be overridden with "showStreaks" in code blocks.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.showStreaks)
+				.onChange(async (value) => {
+					this.plugin.settings.showStreaks = value;
+					await this.plugin.saveSettings();
 				}));
 
 		new Setting(containerEl)

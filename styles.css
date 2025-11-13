@@ -267,6 +267,8 @@ div:has(.block-language-habittracker) {
 	width: var(--habit-cell-width);
 	max-width: var(--habit-cell-width);
 	min-width: var(--habit-cell-width);
+	padding-left: var(--habit-streak-padding);
+	padding-right: var(--habit-streak-padding);
 }
 .habit-tick:hover {
 	cursor: pointer;
@@ -278,10 +280,19 @@ div:has(.block-language-habittracker) {
 	content: '';
 	display: inline-block;
 	height: var(--habit-tick-size);
-	width: 100%;
 	transition: all 0.3s ease;
 	line-height: var(--habit-tick-size);
 	color: var(--habit-icon-ticked);
+	border-radius: 50%;
+	width: 100%;
+}
+
+.habit-tick--streak {
+	padding-left: 0;
+	padding-right: 0;
+}
+.habit-tick--streak:before {
+	border-radius: 0;
 }
 
 .habit-tick--streak-start {

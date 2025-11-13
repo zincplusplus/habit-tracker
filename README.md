@@ -105,6 +105,7 @@ Override global settings in individual code blocks:
 | `daysToShow`        | number  | 21      | Number of days to display                                                        |
 | `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
 | `color`             | string  | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                     |
+| `showStreaks`       | boolean | true    | Display streak indicators and counts                                             |
 | `debug`             | boolean | false   | Enable debug console output                                                      |
 | `matchLineLength`   | boolean | false   | Match readable line width                                                        |
 
@@ -156,6 +157,19 @@ Override default color for entire tracker:
 {
   "path": "Habits",
   "color": "#FF5722"
+}
+```
+````
+
+### Disable Streaks
+
+Hide streak indicators for cleaner view:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "showStreaks": false
 }
 ```
 ````

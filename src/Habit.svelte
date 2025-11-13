@@ -49,25 +49,30 @@
 		if (entriesInRange[date].ticked) {
 			classes.push('habit-tick--ticked')
 		}
-		const streak = entriesInRange[date].streak
-		if (streak) {
-			classes.push('habit-tick--streak')
-		}
-		if (streak == 1) {
-			classes.push('habit-tick--streak-start')
-		}
 
-		let isNextDayTicked = false
-		const nextDate = getDateAsString(addDays(parseISO(date), 1))
-		if (date === dates.at(-1)) {
-			// last in the dates in range
-			isNextDayTicked = entries.includes(nextDate)
-		} else {
-			isNextDayTicked = entriesInRange[nextDate].ticked
-		}
+		// Only add streak classes if streaks are enabled
+		const showStreaksEnabled = userSettings.showStreaks !== undefined ? userSettings.showStreaks : globalSettings.showStreaks
+		if (showStreaksEnabled) {
+			const streak = entriesInRange[date].streak
+			if (streak) {
+				classes.push('habit-tick--streak')
+			}
+			if (streak == 1) {
+				classes.push('habit-tick--streak-start')
+			}
 
-		if (entriesInRange[date].ticked && !isNextDayTicked) {
-			classes.push('habit-tick--streak-end')
+			let isNextDayTicked = false
+			const nextDate = getDateAsString(addDays(parseISO(date), 1))
+			if (date === dates.at(-1)) {
+				// last in the dates in range
+				isNextDayTicked = entries.includes(nextDate)
+			} else {
+				isNextDayTicked = entriesInRange[nextDate].ticked
+			}
+
+			if (entriesInRange[date].ticked && !isNextDayTicked) {
+				classes.push('habit-tick--streak-end')
+			}
 		}
 
 		return classes.join(' ')

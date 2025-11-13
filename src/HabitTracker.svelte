@@ -55,6 +55,7 @@
 		debug: boolean
 		matchLineLength: boolean
 		defaultColor: string
+		showStreaks: boolean
 	}
 	export let userSettings: Partial<{
 		path: string
@@ -63,6 +64,7 @@
 		debug: boolean
 		matchLineLength: boolean
 		color: string
+		showStreaks: boolean
 	}>
 
 	// Default settings - use global settings as defaults
