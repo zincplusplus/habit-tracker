@@ -1,5 +1,5 @@
 <script>
-	import {debugLog} from './utils'
+	import {debugLog, isValidCSSColor} from './utils'
 
 	import {parseYaml, TFile} from 'obsidian'
 	import {getDateAsString, getDayOfTheWeek} from './utils'
@@ -15,6 +15,7 @@
 	let entries = []
 	let frontmatter = {}
 	let habitName = name
+	let customStyles = ''
 	$: entriesInRange = dates.reduce((acc, date) => {
 		const ticked = entries.includes(date)
 		acc[date] = {
@@ -72,6 +73,7 @@
 		return streak
 	}
 
+
 	const init = async function () {
 		debugLog(`Loading habit ${habitName}`, debug, undefined, pluginName)
 
@@ -114,6 +116,13 @@
 		entries = entries.sort()
 		habitName = frontmatter.title || habitName
 
+		// Set custom styles
+		if (frontmatter.color && isValidCSSColor(frontmatter.color)) {
+			customStyles = `--habit-bg-ticked: ${frontmatter.color}`
+		} else {
+			customStyles = ''
+		}
+
 		debugLog(`Habit "${habitName}": Found ${entries.length} entries`, debug)
 		debugLog(entries, debug, undefined, pluginName)
 
@@ -155,7 +164,7 @@
 </script>
 
 <!-- <div bind:this={rootElement}> -->
-<div class="habit-tracker__row">
+<div class="habit-tracker__row" style={customStyles}>
 	<div class="habit-tracker__cell--name habit-tracker__cell">
 		<a
 			href={path}

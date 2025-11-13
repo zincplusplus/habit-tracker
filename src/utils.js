@@ -41,10 +41,18 @@ const renderPrettyDate = function (dateString) {
 		return prettyDate
 	}
 
+const isValidCSSColor = function (color) {
+	if (!color) return false
+	const tempEl = document.createElement('div')
+	tempEl.style.color = color
+	return tempEl.style.color !== ''
+}
+
 export {
 	getDateAsString,
 	getDayOfTheWeek,
 	debugLog,
 	renderPrettyDate,
-	pluralize
+	pluralize,
+	isValidCSSColor
 };

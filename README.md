@@ -51,6 +51,25 @@ Examples:
 
 If no title is specified, the filename is used as before.
 
+### Custom Habit Colors
+
+By default, habit colors inherit from your Obsidian theme's checkbox ticked color. Personalize individual habits with custom colors by adding a `color` property to your habit file frontmatter:
+
+```markdown
+---
+title: "Morning Workout 💪"
+color: "#4CAF50"
+entries: []
+---
+```
+
+Examples:
+- `color: "#FF5722"` (hex colors)
+- `color: "rgb(76, 175, 80)"` (RGB values)
+- `color: "green"` (CSS color names)
+
+Invalid colors are ignored and the default theme color is used.
+
 ## Configuration
 
 ### Global Settings
