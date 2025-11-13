@@ -104,6 +104,7 @@ Override global settings in individual code blocks:
 | `path`              | string  | "/"     | Path to habit folder or file. Defaults to root folder if left empty              |
 | `daysToShow`        | number  | 21      | Number of days to display                                                        |
 | `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
+| `color`             | string  | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                     |
 | `debug`             | boolean | false   | Enable debug console output                                                      |
 | `matchLineLength`   | boolean | false   | Match readable line width                                                        |
 
@@ -142,6 +143,19 @@ Show last 30 days:
 {
   "path": "Habits",
   "daysToShow": 30
+}
+```
+````
+
+### Custom Tracker Color
+
+Override default color for entire tracker:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "color": "#FF5722"
 }
 ```
 ````

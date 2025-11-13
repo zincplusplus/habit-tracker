@@ -11,11 +11,23 @@
 	export let dates
 	export let debug
 	export let pluginName
+	export let userSettings
+	export let globalSettings
 
 	let entries = []
 	let frontmatter = {}
 	let habitName = name
 	let customStyles = ''
+
+	// Reactive color resolution - updates whenever frontmatter, userSettings, or globalSettings change
+	$: {
+		const resolvedColor = frontmatter.color || userSettings.color || globalSettings.defaultColor
+		if (resolvedColor && isValidCSSColor(resolvedColor)) {
+			customStyles = `--habit-bg-ticked: ${resolvedColor}`
+		} else {
+			customStyles = ''
+		}
+	}
 	$: entriesInRange = dates.reduce((acc, date) => {
 		const ticked = entries.includes(date)
 		acc[date] = {
@@ -116,12 +128,6 @@
 		entries = entries.sort()
 		habitName = frontmatter.title || habitName
 
-		// Set custom styles
-		if (frontmatter.color && isValidCSSColor(frontmatter.color)) {
-			customStyles = `--habit-bg-ticked: ${frontmatter.color}`
-		} else {
-			customStyles = ''
-		}
 
 		debugLog(`Habit "${habitName}": Found ${entries.length} entries`, debug)
 		debugLog(entries, debug, undefined, pluginName)

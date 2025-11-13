@@ -2,7 +2,7 @@
 import {Plugin, Notice, setIcon, App, PluginSettingTab, Setting} from 'obsidian'
 import HabitTracker from './HabitTracker.svelte'
 import HabitTrackerError from './HabitTrackerError.svelte'
-import { debugLog, renderPrettyDate } from './utils'
+import { debugLog, renderPrettyDate, isValidCSSColor } from './utils'
 
 	import {
 		format,
@@ -13,13 +13,15 @@ interface HabitTrackerSettings {
 	daysToShow: number;
 	debug: boolean;
 	matchLineLength: boolean;
+	defaultColor: string;
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	path: '',
 	daysToShow: 21,
 	debug: false,
-	matchLineLength: false
+	matchLineLength: true,
+	defaultColor: ''
 }
 
 export default class HabitTracker21 extends Plugin {
@@ -289,16 +291,16 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h3', {text: `${this.plugin.manifest.name} Settings`});
 
-		// Add explanation text
-		const descEl = containerEl.createEl('div', {
+		// General Settings Section
+		let generalHeader = containerEl.createEl('h4', {text: 'General Settings'});
+		generalHeader.style.marginBottom = '0';
+		const generalDesc = containerEl.createEl('div', {
 			cls: 'setting-item-description',
-			text: 'These are the global default settings. You can override any of these settings in individual habit tracker code blocks by specifying them in the JSON configuration.'
+			text: 'These apply to all trackers and can be overridden either in the codeblock or in the habit tracker file.'
 		});
-		descEl.style.marginBottom = '20px';
-		descEl.style.padding = '10px';
-		descEl.style.backgroundColor = 'var(--background-secondary)';
-		descEl.style.borderRadius = '6px';
-		descEl.style.fontSize = '0.9em';
+		generalDesc.style.marginBottom = '15px';
+		generalDesc.style.fontSize = '0.85em';
+		generalDesc.style.color = 'var(--text-muted)';
 
 		new Setting(containerEl)
 			.setName('Default path')
@@ -348,13 +350,17 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName('Debug mode')
-			.setDesc('Enable debug output to console. Can be overridden with "debug" in code blocks.')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.debug)
+			.setName('Default color')
+			.setDesc('Default habit color (hex, RGB, or CSS color name). Can be overridden with "color" in code blocks or habit frontmatter.')
+			.addText(text => text
+				.setValue(this.plugin.settings.defaultColor)
+				.setPlaceholder('#4CAF50 or green')
 				.onChange(async (value) => {
-					this.plugin.settings.debug = value;
-					await this.plugin.saveSettings();
+					// Only save valid colors or empty string
+					if (!value || isValidCSSColor(value)) {
+						this.plugin.settings.defaultColor = value;
+						await this.plugin.saveSettings();
+					}
 				}));
 
 		new Setting(containerEl)
@@ -364,6 +370,20 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.matchLineLength)
 				.onChange(async (value) => {
 					this.plugin.settings.matchLineLength = value;
+					await this.plugin.saveSettings();
+				}));
+
+		// Troubleshooting Section
+		const troubleshootingHeader = containerEl.createEl('h4', {text: 'Troubleshooting'});
+		troubleshootingHeader.style.marginTop = '30px';
+
+		new Setting(containerEl)
+			.setName('Debug mode')
+			.setDesc('Enable debug output to console. Can be overridden with "debug" in code blocks.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.debug)
+				.onChange(async (value) => {
+					this.plugin.settings.debug = value;
 					await this.plugin.saveSettings();
 				}));
 

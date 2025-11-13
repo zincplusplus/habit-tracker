@@ -54,6 +54,7 @@
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
+		defaultColor: string
 	}
 	export let userSettings: Partial<{
 		path: string
@@ -61,6 +62,7 @@
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
+		color: string
 	}>
 
 	// Default settings - use global settings as defaults
@@ -345,6 +347,8 @@
 				debug={state.settings.debug}
 				{app}
 				{pluginName}
+				{userSettings}
+				{globalSettings}
 			></Habit>
 		{/each}
 	</div>
