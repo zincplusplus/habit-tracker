@@ -111,9 +111,15 @@
 				return await this.app.vault.read(file).then((result) => {
 					const frontmatter = result.split('---')[1]
 
-					if (!frontmatter) return {}
-
-					return parseYaml(frontmatter)
+					if (!frontmatter){
+						return {"entries": []};
+					}
+					fmParsed = parseYaml(frontmatter)
+					if(fmParsed["entries"] == undefined){
+						fmParsed["entries"] = [];
+					}
+					
+					return fmParsed;
 				})
 			} catch (error) {
 				debugLog(
