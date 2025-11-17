@@ -240,7 +240,9 @@
 				undefined,
 				pluginName,
 			)
-			return filesOnly as HabitData[]
+			// Sort files alphabetically by name
+			const sortedFiles = filesOnly.sort((a, b) => a.basename.localeCompare(b.basename))
+			return sortedFiles as HabitData[]
 		}
 
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFile) {
