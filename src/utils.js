@@ -5,11 +5,12 @@ import {
 } from 'date-fns';
 
 const getDateAsString = function(date) {
-	return format(date, 'yyyy-MM-dd')
+	const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return format(dateObj, 'yyyy-MM-dd')
 }
 
 const getDayOfTheWeek = function(date) {
-	return format(date,'EEEE').toLowerCase();
+	return format(parseISO(date),'EEEE').toLowerCase();
 }
 
 // TODO make it somehow that i don't have to pass the debug level every time?
