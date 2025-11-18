@@ -230,10 +230,10 @@ div:has(.block-language-habittracker) {
 	font-weight: bold;
 }
 
-.habit-tracker__header .habit-tracker__cell[data-pretty-date] {
+.habit-tracker__header .habit-tracker__cell[data-ht21-pretty-date] {
 	position: relative;
 }
-.habit-tracker__header .habit-tracker__cell[data-pretty-date]:hover {
+.habit-tracker__header .habit-tracker__cell[data-ht21-pretty-date]:hover {
 	cursor: pointer;
 	background: var(--habit-header-bg-hover);
 	color: var(--habit-header-text-hover);
@@ -241,10 +241,10 @@ div:has(.block-language-habittracker) {
 	border-top-right-radius: var(--habit-tooltip-radius);
 }
 
-.habit-tracker__header .habit-tracker__cell[data-pretty-date]:hover:after {
+.habit-tracker__header .habit-tracker__cell[data-ht21-pretty-date]:hover:after {
 	background: var(--habit-header-bg-hover);
 	color: var(--habit-header-text-hover);
-	content: attr(data-pretty-date);
+	content: attr(data-ht21-pretty-date);
 	left: 50%;
 	padding: var(--habit-tooltip-padding);
 	position: absolute;
@@ -254,7 +254,7 @@ div:has(.block-language-habittracker) {
 	border-radius: var(--habit-tooltip-radius);
 }
 .habit-tracker__header
-	.habit-tracker__cell[data-pretty-date]:last-child:hover:after {
+	.habit-tracker__cell[data-ht21-pretty-date]:last-child:hover:after {
 	left: auto;
 	right: 0;
 	transform: none;

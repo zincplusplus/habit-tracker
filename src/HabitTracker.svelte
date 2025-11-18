@@ -336,8 +336,8 @@
 					class="habit-tracker__cell habit-tracker__cell--{getDayOfTheWeek(
 						date,
 					)}"
-					data-date={date}
-					data-pretty-date={renderPrettyDate(date)}
+					data-ht21-date={date}
+					data-ht21-pretty-date={renderPrettyDate(date)}
 				>
 					{getDate(parseISO(date))}
 				</div>
