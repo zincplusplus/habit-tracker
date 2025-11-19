@@ -5,18 +5,20 @@ div:has(.block-language-habittracker) {
 	--habit-bg: var(--background-primary);
 	--habit-bg-ticked: var(--checkbox-color);
 	--habit-icon-ticked: var(--checkbox-marker-color);
-	--habit-border: 1px solid var(--color-base-30);
+	--habit-border: 1px solid var(--divider-color);
 	--habit-outer-border: var(--habit-border);
 	--habit-horizontal-border: var(--habit-border);
 	--habit-vertical-border: var(--habit-border);
-	--habit-row-bg-hover: var(--color-base-10);
-	--habit-highlight-weekend: var(--color-base-10);
-	--habit-highlight-names: var(--color-base-10);
-	--habit-container-hover: var(--color-base-10);
-	--habit-tick-hover: var(--color-base-30);
+	--habit-row-bg-hover: var(--background-secondary);
+	--habit-highlight-weekend: var(--background-secondary);
+	--habit-highlight-names: var(--background-secondary);
+	--habit-container-hover: var(--background-secondary);
+	--habit-tick-hover: var(--color-base-00);
 	--habit-name-text-color: var(--link-color);
 	--habit-header-bg-hover: var(--color-base-100);
 	--habit-header-text-hover: var(--color-base-00);
+
+	/* TODO: make the scroll bar not take vertical space at the bottom at least in synthwave theme */
 
 	/* Typography */
 	--habit-header-font-size: 11px;
@@ -48,7 +50,7 @@ div:has(.block-language-habittracker) {
 	left: var(--habit-name-padding);
 	right: var(--habit-name-padding);
 	background: var(--background-secondary);
-	border: 1px solid var(--border-color);
+	border: var(--habit-border)
 	border-radius: 0 0 var(--radius-s) var(--radius-s);
 	padding: var(--habit-name-padding);
 	justify-content: space-between;
@@ -97,7 +99,7 @@ div:has(.block-language-habittracker) {
 
 .ht21-action-bar__btn {
 	background: var(--interactive-normal);
-	border: 1px solid var(--border-color);
+	border: var(--habit-border);
 	border-radius: 4px;
 	padding: 4px 8px;
 	font-size: 11px;
@@ -153,6 +155,7 @@ div:has(.block-language-habittracker) {
 	overflow-x: scroll;
 	width: fit-content;
 	max-width: 100%;
+	scrollbar-width: thin;
 }
 
 .habit-tracker {
@@ -189,7 +192,6 @@ div:has(.block-language-habittracker) {
 }
 .habit-tracker__cell:not(:last-child) {
 	border-right: var(--habit-vertical-border);
-	/* box-shadow: -1px 0 red; */
 }
 .habit-tracker__row:not(.habit-tracker__header) .habit-tracker__cell {
 	border-top: var(--habit-horizontal-border);
