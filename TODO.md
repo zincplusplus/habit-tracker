@@ -1,18 +1,31 @@
-## Now
-- refactor the code so we can debug issues especially around dates
-- give a UI version to configure this
-- show streak even if it's starting from before the 21(displayed days)
+## Critical Fixes (Do Now)
+- Fix date mutation bug in streak calculation (Habit.svelte:87)
+- Add missing `let` to variable declaration (Habit.svelte:117)
+- Clean up event listeners in `onDestroy` to prevent memory leaks
+- ✅ Fix daysToShow off-by-one error (already fixed)
 
-## Next
+## Quality Improvements (Next Sprint)
+- Migrate utils.js to TypeScript for better type safety
+- Add error boundaries for better user experience
+- Optimize reactive computations in Habit component
+- Convert manual DOM action bar to Svelte component
+- Add keyboard navigation and basic accessibility
 
-- pass Today as a variable
-- link to pages
-- listen for changes and auto update
-- auto switch to new day at midnight
-- allow user to create a habit from the tracker
-- show only habits that have activity in the past 21 days
-- settings page
-- add dashboard for each habit with stats (current streak, avg streak, best streak, avg completion rate etc)
+## Feature Backlog
+- Show streak even if it's starting from before the displayed days
+- Pass Today as a variable instead of using new Date()
+- Auto switch to new day at midnight
+- Allow user to create a habit from the tracker
+- Show only habits that have activity in recent period
+- Add dashboard for each habit with stats (current streak, avg streak, best streak, avg completion rate etc)
+- Batch file operations for better performance with large habit folders
+
+## Nice to Have
+- Add comprehensive test suite
+- Implement proper CSS design system
+- Add RTL language support
+- Performance monitoring and optimization
+- Add habit templates and quick-create workflows
 
 ## Done
 
