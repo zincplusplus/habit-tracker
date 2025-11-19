@@ -5,7 +5,6 @@ div:has(.block-language-habittracker) {
 	--habit-bg: var(--background-primary);
 	--habit-bg-ticked: var(--checkbox-color);
 	--habit-icon-ticked: var(--checkbox-marker-color);
-	--habit-min-width: var(--file-line-width);
 	--habit-border: 1px solid var(--color-base-30);
 	--habit-outer-border: var(--habit-border);
 	--habit-horizontal-border: var(--habit-border);
@@ -167,6 +166,7 @@ div:has(.block-language-habittracker) {
 }
 
 .is-readable-line-width .habit-tracker--match-line-length {
+	max-width: 100%;
 	width: var(--file-line-width);
 }
 
