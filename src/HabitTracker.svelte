@@ -130,7 +130,7 @@
 		)
 
 		state.computed.dates = eachDayOfInterval({
-			start: firstDisplayedDate,
+			start: parseISO(firstDisplayedDate),
 			end: parseISO(state.settings.lastDisplayedDate),
 		}).map((date) => getDateAsString(date))
 
