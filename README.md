@@ -102,8 +102,9 @@ Override global settings in individual code blocks:
 | Setting             | Type    | Default | Description                                                                      |
 | ------------------- | ------- | ------- | -------------------------------------------------------------------------------- |
 | `path`              | string  | "/"     | Path to habit folder or file. Defaults to root folder if left empty              |
-| `daysToShow`        | number  | 21      | Number of days to display                                                        |
+| `firstDisplayedDate`| string  | auto    | First date shown in grid (format: "YYYY-MM-DD"). Calculated from daysToShow if not provided |
 | `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
+| `daysToShow`        | number  | 21      | Number of days to display. Auto-calculated when both firstDisplayedDate and lastDisplayedDate are provided |
 | `color`             | string  | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                     |
 | `showStreaks`       | boolean | true    | Display streak indicators and counts                                             |
 | `debug`             | boolean | false   | Enable debug console output                                                      |
@@ -184,6 +185,20 @@ Show habits ending on a specific date:
   "path": "Habits",
   "lastDisplayedDate": "2024-01-15",
   "daysToShow": 30
+}
+```
+````
+
+### Show Specific Date Range
+
+Track habits for the entire month of November 2024:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "firstDisplayedDate": "2024-11-01",
+  "lastDisplayedDate": "2024-11-30"
 }
 ```
 ````
