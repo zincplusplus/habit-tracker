@@ -18,6 +18,7 @@
 	// TypeScript interfaces for better state management
 	interface HabitTrackerSettings {
 		path: string
+		firstDisplayedDate: string
 		lastDisplayedDate: string
 		daysToShow: number
 		debug: boolean
@@ -51,6 +52,7 @@
 	export let pluginName: string
 	export let globalSettings: {
 		path: string
+		firstDisplayedDate: string
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
@@ -59,6 +61,7 @@
 	}
 	export let userSettings: Partial<{
 		path: string
+		firstDisplayedDate: string
 		lastDisplayedDate: Date
 		daysToShow: number
 		debug: boolean
@@ -70,6 +73,7 @@
 	// Default settings - use global settings as defaults
 	const createDefaultSettings = (): HabitTrackerSettings => ({
 		path: globalSettings.path,
+		firstDisplayedDate: globalSettings.firstDisplayedDate || getDateAsString(subDays(new Date(), globalSettings.daysToShow - 1)),
 		lastDisplayedDate: getDateAsString(new Date()),
 		daysToShow: globalSettings.daysToShow,
 		debug: globalSettings.debug,
@@ -99,9 +103,11 @@
 		// Merge user settings with defaults first (let TypeScript handle type safety)
 		state.settings = {
 			path: userSettings.path || state.settings.path,
-			daysToShow: userSettings.daysToShow || state.settings.daysToShow,
+			firstDisplayedDate:
+				userSettings.firstDisplayedDate || state.settings.firstDisplayedDate,
 			lastDisplayedDate:
 				userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
+			daysToShow: userSettings.daysToShow || state.settings.daysToShow,
 			matchLineLength:
 				userSettings.matchLineLength !== undefined
 					? userSettings.matchLineLength
@@ -110,6 +116,14 @@
 				userSettings.debug !== undefined
 					? userSettings.debug
 					: state.settings.debug,
+		}
+
+		// Calculate daysToShow from firstDisplayedDate and lastDisplayedDate if both are provided
+		if (state.settings.firstDisplayedDate && state.settings.lastDisplayedDate) {
+			const startDate = parseISO(state.settings.firstDisplayedDate)
+			const endDate = parseISO(state.settings.lastDisplayedDate)
+			const calculatedDays = eachDayOfInterval({ start: startDate, end: endDate }).length
+			state.settings.daysToShow = calculatedDays
 		}
 
 		// Only validate essential business logic
@@ -122,15 +136,8 @@
 		}
 		debugLog(state.settings, state.settings.debug)
 
-		const firstDisplayedDate = getDateAsString(
-			subDays(
-				parseISO(state.settings.lastDisplayedDate),
-				state.settings.daysToShow - 1,
-			),
-		)
-
 		state.computed.dates = eachDayOfInterval({
-			start: parseISO(firstDisplayedDate),
+			start: parseISO(state.settings.firstDisplayedDate),
 			end: parseISO(state.settings.lastDisplayedDate),
 		}).map((date) => getDateAsString(date))
 
