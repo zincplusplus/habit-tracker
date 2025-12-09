@@ -213,17 +213,8 @@
 			return
 		}
 
-		parent.scrollLeft = parent.scrollWidth
-		debugLog(`scrollToEnd completed ↴`, state.settings.debug)
-		debugLog(
-			{
-				element: state.ui.rootElement,
-				parent: parent,
-				scrollLeft: parent.scrollLeft,
-				scrollWidth: parent.scrollWidth,
-			},
-			state.settings.debug,
-		)
+		parent.scrollLeft = 99999999
+		debugLog(`scrollToEnd completed`, state.settings.debug)
 	}
 
 	const validateEssentials = async function (
@@ -289,7 +280,9 @@
 	}
 
 	$: if (state.ui.rootElement) {
-		scrollToEnd()
+		setTimeout(() => {
+			scrollToEnd()
+		}, 50)
 	}
 
 	// Listen for settings refresh events
