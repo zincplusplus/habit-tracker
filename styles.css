@@ -169,8 +169,7 @@ div:has(.block-language-habittracker) {
 }
 
 .is-readable-line-width .habit-tracker--match-line-length {
-	max-width: 100%;
-	width: var(--file-line-width);
+	min-width: calc(var(--file-line-width) - 2px); /* TODO: this is a hack since I know the widht of the border. but it won't scale. figure out a way to fix this that hopefully doesn't break overrides people added in place */
 }
 
 .habit-tracker__row {
