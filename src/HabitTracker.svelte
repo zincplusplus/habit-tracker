@@ -108,6 +108,7 @@
 		// Start with defaults
 		let resolvedSettings = {
 			path: userSettings.path || state.settings.path,
+			firstDisplayedDate: '',
 			lastDisplayedDate: userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
 			daysToShow: userSettings.daysToShow !== undefined ? userSettings.daysToShow : state.settings.daysToShow,
 			matchLineLength:
@@ -123,11 +124,11 @@
 		// Apply smart firstDisplayedDate logic
 		if (hasExplicitFirstDate) {
 			// User provided firstDisplayedDate - use it directly
-			resolvedSettings.firstDisplayedDate = userSettings.firstDisplayedDate
+			resolvedSettings.firstDisplayedDate = userSettings.firstDisplayedDate!
 			// If user also provided lastDisplayedDate, recalculate daysToShow to match the actual range
 			if (hasExplicitLastDate) {
-				const startDate = parseISO(userSettings.firstDisplayedDate)
-				const endDate = parseISO(userSettings.lastDisplayedDate)
+				const startDate = parseISO(userSettings.firstDisplayedDate!)
+				const endDate = parseISO(userSettings.lastDisplayedDate!)
 				resolvedSettings.daysToShow = eachDayOfInterval({ start: startDate, end: endDate }).length
 			}
 		} else if (hasExplicitDaysToShow || hasExplicitLastDate) {
