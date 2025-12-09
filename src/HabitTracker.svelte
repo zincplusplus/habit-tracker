@@ -100,14 +100,16 @@
 			userSettings.path = userSettings.path.replace(/\/$/, '')
 		}
 
-		// Merge user settings with defaults first (let TypeScript handle type safety)
-		state.settings = {
+		// Smart date/daysToShow logic: explicit user settings take priority
+		const hasExplicitFirstDate = userSettings.firstDisplayedDate !== undefined
+		const hasExplicitLastDate = userSettings.lastDisplayedDate !== undefined
+		const hasExplicitDaysToShow = userSettings.daysToShow !== undefined
+
+		// Start with defaults
+		let resolvedSettings = {
 			path: userSettings.path || state.settings.path,
-			firstDisplayedDate:
-				userSettings.firstDisplayedDate || state.settings.firstDisplayedDate,
-			lastDisplayedDate:
-				userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
-			daysToShow: userSettings.daysToShow || state.settings.daysToShow,
+			lastDisplayedDate: userSettings.lastDisplayedDate || state.settings.lastDisplayedDate,
+			daysToShow: userSettings.daysToShow !== undefined ? userSettings.daysToShow : state.settings.daysToShow,
 			matchLineLength:
 				userSettings.matchLineLength !== undefined
 					? userSettings.matchLineLength
@@ -118,13 +120,27 @@
 					: state.settings.debug,
 		}
 
-		// Calculate daysToShow from firstDisplayedDate and lastDisplayedDate if both are provided
-		if (state.settings.firstDisplayedDate && state.settings.lastDisplayedDate) {
-			const startDate = parseISO(state.settings.firstDisplayedDate)
-			const endDate = parseISO(state.settings.lastDisplayedDate)
-			const calculatedDays = eachDayOfInterval({ start: startDate, end: endDate }).length
-			state.settings.daysToShow = calculatedDays
+		// Apply smart firstDisplayedDate logic
+		if (hasExplicitFirstDate) {
+			// User provided firstDisplayedDate - use it directly
+			resolvedSettings.firstDisplayedDate = userSettings.firstDisplayedDate
+			// If user also provided lastDisplayedDate, recalculate daysToShow to match the actual range
+			if (hasExplicitLastDate) {
+				const startDate = parseISO(userSettings.firstDisplayedDate)
+				const endDate = parseISO(userSettings.lastDisplayedDate)
+				resolvedSettings.daysToShow = eachDayOfInterval({ start: startDate, end: endDate }).length
+			}
+		} else if (hasExplicitDaysToShow) {
+			// User provided daysToShow but not firstDisplayedDate - calculate firstDisplayedDate (2.1.4 behavior)
+			resolvedSettings.firstDisplayedDate = getDateAsString(
+				subDays(parseISO(resolvedSettings.lastDisplayedDate), resolvedSettings.daysToShow - 1)
+			)
+		} else {
+			// No explicit user settings - use defaults
+			resolvedSettings.firstDisplayedDate = state.settings.firstDisplayedDate
 		}
+
+		state.settings = resolvedSettings
 
 		// Only validate essential business logic
 		try {
