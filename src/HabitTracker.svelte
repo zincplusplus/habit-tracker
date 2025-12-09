@@ -130,8 +130,8 @@
 				const endDate = parseISO(userSettings.lastDisplayedDate)
 				resolvedSettings.daysToShow = eachDayOfInterval({ start: startDate, end: endDate }).length
 			}
-		} else if (hasExplicitDaysToShow) {
-			// User provided daysToShow but not firstDisplayedDate - calculate firstDisplayedDate (2.1.4 behavior)
+		} else if (hasExplicitDaysToShow || hasExplicitLastDate) {
+			// User provided daysToShow and/or lastDisplayedDate but not firstDisplayedDate - calculate firstDisplayedDate from lastDisplayedDate
 			resolvedSettings.firstDisplayedDate = getDateAsString(
 				subDays(parseISO(resolvedSettings.lastDisplayedDate), resolvedSettings.daysToShow - 1)
 			)
