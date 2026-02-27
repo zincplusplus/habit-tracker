@@ -384,3 +384,102 @@ div:has(.block-language-habittracker),
 .habit-tracker__header .habit-tracker__cell--today {
 	color: var(--habit-name-text-color);
 }
+
+/* === Contribution Graph Mode === */
+.habit-tracker-graph {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 8px;
+}
+
+.contribution-graph__header {
+	margin-bottom: 4px;
+}
+
+.contribution-graph__name {
+	color: var(--habit-name-text-color);
+	font-size: var(--habit-name-font-size);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.contribution-graph__body {
+	display: flex;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.contribution-graph__day-labels {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	margin-top: 20px;
+	margin-right: 4px;
+	flex-shrink: 0;
+}
+
+.contribution-graph__day-label {
+	height: 13px;
+	font-size: 10px;
+	line-height: 13px;
+	color: var(--text-muted);
+	text-align: right;
+}
+
+.contribution-graph__day-label--hidden {
+	visibility: hidden;
+}
+
+.contribution-graph__grid-wrapper {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.contribution-graph__month-labels {
+	display: grid;
+	grid-template-columns: repeat(var(--graph-weeks), 13px);
+	gap: 3px;
+	height: 17px;
+	margin-bottom: 3px;
+}
+
+.contribution-graph__month-label {
+	font-size: 10px;
+	line-height: 17px;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.contribution-graph__grid {
+	display: grid;
+	grid-template-columns: repeat(var(--graph-weeks), 13px);
+	grid-template-rows: repeat(7, 13px);
+	grid-auto-flow: column;
+	gap: 3px;
+}
+
+.contribution-graph__cell {
+	width: 13px;
+	height: 13px;
+	border-radius: 2px;
+	background-color: var(--background-modifier-border);
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+
+.contribution-graph__cell:hover {
+	outline: 1px solid var(--text-muted);
+	outline-offset: -1px;
+}
+
+.contribution-graph__cell--ticked {
+	background-color: var(--graph-cell-color, var(--habit-bg-ticked));
+}
+
+.contribution-graph__cell--empty {
+	background-color: transparent;
+	cursor: default;
+	pointer-events: none;
+}

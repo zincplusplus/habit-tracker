@@ -9,6 +9,7 @@
 	import {onMount, onDestroy} from 'svelte'
 
 	import Habit from './Habit.svelte'
+	import ContributionGraph from './ContributionGraph.svelte'
 
 	import {TFile, TFolder, Notice, type Plugin} from 'obsidian'
 	import {getDateAsString, getDayOfTheWeek} from './utils.js'
@@ -29,6 +30,7 @@
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
+		mode: string
 	}
 
 	interface HabitData {
@@ -66,6 +68,7 @@
 		showStreaks: boolean	
 		openDailyNoteOnClick: boolean
 		gapStyle: string
+		mode: string
 	}
 	export let userSettings: Partial<{
 		path: string
@@ -77,6 +80,7 @@
 		color: string
 		showStreaks: boolean
 		gapStyle: string
+		mode: string
 	}>
 
 	// Default settings - use global settings as defaults
@@ -89,6 +93,7 @@
 		daysToShow: globalSettings.daysToShow,
 		debug: globalSettings.debug,
 		matchLineLength: globalSettings.matchLineLength,
+		mode: globalSettings.mode || 'default',
 	})
 
 	// Initialize unified state
@@ -134,6 +139,10 @@
 				userSettings.debug !== undefined
 					? userSettings.debug
 					: state.settings.debug,
+			mode:
+				userSettings.mode !== undefined
+					? userSettings.mode
+					: state.settings.mode,
 		}
 
 		// Apply smart firstDisplayedDate logic
@@ -407,6 +416,24 @@
 		<strong>😕 {pluginName}</strong>
 	</div>
 	No habits to show at "{state.settings.path}"
+{:else if state.settings.mode === 'graph'}
+	<div
+		class="habit-tracker-graph"
+		bind:this={state.ui.rootElement}
+	>
+		{#each state.computed.habits as habit}
+			<ContributionGraph
+				name={habit.basename}
+				path={habit.path}
+				dates={state.computed.dates}
+				debug={state.settings.debug}
+				{app}
+				{pluginName}
+				{userSettings}
+				{globalSettings}
+			/>
+		{/each}
+	</div>
 {:else}
 	<div
 		class="habit-tracker {state.settings.matchLineLength
