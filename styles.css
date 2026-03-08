@@ -483,3 +483,17 @@ div:has(.block-language-habittracker),
 	cursor: default;
 	pointer-events: none;
 }
+
+.contribution-graph__streak-summary {
+	display: flex;
+	gap: 16px;
+	margin-top: 8px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.contribution-graph__streak-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
