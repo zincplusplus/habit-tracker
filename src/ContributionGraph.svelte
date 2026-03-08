@@ -47,10 +47,16 @@
 
 		let currentDate = weekStart
 		let weekIndex = 0
+		let prevMonth = ''
 
 		while (isBefore(currentDate, lastDate) || isSameDay(currentDate, lastDate)) {
 			const week = []
-			let weekMonthLabel = ''
+
+			const currentMonth = format(currentDate, 'MMM')
+			if (weekIndex === 0 || currentMonth !== prevMonth) {
+				monthLabels.push({weekIndex, label: currentMonth})
+			}
+			prevMonth = currentMonth
 
 			for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
 				const cellDate = addDays(currentDate, dayOfWeek)
@@ -58,22 +64,11 @@
 				const isInRange = !isBefore(cellDate, firstDate) && !isAfter(cellDate, lastDate)
 				const ticked = isInRange && entrySet.has(dateStr)
 
-				// Show month label on the first week, or when a new month starts
-				if (weekIndex === 0 && dayOfWeek === 0) {
-					weekMonthLabel = format(cellDate, 'MMM')
-				} else if (format(cellDate, 'd') === '1') {
-					weekMonthLabel = format(cellDate, 'MMM')
-				}
-
 				week.push({
 					date: dateStr,
 					ticked,
 					isInRange,
 				})
-			}
-
-			if (weekMonthLabel && monthLabels[monthLabels.length - 1]?.label !== weekMonthLabel) {
-				monthLabels.push({weekIndex, label: weekMonthLabel})
 			}
 
 			weeks.push(week)
