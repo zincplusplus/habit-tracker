@@ -79,13 +79,14 @@
 		return {weeks, monthLabels, dayLabels}
 	})()
 
+	$: showStreaks =
+		userSettings.showStreaks !== undefined
+			? userSettings.showStreaks
+			: globalSettings.showStreaks
+
 	// Compute streak stats for the graph footer
 	$: streakStats = (() => {
 		const maxGap = Number(frontmatter.maxGap) || 0
-		const showStreaks =
-			userSettings.showStreaks !== undefined
-				? userSettings.showStreaks
-				: globalSettings.showStreaks
 
 		if (!showStreaks || entries.length === 0) return {currentStreak: 0, longestStreak: 0}
 
@@ -268,7 +269,7 @@
 			</div>
 		</div>
 	</div>
-	{#if streakStats.currentStreak > 0 || streakStats.longestStreak > 0}
+	{#if showStreaks && (streakStats.currentStreak > 0 || streakStats.longestStreak > 0)}
 		<div class="contribution-graph__streak-summary">
 			<span class="contribution-graph__streak-item" title="Current streak">
 				🔥 {streakStats.currentStreak} day{streakStats.currentStreak !== 1 ? 's' : ''}

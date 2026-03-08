@@ -418,7 +418,7 @@
 	No habits to show at "{state.settings.path}"
 {:else if state.settings.mode === 'graph'}
 	<div
-		class="habit-tracker-graph"
+		class="habit-tracker-graph {state.settings.matchLineLength ? 'habit-tracker-graph--match-line-length' : ''}"
 		bind:this={state.ui.rootElement}
 	>
 		{#each state.computed.habits as habit}
