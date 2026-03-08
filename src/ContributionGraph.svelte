@@ -1,9 +1,9 @@
 <script>
-	import {debugLog, isValidCSSColor} from './utils'
+	import {debugLog} from './utils'
+	import {loadFrontmatter, toggleHabitEntry, resolveColor} from './habitData'
 
 	import {onDestroy} from 'svelte'
-	import {parseYaml, TFile} from 'obsidian'
-	import {parseISO, format, getDay, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays} from 'date-fns'
+	import {parseISO, format, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays} from 'date-fns'
 
 	export let app
 	export let name
@@ -21,13 +21,8 @@
 	let savingChanges = false
 
 	$: {
-		const resolvedColor =
-			frontmatter.color || userSettings.color || globalSettings.defaultColor
-		if (resolvedColor && isValidCSSColor(resolvedColor)) {
-			customColor = resolvedColor
-		} else {
-			customColor = ''
-		}
+		const color = resolveColor(frontmatter, userSettings, globalSettings)
+		customColor = color
 	}
 
 	// Build the contribution graph grid: rows = days of week (Mon-Sun), columns = weeks
@@ -79,13 +74,14 @@
 		return {weeks, monthLabels, dayLabels}
 	})()
 
+	$: showStreaks =
+		userSettings.showStreaks !== undefined
+			? userSettings.showStreaks
+			: globalSettings.showStreaks
+
 	// Compute streak stats for the graph footer
 	$: streakStats = (() => {
 		const maxGap = Number(frontmatter.maxGap) || 0
-		const showStreaks =
-			userSettings.showStreaks !== undefined
-				? userSettings.showStreaks
-				: globalSettings.showStreaks
 
 		if (!showStreaks || entries.length === 0) return {currentStreak: 0, longestStreak: 0}
 
@@ -134,45 +130,7 @@
 	const init = async function () {
 		debugLog(`Loading habit ${habitName}`, debug, undefined, pluginName)
 
-		const getFrontmatter = async function (path) {
-			const file = this.app.vault.getAbstractFileByPath(path)
-
-			if (!file || !(file instanceof TFile)) {
-				debugLog(
-					`No file found for path: ${path}`,
-					debug,
-					undefined,
-					pluginName,
-				)
-				return {}
-			}
-
-			try {
-				return await this.app.vault.read(file).then((result) => {
-					const frontmatter = result.split('---')[1]
-
-					if (!frontmatter) {
-						return {entries: []}
-					}
-					const fmParsed = parseYaml(frontmatter)
-					if (fmParsed['entries'] == undefined) {
-						fmParsed['entries'] = []
-					}
-
-					return fmParsed
-				})
-			} catch (error) {
-				debugLog(
-					`Error in habit ${habitName}: ${error.message}`,
-					debug,
-					undefined,
-					pluginName,
-				)
-				return {}
-			}
-		}
-
-		frontmatter = await getFrontmatter(path)
+		frontmatter = await loadFrontmatter(app, path, habitName, debug, pluginName)
 		debugLog(`Frontmatter for ${path} ↴`, debug)
 		debugLog(frontmatter, debug)
 		entries = frontmatter.entries
@@ -184,24 +142,12 @@
 	}
 
 	const toggleHabit = function (date) {
-		const file = this.app.vault.getAbstractFileByPath(path)
-		if (!file || !(file instanceof TFile)) {
+		const newEntries = toggleHabitEntry(app, path, entries, date)
+		if (newEntries === null) {
 			return
 		}
-
-		let newEntries = [...entries]
-		if (entries.includes(date)) {
-			newEntries = newEntries.filter((e) => e !== date)
-		} else {
-			newEntries.push(date)
-		}
-		entries = newEntries.sort()
-
+		entries = newEntries
 		savingChanges = true
-
-		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			frontmatter['entries'] = entries
-		})
 	}
 
 	init()
@@ -268,7 +214,7 @@
 			</div>
 		</div>
 	</div>
-	{#if streakStats.currentStreak > 0 || streakStats.longestStreak > 0}
+	{#if showStreaks && (streakStats.currentStreak > 0 || streakStats.longestStreak > 0)}
 		<div class="contribution-graph__streak-summary">
 			<span class="contribution-graph__streak-item" title="Current streak">
 				🔥 {streakStats.currentStreak} day{streakStats.currentStreak !== 1 ? 's' : ''}

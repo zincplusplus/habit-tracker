@@ -1,8 +1,8 @@
 <script>
-	import {debugLog, isValidCSSColor} from './utils'
+	import {debugLog} from './utils'
+	import {loadFrontmatter, toggleHabitEntry, resolveColor} from './habitData'
 
 	import {onDestroy} from 'svelte'
-	import {parseYaml, TFile} from 'obsidian'
 	import {getDayOfTheWeek} from './utils'
 	import {differenceInCalendarDays, parseISO, format} from 'date-fns'
 
@@ -23,13 +23,8 @@
 
 	// Reactive color resolution - updates whenever frontmatter, userSettings, or globalSettings change
 	$: {
-		const resolvedColor =
-			frontmatter.color || userSettings.color || globalSettings.defaultColor
-		if (resolvedColor && isValidCSSColor(resolvedColor)) {
-			customStyles = `--habit-bg-ticked: ${resolvedColor}`
-		} else {
-			customStyles = ''
-		}
+		const color = resolveColor(frontmatter, userSettings, globalSettings)
+		customStyles = color ? `--habit-bg-ticked: ${color}` : ''
 	}
 	$: renderedDates = (() => {
 		const maxGap = Number(frontmatter.maxGap) || 0
@@ -207,45 +202,7 @@
 	const init = async function () {
 		debugLog(`Loading habit ${habitName}`, debug, undefined, pluginName)
 
-		const getFrontmatter = async function (path) {
-			const file = this.app.vault.getAbstractFileByPath(path)
-
-			if (!file || !(file instanceof TFile)) {
-				debugLog(
-					`No file found for path: ${path}`,
-					debug,
-					undefined,
-					pluginName,
-				)
-				return {}
-			}
-
-			try {
-				return await this.app.vault.read(file).then((result) => {
-					const frontmatter = result.split('---')[1]
-
-					if (!frontmatter) {
-						return {entries: []}
-					}
-					const fmParsed = parseYaml(frontmatter)
-					if (fmParsed['entries'] == undefined) {
-						fmParsed['entries'] = []
-					}
-
-					return fmParsed
-				})
-			} catch (error) {
-				debugLog(
-					`Error in habit ${habitName}: error.message`,
-					debug,
-					undefined,
-					pluginName,
-				)
-				return {}
-			}
-		}
-
-		frontmatter = await getFrontmatter(path)
+		frontmatter = await loadFrontmatter(app, path, habitName, debug, pluginName)
 		debugLog(`Frontmatter for ${path} ↴`, debug)
 		debugLog(frontmatter, debug)
 		entries = frontmatter.entries
@@ -257,25 +214,13 @@
 	}
 
 	const toggleHabit = function (date) {
-		const file = this.app.vault.getAbstractFileByPath(path)
-		if (!file || !(file instanceof TFile)) {
+		const newEntries = toggleHabitEntry(app, path, entries, date)
+		if (newEntries === null) {
 			new Notice(`${pluginName}: file missing while trying to toggle habit`)
 			return
 		}
-
-		let newEntries = [...entries]
-		if (entries.includes(date)) {
-			newEntries = newEntries.filter((e) => e !== date)
-		} else {
-			newEntries.push(date)
-		}
-		entries = newEntries.sort()
-
+		entries = newEntries
 		savingChanges = true
-
-		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-			frontmatter['entries'] = entries
-		})
 	}
 
 	init()
