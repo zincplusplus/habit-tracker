@@ -3,7 +3,7 @@
 
 	import {onDestroy} from 'svelte'
 	import {parseYaml, TFile} from 'obsidian'
-	import {parseISO, format, getDay, startOfWeek, addDays, isBefore, isAfter, isSameDay} from 'date-fns'
+	import {parseISO, format, getDay, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays} from 'date-fns'
 
 	export let app
 	export let name
@@ -82,6 +82,58 @@
 		}
 
 		return {weeks, monthLabels, dayLabels}
+	})()
+
+	// Compute streak stats for the graph footer
+	$: streakStats = (() => {
+		const maxGap = Number(frontmatter.maxGap) || 0
+		const showStreaks =
+			userSettings.showStreaks !== undefined
+				? userSettings.showStreaks
+				: globalSettings.showStreaks
+
+		if (!showStreaks || entries.length === 0) return {currentStreak: 0, longestStreak: 0}
+
+		// Walk through sorted entries to find all streaks
+		// A streak is a sequence of entries where consecutive gaps ≤ maxGap
+		let currentStreak = 0
+		let longestStreak = 0
+		let streakLength = 1
+
+		for (let i = 1; i < entries.length; i++) {
+			const gapDays =
+				differenceInCalendarDays(parseISO(entries[i]), parseISO(entries[i - 1])) - 1
+			if (gapDays <= maxGap) {
+				streakLength++
+			} else {
+				if (streakLength > longestStreak) longestStreak = streakLength
+				streakLength = 1
+			}
+		}
+		// Final streak segment
+		if (streakLength > longestStreak) longestStreak = streakLength
+
+		// Current streak: walk backward from the last entry
+		// The current streak is only "current" if the last entry is recent enough
+		// (within maxGap+1 days of today)
+		const today = format(new Date(), 'yyyy-MM-dd')
+		const lastEntry = entries[entries.length - 1]
+		const daysSinceLast = differenceInCalendarDays(parseISO(today), parseISO(lastEntry))
+
+		if (daysSinceLast <= maxGap + 1) {
+			// Last entry is recent — count backward
+			currentStreak = 1
+			for (let j = entries.length - 1; j > 0; j--) {
+				const gapDays =
+					differenceInCalendarDays(parseISO(entries[j]), parseISO(entries[j - 1])) - 1
+				if (gapDays > maxGap) break
+				currentStreak++
+			}
+		} else {
+			currentStreak = 0
+		}
+
+		return {currentStreak, longestStreak}
 	})()
 
 	const init = async function () {
@@ -221,4 +273,14 @@
 			</div>
 		</div>
 	</div>
+	{#if streakStats.currentStreak > 0 || streakStats.longestStreak > 0}
+		<div class="contribution-graph__streak-summary">
+			<span class="contribution-graph__streak-item" title="Current streak">
+				🔥 {streakStats.currentStreak} day{streakStats.currentStreak !== 1 ? 's' : ''}
+			</span>
+			<span class="contribution-graph__streak-item" title="Longest streak">
+				🏆 {streakStats.longestStreak} day{streakStats.longestStreak !== 1 ? 's' : ''}
+			</span>
+		</div>
+	{/if}
 </div>
