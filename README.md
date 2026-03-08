@@ -14,6 +14,7 @@ Transform your [Obsidian](https://obsidian.md) vault into a habit-building power
 - **Smart Folder Support** - Track individual files or entire habit folders
 - **Flexible Streak Counting** - Optional gap tolerance (`maxGap`) keeps streaks intact across short breaks while counting only days you actually completed
 - **Daily Note Integration** - Click any date in the header to jump straight to your daily note for that day
+- **Contribution Graph Mode** - Switch to a GitHub-style contribution graph view for a different way to visualize your habits
 - **Debug Mode** - Comprehensive debugging gives you all the info you need to figure it out
 
 ## Quick Start
@@ -107,6 +108,7 @@ Access via **Settings > Community plugins > Habit Tracker** to set defaults for 
 - **Days to Show** - Number input (default: 21)
 - **Show Streaks** - Toggle streak indicators and counts on/off (default: on)
 - **Open daily note on date click** - Click a date in the header row to open the corresponding daily note (default: on). Requires the Daily Notes core plugin or the Periodic Notes community plugin
+- **Display Mode** - Choose between "Default" (grid) and "Contribution Graph" (GitHub-style graph). Can be overridden per-tracker with `"mode"` in code blocks
 - **Debug Mode** - Toggle debug output on/off
 - **Match Line Length** - Fit tracker to readable line width
 
@@ -139,6 +141,7 @@ Override global settings in individual code blocks:
 | `color`             | string  | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                     |
 | `showStreaks`       | boolean | true    | Display streak indicators and counts                                             |
 | `debug`             | boolean | false   | Enable debug console output                                                      |
+| `mode`              | string  | "default" | Display mode: `"default"` for grid view, `"graph"` for GitHub-style contribution graph |
 | `matchLineLength`   | boolean | false   | Match readable line width                                                        |
 
 ### Per-Habit Settings (frontmatter)
@@ -259,6 +262,19 @@ Track habits for the entire month of November 2024:
   "path": "Habits",
   "firstDisplayedDate": "2024-11-01",
   "lastDisplayedDate": "2024-11-30"
+}
+```
+````
+
+### Contribution Graph Mode
+
+Display habits as a GitHub-style contribution graph:
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "mode": "graph"
 }
 ```
 ````
