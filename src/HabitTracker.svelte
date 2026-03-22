@@ -332,6 +332,23 @@
 	let vaultDeleteRef: any
 	let vaultRenameRef: any
 	let midnightTimer: ReturnType<typeof setTimeout>
+	let syncingGraphScroll = false
+
+	const syncGraphScroll = (sourceElement: HTMLElement) => {
+		if (syncingGraphScroll || !state.ui.rootElement) return
+		syncingGraphScroll = true
+
+		const graphRows = Array.from(
+			state.ui.rootElement.querySelectorAll('.contribution-graph__body'),
+		) as HTMLElement[]
+		for (const row of graphRows) {
+			if (row !== sourceElement) {
+				row.scrollLeft = sourceElement.scrollLeft
+			}
+		}
+
+		syncingGraphScroll = false
+	}
 
 	const isInWatchedPath = (filePath: string) =>
 		filePath === state.settings.path ||
@@ -427,6 +444,7 @@
 				path={habit.path}
 				dates={state.computed.dates}
 				debug={state.settings.debug}
+				onGraphScroll={syncGraphScroll}
 				{app}
 				{pluginName}
 				{userSettings}
