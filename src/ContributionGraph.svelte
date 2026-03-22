@@ -3,7 +3,7 @@
 
 	import {onDestroy} from 'svelte'
 	import {parseYaml, TFile} from 'obsidian'
-	import {parseISO, format, getDate, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays, isToday} from 'date-fns'
+	import {parseISO, format, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays, isToday} from 'date-fns'
 
 	export let app
 	export let name
@@ -21,7 +21,7 @@
 	let customColor = ''
 	let savingChanges = false
 	// Keep graph streak badges aligned with default mode behavior (only meaningful multi-day streaks).
-	const MIN_STREAK_COUNT_FOR_BADGE = 2
+	const STREAK_BADGE_THRESHOLD = 2
 
 	$: {
 		const resolvedColor =
@@ -32,8 +32,6 @@
 			customColor = ''
 		}
 	}
-
-	$: renderedDatesByDate = new Map(renderedDates.map((day) => [day.date, day]))
 
 	// Build the contribution graph grid: rows = days of week (Mon-Sun), columns = weeks
 	$: graph = (() => {
@@ -49,6 +47,7 @@
 
 		let currentDate = weekStart
 		let weekIndex = 0
+		let previousColumnMonth = ''
 
 		while (isBefore(currentDate, lastDate) || isSameDay(currentDate, lastDate)) {
 			const week = []
@@ -58,7 +57,7 @@
 				const cellDate = addDays(currentDate, dayOfWeek)
 				const dateStr = format(cellDate, 'yyyy-MM-dd')
 				const isInRange = !isBefore(cellDate, firstDate) && !isAfter(cellDate, lastDate)
-				const renderedDay = renderedDatesByDate.get(dateStr)
+				const renderedDay = renderedDates.byDate.get(dateStr)
 				if (isInRange) inRangeDates.push(cellDate)
 
 				week.push({
@@ -71,17 +70,18 @@
 						isInRange &&
 						showStreaks &&
 						!!renderedDay?.streakEnd &&
-						renderedDay.streakCount >= MIN_STREAK_COUNT_FOR_BADGE,
+						renderedDay.streakCount >= STREAK_BADGE_THRESHOLD,
 					streakCount: renderedDay?.streakCount || 0,
 					isInRange,
 				})
 			}
 
-			const monthStartDate = inRangeDates.find((date) => getDate(date) === 1)
-			if (monthStartDate) {
-				monthStarts.push({weekIndex, label: format(monthStartDate, 'MMM')})
-			} else if (weekIndex === 0 && inRangeDates.length > 0) {
-				monthStarts.push({weekIndex, label: format(inRangeDates[0], 'MMM')})
+			if (inRangeDates.length > 0) {
+				const columnMonth = format(inRangeDates[0], 'MMM')
+				if (weekIndex === 0 || columnMonth !== previousColumnMonth) {
+					monthStarts.push({weekIndex, label: columnMonth})
+					previousColumnMonth = columnMonth
+				}
 			}
 
 			weeks.push(week)
@@ -136,39 +136,42 @@
 			}
 		}
 
+		const closeStreakAt = (endIdx) => {
+			let lastTickDate = null
+			for (let j = streakStartIdx; j <= endIdx; j++) {
+				if (days[j].ticked) lastTickDate = days[j].date
+			}
+
+			let count = 0
+			if (lastTickDate) {
+				const anchorIdx = entries.indexOf(lastTickDate)
+				if (anchorIdx !== -1) {
+					count = 1
+					for (let j = anchorIdx; j > 0; j--) {
+						const gapDays =
+							differenceInCalendarDays(parseISO(entries[j]), parseISO(entries[j - 1])) - 1
+						if (gapDays > maxGap) break
+						count++
+					}
+				}
+			}
+
+			days[endIdx].streakEnd = true
+			days[endIdx].streakCount = count
+		}
+
 		let streakStartIdx = -1
-		for (let i = 0; i <= days.length; i++) {
-			const inStreak = i < days.length && (days[i].ticked || days[i].gap)
+		for (let i = 0; i < days.length; i++) {
+			const inStreak = days[i].ticked || days[i].gap
 			if (inStreak && streakStartIdx === -1) {
 				streakStartIdx = i
 			} else if (!inStreak && streakStartIdx !== -1) {
-				const endIdx = i - 1
-				let lastTickDate = null
-				for (let j = streakStartIdx; j <= endIdx; j++) {
-					if (days[j].ticked) lastTickDate = days[j].date
-				}
-
-				let count = 0
-				if (lastTickDate) {
-					const anchorIdx = entries.indexOf(lastTickDate)
-					if (anchorIdx !== -1) {
-						count = 1
-						for (let j = anchorIdx; j > 0; j--) {
-							const gapDays =
-								differenceInCalendarDays(
-									parseISO(entries[j]),
-									parseISO(entries[j - 1]),
-								) - 1
-							if (gapDays > maxGap) break
-							count++
-						}
-					}
-				}
-
-				days[endIdx].streakEnd = true
-				days[endIdx].streakCount = count
+				closeStreakAt(i - 1)
 				streakStartIdx = -1
 			}
+		}
+		if (streakStartIdx !== -1) {
+			closeStreakAt(days.length - 1)
 		}
 
 		if (maxGap > 0 && entries.length > 0) {
@@ -184,7 +187,7 @@
 			}
 		}
 
-		return days
+		return {days, byDate: new Map(days.map((day) => [day.date, day]))}
 	})()
 
 	const init = async function () {
@@ -274,6 +277,15 @@
 	onDestroy(() => {
 		app.vault.offref(modifyRef)
 	})
+
+	const getCellStyle = (cell) => {
+		if (!customColor || !(cell.ticked || cell.gap || cell.deadline || cell.today)) {
+			return ''
+		}
+		return cell.today
+			? `--graph-cell-color: ${customColor}; --graph-today-color: ${customColor}`
+			: `--graph-cell-color: ${customColor}`
+	}
 </script>
 
 <div class="contribution-graph">
@@ -309,7 +321,7 @@
 							class:contribution-graph__cell--today={cell.today}
 							class:contribution-graph__cell--streak-end={cell.streakEnd}
 							class:contribution-graph__cell--empty={!cell.isInRange}
-							style={customColor && (cell.ticked || cell.gap || cell.deadline) ? `--graph-cell-color: ${customColor}` : ''}
+							style={getCellStyle(cell)}
 							title={cell.isInRange ? cell.date : ''}
 							on:click={() => cell.isInRange && toggleHabit(cell.date)}
 						>
