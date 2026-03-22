@@ -45,7 +45,7 @@
 		const weekStart = startOfWeek(firstDate, {weekStartsOn: 1}) // 1 = Monday
 
 		const weeks = []
-		const monthLabels = []
+		const monthStarts = []
 
 		let currentDate = weekStart
 		let weekIndex = 0
@@ -79,15 +79,23 @@
 
 			const monthStartDate = inRangeDates.find((date) => getDate(date) === 1)
 			if (monthStartDate) {
-				monthLabels.push({weekIndex, label: format(monthStartDate, 'MMM')})
+				monthStarts.push({weekIndex, label: format(monthStartDate, 'MMM')})
 			} else if (weekIndex === 0 && inRangeDates.length > 0) {
-				monthLabels.push({weekIndex, label: format(inRangeDates[0], 'MMM')})
+				monthStarts.push({weekIndex, label: format(inRangeDates[0], 'MMM')})
 			}
 
 			weeks.push(week)
 			currentDate = addDays(currentDate, 7)
 			weekIndex++
 		}
+
+		const monthLabels = monthStarts.map((monthStart, index) => ({
+			...monthStart,
+			endWeekIndex:
+				index < monthStarts.length - 1
+					? monthStarts[index + 1].weekIndex
+					: weeks.length,
+		}))
 
 		return {weeks, monthLabels}
 	})()
@@ -282,7 +290,7 @@
 				{#each graph.monthLabels as monthLabel}
 					<div
 						class="contribution-graph__month-label"
-						style="grid-column: {monthLabel.weekIndex + 1}"
+						style="grid-column: {monthLabel.weekIndex + 1} / {monthLabel.endWeekIndex + 1}"
 					>
 						{monthLabel.label}
 					</div>
@@ -301,7 +309,7 @@
 							class:contribution-graph__cell--today={cell.today}
 							class:contribution-graph__cell--streak-end={cell.streakEnd}
 							class:contribution-graph__cell--empty={!cell.isInRange}
-							style={cell.ticked && customColor ? `--graph-cell-color: ${customColor}` : ''}
+							style={customColor && (cell.ticked || cell.gap || cell.deadline) ? `--graph-cell-color: ${customColor}` : ''}
 							title={cell.isInRange ? cell.date : ''}
 							on:click={() => cell.isInRange && toggleHabit(cell.date)}
 						>

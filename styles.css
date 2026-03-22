@@ -439,6 +439,8 @@ div:has(.block-language-habittracker),
 	line-height: 17px;
 	color: var(--text-muted);
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .contribution-graph__grid {
@@ -471,7 +473,11 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__cell--gap {
-	opacity: var(--graph-gap-opacity);
+	background-color: color-mix(
+		in srgb,
+		var(--graph-cell-color, var(--habit-bg-ticked)) calc(var(--graph-gap-opacity) * 100%),
+		var(--background-primary) calc(100% - (var(--graph-gap-opacity) * 100%))
+	);
 }
 
 .contribution-graph__cell--deadline {
@@ -487,19 +493,24 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__cell--today {
-	outline: 1px solid var(--habit-name-text-color);
-	outline-offset: 1px;
+	outline: 2px solid var(--habit-name-text-color);
+	outline-offset: 0;
+	box-shadow: 0 0 0 1px var(--background-primary) inset;
 }
 
 .contribution-graph__cell--streak-end {
-	color: var(--habit-icon-ticked);
+	color: var(--text-on-accent, var(--text-normal));
 	font-size: 8px;
 	font-weight: bold;
 	line-height: 1;
+	text-shadow: 0 0 1px color-mix(in srgb, var(--background-primary) 80%, transparent);
 }
 
 .contribution-graph__streak-count {
 	pointer-events: none;
+	background: color-mix(in srgb, var(--background-primary) 35%, transparent);
+	border-radius: 2px;
+	padding: 0 1px;
 }
 
 .contribution-graph__cell--empty {
