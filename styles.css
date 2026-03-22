@@ -422,8 +422,8 @@ div:has(.block-language-habittracker),
 
 .contribution-graph__grid-wrapper {
 	display: grid;
-	--graph-cell-size: 20px;
-	--graph-cell-gap: 5px;
+	--graph-cell-size: 18px;
+	--graph-cell-gap: 4px;
 	--graph-gap-opacity-percentage: calc(var(--graph-gap-opacity) * 100%);
 	gap: var(--graph-cell-gap);
 	min-width: 0;
@@ -433,13 +433,13 @@ div:has(.block-language-habittracker),
 	display: grid;
 	grid-template-columns: repeat(var(--graph-weeks), var(--graph-cell-size));
 	gap: var(--graph-cell-gap);
-	height: 20px;
+	height: 18px;
 	margin-bottom: var(--graph-cell-gap);
 }
 
 .contribution-graph__month-label {
 	font-size: var(--habit-header-font-size);
-	line-height: 20px;
+	line-height: 18px;
 	color: var(--text-muted);
 	white-space: nowrap;
 	overflow: hidden;
@@ -497,7 +497,7 @@ div:has(.block-language-habittracker),
 	width: 5px;
 	height: 5px;
 	border-radius: 50%;
-	background-color: var(--graph-cell-contrast-color, var(--graph-cell-color, var(--habit-bg-ticked)));
+	background-color: color-mix(in srgb, var(--graph-cell-color, var(--habit-bg-ticked)) 72%, var(--background-primary) 28%);
 }
 
 .contribution-graph__cell--today {
@@ -508,19 +508,19 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__cell--streak-end {
-	color: var(--graph-cell-contrast-color, var(--text-on-accent, var(--text-normal)));
-	font-size: 8px;
+	color: var(--graph-cell-text-color, var(--text-on-accent, var(--text-normal)));
+	font-size: 10px;
 	font-weight: 500;
 	line-height: 1;
 	text-shadow: 0 0 1px color-mix(in srgb, var(--background-primary) 55%, transparent);
-	opacity: 0.9;
+	opacity: 0.95;
 }
 
 .contribution-graph__streak-count {
 	pointer-events: none;
-	background: color-mix(in srgb, var(--background-primary) 32%, transparent);
-	border-radius: 2px;
-	padding: 0 1px;
+	background: transparent;
+	border-radius: 0;
+	padding: 0;
 }
 
 .contribution-graph__cell--empty {

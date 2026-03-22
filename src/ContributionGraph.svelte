@@ -282,7 +282,53 @@
 		if (!customColor || !(cell.ticked || cell.gap || cell.deadline || cell.today)) {
 			return ''
 		}
-		return `--graph-cell-color: ${customColor}; --graph-today-color: ${customColor}; --graph-cell-contrast-color: color-mix(in srgb, ${customColor} 15%, black 85%)`
+
+		const toRgb = (color) => {
+			if (typeof document === 'undefined') return null
+			const canvas = document.createElement('canvas')
+			const context = canvas.getContext('2d')
+			if (!context) return null
+			context.fillStyle = '#000000'
+			context.fillStyle = color
+			const normalizedColor = context.fillStyle
+			const hexMatch = normalizedColor.match(/^#([0-9a-f]{3,8})$/i)
+			if (hexMatch) {
+				const hex = hexMatch[1]
+				if (hex.length === 3) {
+					return {
+						r: Number.parseInt(hex[0] + hex[0], 16),
+						g: Number.parseInt(hex[1] + hex[1], 16),
+						b: Number.parseInt(hex[2] + hex[2], 16),
+					}
+				}
+				if (hex.length >= 6) {
+					return {
+						r: Number.parseInt(hex.slice(0, 2), 16),
+						g: Number.parseInt(hex.slice(2, 4), 16),
+						b: Number.parseInt(hex.slice(4, 6), 16),
+					}
+				}
+				return null
+			}
+			const rgbMatch = normalizedColor.match(
+				/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i,
+			)
+			if (!rgbMatch) return null
+			return {
+				r: Number.parseInt(rgbMatch[1], 10),
+				g: Number.parseInt(rgbMatch[2], 10),
+				b: Number.parseInt(rgbMatch[3], 10),
+			}
+		}
+
+		const textColor = (() => {
+			const rgb = toRgb(customColor)
+			if (!rgb) return 'var(--text-on-accent, var(--text-normal))'
+			const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255
+			return luminance > 0.72 ? 'rgb(34, 38, 43)' : 'rgb(244, 247, 250)'
+		})()
+
+		return `--graph-cell-color: ${customColor}; --graph-today-color: ${customColor}; --graph-cell-contrast-color: color-mix(in srgb, ${customColor} 18%, black 82%); --graph-cell-text-color: ${textColor}`
 	}
 </script>
 
