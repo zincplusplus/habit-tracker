@@ -9,6 +9,7 @@
 	import {onMount, onDestroy} from 'svelte'
 
 	import Habit from './Habit.svelte'
+	import ContributionGraph from './ContributionGraph.svelte'
 
 	import {TFile, TFolder, Notice, type Plugin} from 'obsidian'
 	import {getDateAsString, getDayOfTheWeek} from './utils.js'
@@ -29,6 +30,7 @@
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
+		mode: string
 	}
 
 	interface HabitData {
@@ -66,6 +68,7 @@
 		showStreaks: boolean	
 		openDailyNoteOnClick: boolean
 		gapStyle: string
+		mode: string
 	}
 	export let userSettings: Partial<{
 		path: string
@@ -77,6 +80,7 @@
 		color: string
 		showStreaks: boolean
 		gapStyle: string
+		mode: string
 	}>
 
 	// Default settings - use global settings as defaults
@@ -89,6 +93,7 @@
 		daysToShow: globalSettings.daysToShow,
 		debug: globalSettings.debug,
 		matchLineLength: globalSettings.matchLineLength,
+		mode: globalSettings.mode || 'default',
 	})
 
 	// Initialize unified state
@@ -134,6 +139,10 @@
 				userSettings.debug !== undefined
 					? userSettings.debug
 					: state.settings.debug,
+			mode:
+				userSettings.mode !== undefined
+					? userSettings.mode
+					: state.settings.mode,
 		}
 
 		// Apply smart firstDisplayedDate logic
@@ -323,6 +332,23 @@
 	let vaultDeleteRef: any
 	let vaultRenameRef: any
 	let midnightTimer: ReturnType<typeof setTimeout>
+	let syncingGraphScroll = false
+
+	const syncGraphScroll = (sourceElement: HTMLElement) => {
+		if (syncingGraphScroll || !state.ui.rootElement) return
+		syncingGraphScroll = true
+
+		const graphRows = Array.from(
+			state.ui.rootElement.querySelectorAll('.contribution-graph__body'),
+		) as HTMLElement[]
+		for (const row of graphRows) {
+			if (row !== sourceElement) {
+				row.scrollLeft = sourceElement.scrollLeft
+			}
+		}
+
+		syncingGraphScroll = false
+	}
 
 	const isInWatchedPath = (filePath: string) =>
 		filePath === state.settings.path ||
@@ -407,6 +433,25 @@
 		<strong>😕 {pluginName}</strong>
 	</div>
 	No habits to show at "{state.settings.path}"
+{:else if state.settings.mode === 'graph'}
+	<div
+		class="habit-tracker-graph {state.settings.matchLineLength ? 'habit-tracker-graph--match-line-length' : ''}"
+		bind:this={state.ui.rootElement}
+	>
+		{#each state.computed.habits as habit}
+			<ContributionGraph
+				name={habit.basename}
+				path={habit.path}
+				dates={state.computed.dates}
+				debug={state.settings.debug}
+				onGraphScroll={syncGraphScroll}
+				{app}
+				{pluginName}
+				{userSettings}
+				{globalSettings}
+			/>
+		{/each}
+	</div>
 {:else}
 	<div
 		class="habit-tracker {state.settings.matchLineLength
