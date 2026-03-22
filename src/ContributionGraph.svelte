@@ -282,9 +282,7 @@
 		if (!customColor || !(cell.ticked || cell.gap || cell.deadline || cell.today)) {
 			return ''
 		}
-		return cell.today
-			? `--graph-cell-color: ${customColor}; --graph-today-color: ${customColor}`
-			: `--graph-cell-color: ${customColor}`
+		return `--graph-cell-color: ${customColor}; --graph-today-color: ${customColor}; --graph-cell-contrast-color: color-mix(in srgb, ${customColor} 15%, black 85%)`
 	}
 </script>
 
