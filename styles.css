@@ -426,6 +426,7 @@ div:has(.block-language-habittracker),
 	--graph-cell-gap: 4px;
 	--graph-gap-opacity-percentage: calc(var(--graph-gap-opacity) * 100%);
 	gap: var(--graph-cell-gap);
+	padding-bottom: 2px;
 	min-width: 0;
 }
 
