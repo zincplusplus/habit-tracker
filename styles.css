@@ -398,46 +398,30 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__header {
-	margin-bottom: 4px;
+	display: flex;
 }
 
 .contribution-graph__name {
 	color: var(--habit-name-text-color);
 	font-size: var(--habit-name-font-size);
 	text-decoration: none;
-	font-weight: 600;
+	font-weight: var(--link-weight);
+	max-width: var(--habit-name-max-width);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: fit-content;
+	display: inline-block;
 }
 
 .contribution-graph__body {
-	display: flex;
 	overflow-x: auto;
 	scrollbar-width: thin;
 }
 
-.contribution-graph__day-labels {
-	display: flex;
-	flex-direction: column;
-	gap: 3px;
-	margin-top: 20px;
-	margin-right: 4px;
-	flex-shrink: 0;
-}
-
-.contribution-graph__day-label {
-	height: 13px;
-	font-size: 10px;
-	line-height: 13px;
-	color: var(--text-muted);
-	text-align: right;
-}
-
-.contribution-graph__day-label--hidden {
-	visibility: hidden;
-}
-
 .contribution-graph__grid-wrapper {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	gap: 3px;
 	min-width: 0;
 }
 
@@ -450,7 +434,7 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__month-label {
-	font-size: 10px;
+	font-size: var(--habit-header-font-size);
 	line-height: 17px;
 	color: var(--text-muted);
 	white-space: nowrap;
@@ -465,6 +449,9 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	width: 13px;
 	height: 13px;
 	border-radius: 2px;
@@ -482,22 +469,40 @@ div:has(.block-language-habittracker),
 	background-color: var(--graph-cell-color, var(--habit-bg-ticked));
 }
 
+.contribution-graph__cell--gap {
+	background-color: color-mix(in srgb, var(--graph-cell-color, var(--habit-bg-ticked)) 30%, transparent);
+}
+
+.contribution-graph__cell--deadline {
+	position: relative;
+}
+
+.contribution-graph__cell--deadline::after {
+	content: '';
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background-color: var(--graph-cell-color, var(--habit-bg-ticked));
+}
+
+.contribution-graph__cell--today {
+	outline: 1px solid var(--habit-name-text-color);
+	outline-offset: 1px;
+}
+
+.contribution-graph__cell--streak-end {
+	color: var(--habit-icon-ticked);
+	font-size: 8px;
+	font-weight: bold;
+	line-height: 1;
+}
+
+.contribution-graph__streak-count {
+	pointer-events: none;
+}
+
 .contribution-graph__cell--empty {
 	background-color: transparent;
 	cursor: default;
 	pointer-events: none;
-}
-
-.contribution-graph__streak-summary {
-	display: flex;
-	gap: 16px;
-	margin-top: 8px;
-	font-size: 12px;
-	color: var(--text-muted);
-}
-
-.contribution-graph__streak-item {
-	display: flex;
-	align-items: center;
-	gap: 4px;
 }
