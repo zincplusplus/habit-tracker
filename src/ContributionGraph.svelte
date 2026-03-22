@@ -3,7 +3,7 @@
 
 	import {onDestroy} from 'svelte'
 	import {parseYaml, TFile} from 'obsidian'
-	import {parseISO, format, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays, isToday} from 'date-fns'
+	import {parseISO, format, getDate, startOfWeek, addDays, isBefore, isAfter, isSameDay, differenceInCalendarDays, isToday} from 'date-fns'
 
 	export let app
 	export let name
@@ -13,13 +13,15 @@
 	export let pluginName
 	export let userSettings
 	export let globalSettings
-	export let onGraphScroll
+	export let onGraphScroll = () => {}
 
 	let entries = []
 	let frontmatter = {}
 	let habitName = name
 	let customColor = ''
 	let savingChanges = false
+	// Keep graph streak badges aligned with default mode behavior (only meaningful multi-day streaks).
+	const MIN_STREAK_COUNT_FOR_BADGE = 2
 
 	$: {
 		const resolvedColor =
@@ -31,11 +33,11 @@
 		}
 	}
 
+	$: renderedDatesByDate = new Map(renderedDates.map((day) => [day.date, day]))
+
 	// Build the contribution graph grid: rows = days of week (Mon-Sun), columns = weeks
 	$: graph = (() => {
 		if (!dates || dates.length === 0) return {weeks: [], monthLabels: []}
-
-		const renderedDatesByDate = new Map(renderedDates.map((day) => [day.date, day]))
 		const firstDate = parseISO(dates[0])
 		const lastDate = parseISO(dates[dates.length - 1])
 
@@ -66,13 +68,16 @@
 					deadline: isInRange && showStreaks && !!renderedDay?.deadline,
 					today: isInRange && isToday(cellDate),
 					streakEnd:
-						isInRange && showStreaks && !!renderedDay?.streakEnd && renderedDay.streakCount > 1,
+						isInRange &&
+						showStreaks &&
+						!!renderedDay?.streakEnd &&
+						renderedDay.streakCount >= MIN_STREAK_COUNT_FOR_BADGE,
 					streakCount: renderedDay?.streakCount || 0,
 					isInRange,
 				})
 			}
 
-			const monthStartDate = inRangeDates.find((date) => Number(format(date, 'd')) === 1)
+			const monthStartDate = inRangeDates.find((date) => getDate(date) === 1)
 			if (monthStartDate) {
 				monthLabels.push({weekIndex, label: format(monthStartDate, 'MMM')})
 			} else if (weekIndex === 0 && inRangeDates.length > 0) {
@@ -162,7 +167,7 @@
 			const today = format(new Date(), 'yyyy-MM-dd')
 			const lastEntry = entries[entries.length - 1]
 			const deadlineDate = format(
-				new Date(parseISO(lastEntry).getTime() + (maxGap + 1) * 86400000),
+				addDays(parseISO(lastEntry), maxGap + 1),
 				'yyyy-MM-dd',
 			)
 			if (deadlineDate >= today) {
@@ -271,7 +276,7 @@
 			class="internal-link contribution-graph__name">{habitName}</a
 		>
 	</div>
-	<div class="contribution-graph__body" on:scroll={(e) => onGraphScroll?.(e.currentTarget)}>
+	<div class="contribution-graph__body" on:scroll={(e) => onGraphScroll(e.currentTarget)}>
 		<div class="contribution-graph__grid-wrapper" style="--graph-weeks: {graph.weeks.length}">
 			<div class="contribution-graph__month-labels">
 				{#each graph.monthLabels as monthLabel}

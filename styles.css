@@ -43,6 +43,7 @@ div:has(.block-language-habittracker),
 	/* Spacing */
 	--habit-streak-padding: 4px;
 	--habit-tooltip-padding: 2px 6px;
+	--graph-gap-opacity: 0.3;
 }
 
 /* Action bar for habit tracker code blocks */
@@ -470,7 +471,7 @@ div:has(.block-language-habittracker),
 }
 
 .contribution-graph__cell--gap {
-	background-color: color-mix(in srgb, var(--graph-cell-color, var(--habit-bg-ticked)) 30%, transparent);
+	opacity: var(--graph-gap-opacity);
 }
 
 .contribution-graph__cell--deadline {
