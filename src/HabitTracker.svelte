@@ -30,6 +30,7 @@
 		debug: boolean
 		matchLineLength: boolean
 		group?: string | string[]
+		excludeGroup?: string | string[]
 	}
 
 	interface HabitData {
@@ -79,6 +80,7 @@
 		showStreaks: boolean
 		gapStyle: string
 		group: string | string[]
+		excludeGroup: string | string[]
 	}>
 
 	// Default settings - use global settings as defaults
@@ -137,6 +139,7 @@
 					? userSettings.debug
 					: state.settings.debug,
 			group: userSettings.group,
+			excludeGroup: userSettings.excludeGroup,
 		}
 
 		// Apply smart firstDisplayedDate logic
@@ -272,14 +275,19 @@
 		await app.workspace.getLeaf(false).openFile(note)
 	}
 
-	const matchesGroupFilter = function (file: TFile, groupFilter: string | string[] | undefined): boolean {
-		if (!groupFilter) return true
+	const matchesGroupFilter = function (file: TFile, groupFilter: string | string[] | undefined, excludeFilter: string | string[] | undefined): boolean {
 		const cache = app.metadataCache.getFileCache(file)
 		const habitGroup = cache?.frontmatter?.group
-		if (habitGroup == null) return false
-		const filterArr = Array.isArray(groupFilter) ? groupFilter : [groupFilter]
-		const habitArr = Array.isArray(habitGroup) ? habitGroup : [habitGroup]
-		return filterArr.some((g) => habitArr.includes(g))
+		const habitArr: string[] = habitGroup == null ? [] : (Array.isArray(habitGroup) ? habitGroup : [habitGroup])
+		if (excludeFilter) {
+			const excludeArr = Array.isArray(excludeFilter) ? excludeFilter : [excludeFilter]
+			if (excludeArr.some((g) => habitArr.includes(g))) return false
+		}
+		if (groupFilter) {
+			const filterArr = Array.isArray(groupFilter) ? groupFilter : [groupFilter]
+			return filterArr.some((g) => habitArr.includes(g))
+		}
+		return true
 	}
 
 	const getHabits = function (path: string): HabitData[] {
@@ -313,13 +321,13 @@
 			})
 			return sortedFiles
 				.map(({file}: {file: TFile}) => file)
-				.filter((file: TFile) => matchesGroupFilter(file, state.settings.group)) as unknown as HabitData[]
+				.filter((file: TFile) => matchesGroupFilter(file, state.settings.group, state.settings.excludeGroup)) as unknown as HabitData[]
 		}
 
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFile) {
 			debugLog(`${path} points to a file`, state.settings.debug)
 			const file = state.ui.habitSource as TFile
-			return matchesGroupFilter(file, state.settings.group) ? [file as unknown as HabitData] : []
+			return matchesGroupFilter(file, state.settings.group, state.settings.excludeGroup) ? [file as unknown as HabitData] : []
 		}
 
 		state.ui.habitSource = app.vault.getAbstractFileByPath(`${path}.md`)
@@ -331,7 +339,7 @@
 				pluginName,
 			)
 			const file = state.ui.habitSource as TFile
-			return matchesGroupFilter(file, state.settings.group) ? [file as unknown as HabitData] : []
+			return matchesGroupFilter(file, state.settings.group, state.settings.excludeGroup) ? [file as unknown as HabitData] : []
 		}
 
 		debugLog(`${path} is not found`, state.settings.debug)
