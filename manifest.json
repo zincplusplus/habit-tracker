@@ -1,11 +1,11 @@
 {
-	"id": "habit-tracker-21",
-	"name": "Habit Tracker 21",
-	"version": "2.4.1",
+	"id": "interactive-habit-tracker",
+	"name": "Interactive Habit Tracker",
+	"version": "1.0.0",
 	"minAppVersion": "1.1.0",
-	"description": "Your 21-day journey to habit formation, simplified",
-	"author": "zincplusplus",
-	"authorUrl": "https://github.com/zincplusplus",
+	"description": "Simple, visual habit tracking in Obsidian.",
+	"author": "koray-eren",
+	"authorUrl": "https://github.com/koray-eren",
 	"isDesktopOnly": false,
-	"fundingUrl": "https://buymeacoffee.com/zincplusplus"
+	"fundingUrl": ""
 }
