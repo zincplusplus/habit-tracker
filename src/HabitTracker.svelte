@@ -284,11 +284,21 @@
 				undefined,
 				pluginName,
 			)
-			// Sort files alphabetically by name
-			const sortedFiles = filesOnly.sort((a, b) =>
-				a.basename.localeCompare(b.basename),
-			)
-			return sortedFiles as HabitData[]
+			// Sort files by optional frontmatter `order` field, then alphabetically
+			const filesWithOrder = filesOnly.map((file: TFile) => {
+				const cache = app.metadataCache.getFileCache(file)
+				const order = cache?.frontmatter?.order
+				return {file, order}
+			})
+			const sortedFiles = filesWithOrder.sort((a: {file: TFile; order: any}, b: {file: TFile; order: any}) => {
+				const aOrd = a.order !== undefined ? Number(a.order) : Infinity
+				const bOrd = b.order !== undefined ? Number(b.order) : Infinity
+				if (aOrd !== bOrd) return aOrd - bOrd
+				return (a.file as TFile).basename.localeCompare(
+					(b.file as TFile).basename,
+				)
+			})
+			return sortedFiles.map(({file}: {file: TFile}) => file) as HabitData[]
 		}
 
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFile) {

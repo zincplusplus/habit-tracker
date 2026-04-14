@@ -368,6 +368,15 @@ div:has(.block-language-habittracker),
 	border-radius: var(--habit-tick-roundess);
 }
 
+/* Numeric habit cells: show value centered, same size as streak counter */
+.habit-tick--numeric .habit-tick__inner {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+	line-height: 1;
+}
+
 .ht21-tooltip {
 	background: var(--habit-tooltip-bg);
 	border-radius: var(--habit-tooltip-radius);
