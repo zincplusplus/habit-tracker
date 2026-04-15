@@ -48,11 +48,46 @@ const isValidCSSColor = function (color) {
 	return tempEl.style.color !== ''
 }
 
+// Pure group-filter logic — extracted for testability.
+// habitGroup: the raw frontmatter `group` value (string, string[], or undefined)
+// groupFilter: the tracker's `group` setting
+// excludeFilter: the tracker's `excludeGroup` setting
+const matchesGroupFilter = function(habitGroup, groupFilter, excludeFilter) {
+	const habitArr = habitGroup == null ? [] : (Array.isArray(habitGroup) ? habitGroup : [habitGroup])
+	if (excludeFilter) {
+		const excludeArr = Array.isArray(excludeFilter) ? excludeFilter : [excludeFilter]
+		if (excludeArr.some((g) => habitArr.includes(g))) return false
+	}
+	if (groupFilter) {
+		const filterArr = Array.isArray(groupFilter) ? groupFilter : [groupFilter]
+		return filterArr.some((g) => habitArr.includes(g))
+	}
+	return true
+}
+
+// Sort comparator for habits — extracted for testability.
+// a, b: objects with { file: { basename: string }, order: any }
+const compareHabits = function(a, b) {
+	const aOrd = a.order !== undefined ? Number(a.order) : Infinity
+	const bOrd = b.order !== undefined ? Number(b.order) : Infinity
+	if (aOrd !== bOrd) return aOrd - bOrd
+	return a.file.basename.localeCompare(b.file.basename)
+}
+
+// Numeric threshold check — extracted for testability.
+// Returns true if value is non-null and meets or exceeds threshold.
+const meetsThreshold = function(value, threshold) {
+	return value !== null && value !== undefined && value >= threshold
+}
+
 export {
 	getDateAsString,
 	getDayOfTheWeek,
 	debugLog,
 	renderPrettyDate,
 	pluralize,
-	isValidCSSColor
+	isValidCSSColor,
+	matchesGroupFilter,
+	compareHabits,
+	meetsThreshold,
 };

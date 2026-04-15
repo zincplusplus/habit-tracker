@@ -1,5 +1,5 @@
 <script>
-	import {debugLog, isValidCSSColor} from './utils'
+	import {debugLog, isValidCSSColor, meetsThreshold} from './utils'
 
 	import {onDestroy} from 'svelte'
 	import {parseYaml, TFile, Modal, Notice} from 'obsidian'
@@ -96,7 +96,7 @@
 			const hasValue = range ? date in valueMap : false
 			const value = range ? (valueMap[date] ?? null) : null
 			const ticked = range
-				? hasValue && value >= streakThreshold
+				? meetsThreshold(value, streakThreshold)
 				: entrySet.has(date)
 			const streakEligible = ticked
 			let gap = false

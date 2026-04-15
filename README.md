@@ -1,24 +1,27 @@
-# Habit Tracker 21 [![Obsidian](https://img.shields.io/badge/Obsidian-6d28d9)](https://obsidian.md) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/zincplusplus) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/zincplusplus/habit-tracker/total?label=Downloads&color=27C840) [![GitHub release](https://img.shields.io/github/release/zincplusplus/habit-tracker.svg?label=Version)](https://github.com/zincplusplus/habit-tracker/releases) ![GitHub Release Date](https://img.shields.io/github/release-date/zincplusplus/habit-tracker?color=6d28d9&label=Latest%20Release) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-27C840)](https://github.com/zincplusplus/habit-tracker/pulls)
+# Interactive Habit Tracker [![Obsidian](https://img.shields.io/badge/Obsidian-6d28d9)](https://obsidian.md)
 
 A minimalist, elegant habit tracker for [Obsidian](https://obsidian.md) that helps you build lasting habits with clear progress visualization.
 
 Transform your [Obsidian](https://obsidian.md) vault into a habit-building powerhouse. Track daily habits with an intuitive grid interface, customize your tracking experience, and watch your consistency streaks grow over time.
 
-![Habit Tracker Demo](screenshots/ui-demo.png)
+> **Fork note:** This is a fork of [Habit Tracker 21](https://github.com/zincplusplus/habit-tracker) with additional features: custom habit order, numeric habits, and group filtering.
 
 ## Features
 
 - **Minimalist Look** - Elegant, clean interface with nothing but essential functionality. Matches your theme effortlessly using Obsidian CSS variables
-- **Maximum configurability** - You can tweak and customize pretty much every aspect of Habit Tracker 21 to make it just right for you
+- **Maximum configurability** - You can tweak and customize pretty much every aspect of the tracker to make it just right for you
 - **Easy to setup** - Matches your theme effortlessly using Obsidian CSS variables and includes sensible defaults for all tracker properties
 - **Smart Folder Support** - Track individual files or entire habit folders
 - **Flexible Streak Counting** - Optional gap tolerance (`maxGap`) keeps streaks intact across short breaks while counting only days you actually completed
 - **Daily Note Integration** - Click any date in the header to jump straight to your daily note for that day
+- **Custom Habit Order** - Set a custom display order for habits with a single frontmatter field
+- **Numeric Habits** - Track quantities (reps, minutes, glasses of water) instead of binary ticks
+- **Group Filtering** - Organise habits into groups and show only relevant ones per tracker
 - **Debug Mode** - Comprehensive debugging gives you all the info you need to figure it out
 
 ## Quick Start
 
-1. Install the plugin from **[Obsidian's Community Plugins](obsidian://show-plugin?id=habit-tracker-21)**
+1. Install the plugin (plugin id: `interactive-habit-tracker`)
 2. **Create your habits folder** (e.g., `Habits/`)
 3. **Add habit files** like `Exercise.md`, `Reading.md` for each habit you want to track
 4. **Insert tracker** in your Daily notes template, or any other file:
@@ -46,16 +49,9 @@ entries: []
 ---
 ```
 
-Examples:
-- `title: "📚 Daily Reading"`
-- `title: "Drink 8 glasses of water"`
-- `title: "Meditation & Mindfulness"`
-
-If no title is specified, the filename is used as before.
-
 ### Custom Habit Colors
 
-By default, habit colors inherit from your Obsidian theme's checkbox ticked color. Personalize individual habits with custom colors by adding a `color` property to your habit file frontmatter:
+Personalize individual habits with custom colors:
 
 ```markdown
 ---
@@ -72,9 +68,118 @@ Examples:
 
 Invalid colors are ignored and the default theme color is used.
 
+### Custom Habit Order
+
+Control the display order of habits within a folder using the `order` frontmatter field. Habits sort ascending by order value; habits without an `order` field fall to the end (alphabetical as tiebreaker):
+
+```markdown
+---
+title: "Morning Workout 💪"
+order: 1
+entries: []
+---
+```
+
+```markdown
+---
+title: "Evening Read"
+order: 2
+entries: []
+---
+```
+
+Habits with no `order` set will always appear after all ordered habits.
+
+### Numeric Habits
+
+Instead of a binary tick, numeric habits let you record a quantity (reps, minutes, pages, glasses of water). Set a `range` in frontmatter; clicking a cell opens a number input:
+
+```markdown
+---
+title: "Push-ups"
+range: [1, 100]
+streak_threshold: 20
+entries: []
+---
+```
+
+- **`range: [min, max]`** — activates numeric mode; the habit title displays as "Push-ups (1–100)"
+- **`streak_threshold`** *(optional)* — minimum value that counts toward a streak (defaults to `range[0]`)
+- Values below `streak_threshold` are recorded but shown without a streak highlight
+- The recorded value is displayed inside each cell
+
+Entries are stored as `{date, value}` objects and managed automatically when you interact with the grid.
+
+### Group Filtering
+
+Assign habits to one or more groups via frontmatter, then filter by group in your tracker codeblock.
+
+**Habit frontmatter:**
+
+```markdown
+---
+title: "Morning Run"
+group: morning
+entries: []
+---
+```
+
+```markdown
+---
+title: "Vitamins"
+group: [morning, health]
+entries: []
+---
+```
+
+**Tracker codeblock — show only a group:**
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "group": "morning"
+}
+```
+````
+
+**Show habits in any of several groups:**
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "group": ["morning", "health"]
+}
+```
+````
+
+**Exclude a group:**
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "excludeGroup": "archived"
+}
+```
+````
+
+**Combine `group` and `excludeGroup`:**
+
+````markdown
+```habittracker
+{
+  "path": "Habits",
+  "group": "health",
+  "excludeGroup": "archived"
+}
+```
+````
+
 ### Streak Gap Tolerance
 
-By default, a single missed day breaks a streak. Use `maxGap` to keep a streak visually intact across short gaps — useful for habits where occasional misses are acceptable (e.g. a rest day in a workout routine):
+By default, a single missed day breaks a streak. Use `maxGap` to keep a streak visually intact across short gaps:
 
 ```markdown
 ---
@@ -92,21 +197,20 @@ entries: []
 
 | Habit | Frequency | `maxGap` | Why |
 | ----- | --------- | -------- | --- |
-| Workout | 3× per week | `3` | Allows up to 3 rest days between sessions (e.g. Mon → Fri) |
-| Clean Puramax | Every 2 weeks | `13` | Up to 13 days can pass between cleanings |
-| Call a friend or family member | Weekly | `6` | One call per week, any day |
-| Car service / deep clean | Monthly | `30` | Up to 30 days between occurrences |
+| Workout | 3× per week | `3` | Allows up to 3 rest days between sessions |
+| Call a friend | Weekly | `6` | One call per week, any day |
+| Car service | Monthly | `30` | Up to 30 days between occurrences |
 
 ## Configuration
 
 ### Global Settings
 
-Access via **Settings > Community plugins > Habit Tracker** to set defaults for all trackers:
+Access via **Settings > Community plugins > Interactive Habit Tracker** to set defaults for all trackers:
 
 - **Default Path** - Choose from dropdown of vault folders
 - **Days to Show** - Number input (default: 21)
 - **Show Streaks** - Toggle streak indicators and counts on/off (default: on)
-- **Open daily note on date click** - Click a date in the header row to open the corresponding daily note (default: on). Requires the Daily Notes core plugin or the Periodic Notes community plugin
+- **Open daily note on date click** - Click a date in the header row to open the corresponding daily note (default: on)
 - **Debug Mode** - Toggle debug output on/off
 - **Match Line Length** - Fit tracker to readable line width
 
@@ -130,31 +234,35 @@ Override global settings in individual code blocks:
 
 ### Per-Tracker Settings (code block)
 
-| Setting             | Type    | Default | Description                                                                      |
-| ------------------- | ------- | ------- | -------------------------------------------------------------------------------- |
-| `path`              | string  | "/"     | Path to habit folder or file. Defaults to root folder if left empty              |
-| `firstDisplayedDate`| string  | auto    | First date shown in grid (format: "YYYY-MM-DD"). When provided, takes priority over daysToShow |
-| `lastDisplayedDate` | string  | today   | Last date shown in grid (format: "YYYY-MM-DD"). If left empty, defaults to today |
-| `daysToShow`        | number  | 21      | Number of days to display. Ignored when firstDisplayedDate is explicitly provided |
-| `color`             | string  | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                     |
-| `showStreaks`       | boolean | true    | Display streak indicators and counts                                             |
-| `debug`             | boolean | false   | Enable debug console output                                                      |
-| `matchLineLength`   | boolean | false   | Match readable line width                                                        |
+| Setting             | Type              | Default | Description                                                                      |
+| ------------------- | ----------------- | ------- | -------------------------------------------------------------------------------- |
+| `path`              | string            | "/"     | Path to habit folder or file                                                     |
+| `firstDisplayedDate`| string            | auto    | First date shown in grid (format: "YYYY-MM-DD")                                  |
+| `lastDisplayedDate` | string            | today   | Last date shown in grid (format: "YYYY-MM-DD")                                   |
+| `daysToShow`        | number            | 21      | Number of days to display                                                        |
+| `color`             | string            | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                      |
+| `showStreaks`        | boolean           | true    | Display streak indicators and counts                                             |
+| `debug`             | boolean           | false   | Enable debug console output                                                      |
+| `matchLineLength`   | boolean           | false   | Match readable line width                                                        |
+| `group`             | string \| array   | —       | Show only habits belonging to this group (or any group in array)                 |
+| `excludeGroup`      | string \| array   | —       | Hide habits belonging to this group (can be combined with `group`)               |
 
 ### Per-Habit Settings (frontmatter)
 
-| Setting   | Type   | Default | Description                                                                                  |
-| --------- | ------ | ------- | -------------------------------------------------------------------------------------------- |
-| `title`   | string | ""      | Custom display name. Falls back to filename if not set                                       |
-| `color`   | string | ""      | Custom color for this habit (hex, RGB, or CSS color name)                                    |
-| `maxGap`  | number | 0       | Allow up to N consecutive missed days within a streak. Gap days show at reduced opacity; only actual ticked days are counted |
-| `entries` | array  | []      | Array of completed dates in YYYY-MM-DD format. Managed automatically when clicking the grid  |
+| Setting            | Type            | Default        | Description                                                                                  |
+| ------------------ | --------------- | -------------- | -------------------------------------------------------------------------------------------- |
+| `title`            | string          | ""             | Custom display name. Falls back to filename if not set                                       |
+| `color`            | string          | ""             | Custom color for this habit (hex, RGB, or CSS color name)                                    |
+| `order`            | number          | —              | Display order (ascending). Habits without `order` appear last, sorted alphabetically         |
+| `maxGap`           | number          | 0              | Allow up to N consecutive missed days within a streak                                        |
+| `group`            | string \| array | —              | Group(s) this habit belongs to                                                               |
+| `range`            | [number, number]| —              | Activates numeric mode. Sets `[min, max]` for the input                                      |
+| `streak_threshold` | number          | `range[0]`     | Minimum value that counts toward a streak (numeric habits only)                              |
+| `entries`          | array           | []             | Completed dates (binary) or `{date, value}` objects (numeric). Managed automatically        |
 
 ## Usage Examples
 
 ### Multiple Habits (Most popular)
-
-Track all habits in a folder:
 
 ````markdown
 ```habittracker
@@ -166,8 +274,6 @@ Track all habits in a folder:
 
 ### Single Habit
 
-Track one specific habit file:
-
 ````markdown
 ```habittracker
 {
@@ -178,8 +284,6 @@ Track one specific habit file:
 
 ### Custom Time Range
 
-Show last 30 days:
-
 ````markdown
 ```habittracker
 {
@@ -189,55 +293,49 @@ Show last 30 days:
 ```
 ````
 
-### Custom Tracker Color
+### Morning Routine Tracker
 
-Override default color for entire tracker:
+Show only habits tagged `morning`:
 
 ````markdown
 ```habittracker
 {
   "path": "Habits",
-  "color": "#FF5722"
+  "group": "morning"
 }
 ```
 ````
 
-### Streak Gap Tolerance
-
-Allow up to 1 missed day without breaking a streak:
-
-````markdown
-```habittracker
-{
-  "path": "Habits/Exercise.md"
-}
-```
-````
+### Numeric Habit — Push-ups
 
 ```markdown
 ---
-title: "Exercise"
-maxGap: 1
+title: "Push-ups"
+range: [1, 100]
+streak_threshold: 20
 entries: []
 ---
 ```
 
-### Disable Streaks
+### Ordered Habits
 
-Hide streak indicators for cleaner view:
-
-````markdown
-```habittracker
-{
-  "path": "Habits",
-  "showStreaks": false
-}
+```markdown
+---
+title: "Wake up early"
+order: 1
+entries: []
+---
 ```
-````
+
+```markdown
+---
+title: "Exercise"
+order: 2
+entries: []
+---
+```
 
 ### View Past Date Range
-
-Show habits ending on a specific date:
 
 ````markdown
 ```habittracker
@@ -249,23 +347,7 @@ Show habits ending on a specific date:
 ```
 ````
 
-### Show Specific Date Range
-
-Track habits for the entire month of November 2024:
-
-````markdown
-```habittracker
-{
-  "path": "Habits",
-  "firstDisplayedDate": "2024-11-01",
-  "lastDisplayedDate": "2024-11-30"
-}
-```
-````
-
 ### Debug Mode
-
-Enable detailed logging:
 
 ````markdown
 ```habittracker
@@ -281,24 +363,20 @@ Enable detailed logging:
 ### Common Issues
 
 **"Path is required" error**
-
 - Set a default path in plugin settings, or specify `"path"` in your tracker
 
 **Tracker shows "No habits found"**
-
 - Check the path exists in your vault
 - Ensure folder contains `.md` files (subfolders are ignored)
 
 **Settings not updating**
-
 - Trackers auto-refresh when global settings change
 - For JSON errors, check syntax (commas, quotes, braces)
 - If issues persist, try force reload (Ctrl+R) or restart Obsidian
 
 **Clicking a date does nothing**
-
 - Ensure **Open daily note on date click** is enabled in plugin settings
-- Ensure either the **Daily Notes** core plugin or the **Periodic Notes** community plugin is enabled — if neither is active, a notice will appear when you click
+- Ensure either the **Daily Notes** core plugin or the **Periodic Notes** community plugin is enabled
 
 **Debug Output**
 Enable debug mode to see detailed logging in the browser console (F12).
@@ -308,10 +386,17 @@ Enable debug mode to see detailed logging in the browser console (F12).
 ### Installation
 
 ```bash
-git clone https://github.com/zincplusplus/habit-tracker
-cd habit-tracker
+git clone https://github.com/koray-eren/interactive-habit-tracker
+cd interactive-habit-tracker
 npm install
 npm run dev
+```
+
+### Tests
+
+```bash
+npm test          # run once
+npm run test:watch # watch mode
 ```
 
 ### Contributing
@@ -321,7 +406,7 @@ PRs welcome! Please:
 - Follow existing code style
 - Update documentation
 
-<a href="https://www.buymeacoffee.com/zincplusplus" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+<a href="https://buymeacoffee.com/koray.e" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## License
 

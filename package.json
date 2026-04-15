@@ -1,24 +1,26 @@
 {
-  "name": "habit-tracker-21-dev",
-  "version": "2.0.2",
+  "name": "interactive-habit-tracker",
+  "version": "1.0.0",
   "description": "A minimalist, elegant habit tracker for Obsidian that helps you build lasting habits with clear progress visualization.",
   "main": "index.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "version": "node version-bump.mjs && git add manifest.json versions.json"
+    "version": "node version-bump.mjs && git add manifest.json versions.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
-  "author": "zoreet",
+  "author": "koray-eren",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zoreet/habit-tracker.git"
+    "url": "git+https://github.com/koray-eren/interactive-habit-tracker.git"
   },
   "bugs": {
-    "url": "https://github.com/zoreet/habit-tracker/issues"
+    "url": "https://github.com/koray-eren/interactive-habit-tracker/issues"
   },
-  "homepage": "https://github.com/zoreet/habit-tracker#readme",
+  "homepage": "https://github.com/koray-eren/interactive-habit-tracker#readme",
   "devDependencies": {
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^16.11.6",
@@ -32,7 +34,8 @@
     "svelte": "^4.2.17",
     "svelte-preprocess": "^5.1.4",
     "tslib": "2.4.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "date-fns": "^3.6.0",

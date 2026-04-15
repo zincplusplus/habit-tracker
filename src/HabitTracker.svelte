@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {debugLog, pluralize, renderPrettyDate} from './utils'
+	import {debugLog, pluralize, renderPrettyDate, matchesGroupFilter as matchesGroupFilterPure, compareHabits} from './utils'
 	import {
 		createDailyNote,
 		getDailyNote,
@@ -278,16 +278,7 @@
 	const matchesGroupFilter = function (file: TFile, groupFilter: string | string[] | undefined, excludeFilter: string | string[] | undefined): boolean {
 		const cache = app.metadataCache.getFileCache(file)
 		const habitGroup = cache?.frontmatter?.group
-		const habitArr: string[] = habitGroup == null ? [] : (Array.isArray(habitGroup) ? habitGroup : [habitGroup])
-		if (excludeFilter) {
-			const excludeArr = Array.isArray(excludeFilter) ? excludeFilter : [excludeFilter]
-			if (excludeArr.some((g) => habitArr.includes(g))) return false
-		}
-		if (groupFilter) {
-			const filterArr = Array.isArray(groupFilter) ? groupFilter : [groupFilter]
-			return filterArr.some((g) => habitArr.includes(g))
-		}
-		return true
+		return matchesGroupFilterPure(habitGroup, groupFilter, excludeFilter)
 	}
 
 	const getHabits = function (path: string): HabitData[] {
@@ -311,14 +302,7 @@
 				const order = cache?.frontmatter?.order
 				return {file, order}
 			})
-			const sortedFiles = filesWithOrder.sort((a: {file: TFile; order: any}, b: {file: TFile; order: any}) => {
-				const aOrd = a.order !== undefined ? Number(a.order) : Infinity
-				const bOrd = b.order !== undefined ? Number(b.order) : Infinity
-				if (aOrd !== bOrd) return aOrd - bOrd
-				return (a.file as TFile).basename.localeCompare(
-					(b.file as TFile).basename,
-				)
-			})
+			const sortedFiles = filesWithOrder.sort(compareHabits)
 			return sortedFiles
 				.map(({file}: {file: TFile}) => file)
 				.filter((file: TFile) => matchesGroupFilter(file, state.settings.group, state.settings.excludeGroup)) as unknown as HabitData[]
