@@ -31,13 +31,14 @@
 			customStyles = ''
 		}
 	}
+	$: showStreaks =
+		userSettings.showStreaks !== undefined
+			? userSettings.showStreaks
+			: globalSettings.showStreaks
+
 	$: renderedDates = (() => {
 		const maxGap = Number(frontmatter.maxGap) || 0
 		const entrySet = new Set(entries)
-		const showStreaks =
-			userSettings.showStreaks !== undefined
-				? userSettings.showStreaks
-				: globalSettings.showStreaks
 		const gapStyle =
 			userSettings.gapStyle !== undefined
 				? userSettings.gapStyle
@@ -343,7 +344,7 @@
 			>
 				<span
 					class="habit-tick__inner"
-				>{#if day.streakEnd && day.streakCount > 1}{day.streakCount}{/if}</span>
+				>{#if showStreaks && day.streakEnd && day.streakCount > 1}{day.streakCount}{/if}</span>
 			</div>
 		{/each}
 	{/if}
