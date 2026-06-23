@@ -30,6 +30,7 @@ div:has(.block-language-habittracker),
 	--habit-cell-width: 25px;
 	--habit-cell-height: 32px;
 	--habit-name-max-width: 173px;
+	--habit-name-min-width: 80px; /* Set an arbitrary minimum limit for name cell width. The value can be changed, but it is necessary*/
 	--habit-name-padding: 8px;
 
 	/* Tick size */
@@ -155,26 +156,57 @@ div:has(.block-language-habittracker),
 .block-language-habittracker {
 	border: var(--habit-outer-border);
 	border-radius: var(--radius-s);
-	overflow-x: scroll;
-	width: fit-content;
+	overflow-x: visible !important; /* Main fix 5: Changed from "scroll" to hand physics over to the grid. The name cells stay fixed (sticky) */
+	width: 100%;
 	max-width: 100%;
 	scrollbar-width: thin;
+	box-sizing: border-box;
+}
+
+
+/* 
+Break the 700px limit on the block language element 
+Applies for the case: 
+"editor/Readable line length" toggled off
+"plugin/Match line length" toggled on
+*/
+body:not(.is-readable-line-width) .block-language-habittracker:has(.habit-tracker--match-line-length) {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important; /* Main fix 1: scales the whole block accordingly when readable line length is off */ 
+    overflow-x: auto !important; /* Handle scroll correctly if window shrinks */
 }
 
 .habit-tracker {
 	display: grid;
-	grid-template-columns: 1fr repeat(
-			var(--date-columns),
-			var(--habit-cell-width)
-		);
-	width: fit-content;
+	grid-template-columns:
+		minmax(var(--habit-name-min-width), calc(100% - (var(--date-columns) * var(--habit-cell-width))))
+        repeat(var(--date-columns), var(--habit-cell-width)) !important;
+		
+	width: 100%;
+	/* Main fix 6.1: we make the habits grid scrollable when shrinked when RLL off MLL off */
+	min-width: 0 !important; 		/* changed from max-content to unlock layout shrinking */
+	max-width: 100% !important;     /* Force containment within view boundaries */
+	overflow-x: auto !important;    /* Make the grid own the scrollbar context */
 	background-color: var(--habit-bg);
 }
 
 .is-readable-line-width .habit-tracker--match-line-length {
-	min-width: calc(
-		var(--file-line-width) - 2px
-	); /* TODO: this is a hack since I know the widht of the border. but it won't scale. figure out a way to fix this that hopefully doesn't break overrides people added in place */
+	/* 
+	Main fix 3: following 3 lines concerning the display property basically do for the case where both settings RLL and MLL are toggled on, 
+	what Main fix 2 does for the other cases
+	*/
+	display: grid !important;
+    grid-template-columns: 
+        minmax(var(--habit-name-min-width), calc(var(--file-line-width) - (var(--date-columns) * var(--habit-cell-width))))
+        repeat(var(--date-columns), var(--habit-cell-width)) !important;
+
+	width: 100%;
+	/* Main fix 6.2: we make the habits grid scrollable when shrinked when RLL on MLL on */
+	min-width: 0 !important; 		/* changed from max-content to unlock layout shrinking */
+	max-width: 100% !important;     /* Force containment within view boundaries */
+	overflow-x: auto !important;    /* Make the grid own the scrollbar context */
+	max-width: var(--file-line-width);
 }
 
 .habit-tracker__row {
@@ -200,13 +232,17 @@ div:has(.block-language-habittracker),
 .habit-tracker__row:not(.habit-tracker__header) .habit-tracker__cell {
 	border-top: var(--habit-horizontal-border);
 }
+
 /*
 */
 
 .habit-tracker__cell--name {
 	padding: 0 var(--habit-name-padding);
 	width: 100%;
-	max-width: var(--habit-name-max-width);
+	min-width: var(--habit-name-min-width);
+	max-width: auto; /* Main fix 4: This should totally be auto, to prevent the big white blank area between name cells and the tick boxes. It should not be constant */
+
+	box-sizing: border-box;
 	justify-content: start;
 	position: sticky;
 	left: 0;
@@ -224,10 +260,21 @@ div:has(.block-language-habittracker),
 	font-size: var(--habit-name-font-size);
 	text-decoration: none;
 }
-.is-readable-line-width
-	.habit-tracker--match-line-length
+
+.is-readable-line-width 
+	.habit-tracker--match-line-length 
 	.habit-tracker__cell--name {
-	max-width: 100%;
+	padding: 0 var(--habit-name-padding);
+	width: 100%;
+
+	box-sizing: border-box;
+	z-index: 10;
+	justify-content: start;
+	position: sticky;
+	left: 0;
+	background-color: var(--habit-highlight-names);
+
+
 }
 
 .habit-tracker__cell--saturday,
@@ -384,3 +431,26 @@ div:has(.block-language-habittracker),
 .habit-tracker__header .habit-tracker__cell--today {
 	color: var(--habit-name-text-color);
 }
+
+/* FIX: Handle nested overflow when both Readable Line Length (RLL) 
+   and Match Line Length (MLL) are toggled on.
+*/
+
+/* 1. Turn off outer scroll behaviors on the markdown wrapper */
+.cm-preview-code-block.markdown-rendered:has(.block-language-habittracker) {
+    overflow-x: visible !important;
+}
+
+.block-language-habittracker {
+    overflow-x: visible !important; /* Prevent the outer container from moving */
+}
+
+/* 2. Force the grid itself to contain the horizontal scrollbar context */
+.habit-tracker,
+.is-readable-line-width .habit-tracker--match-line-length {
+    min-width: 0 !important;         /* Breaks the rigid brick behavior */
+    max-width: 100% !important;      /* Forces the grid to stick to the visible layout width */
+    overflow-x: auto !important;     /* Empowers the grid to own the scrolling physics internally */
+    scrollbar-width: thin;
+}
+
