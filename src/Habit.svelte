@@ -1,10 +1,13 @@
 <script>
-	import {debugLog, isValidCSSColor} from './utils'
+	import {
+		debugLog,
+		isValidCSSColor,
+		getDayOfTheWeek,
+		computeHabitRenderedDays,
+	} from './utils'
 
 	import {onDestroy} from 'svelte'
 	import {parseYaml, TFile} from 'obsidian'
-	import {getDayOfTheWeek} from './utils'
-	import {differenceInCalendarDays, parseISO, format} from 'date-fns'
 
 	export let app
 	export let name
@@ -38,145 +41,17 @@
 
 	$: renderedDates = (() => {
 		const maxGap = Number(frontmatter.maxGap) || 0
-		const entrySet = new Set(entries)
 		const gapStyle =
 			userSettings.gapStyle !== undefined
 				? userSettings.gapStyle
 				: globalSettings.gapStyle
 
-		// Pass 1 — mark each date
-		const days = dates.map((date) => {
-			const ticked = entrySet.has(date)
-			let gap = false
-			if (!ticked && maxGap > 0) {
-				// Gap only between consecutive entries whose gap ≤ maxGap
-				const parsed = parseISO(date)
-				for (let i = 0; i < entries.length - 1; i++) {
-					const prev = parseISO(entries[i])
-					const next = parseISO(entries[i + 1])
-					if (
-						differenceInCalendarDays(parsed, prev) > 0 &&
-						differenceInCalendarDays(next, parsed) > 0
-					) {
-						if (differenceInCalendarDays(next, prev) - 1 <= maxGap) {
-							gap = true
-						}
-						break
-					}
-				}
-			}
-			return {
-				date,
-				ticked,
-				gap,
-				deadline: false,
-				title: '',
-				streakStart: false,
-				streakEnd: false,
-				streakCount: 0,
+		const days = computeHabitRenderedDays({dates, entries, maxGap}).map(
+			(day) => ({
+				...day,
 				classes: '',
-			}
-		})
-
-		// Pass 2 — identify streak boundaries and counts
-		let streakStartIdx = -1
-		for (let i = 0; i <= days.length; i++) {
-			const inStreak = i < days.length && (days[i].ticked || days[i].gap)
-			if (inStreak && streakStartIdx === -1) {
-				streakStartIdx = i
-			} else if (!inStreak && streakStartIdx !== -1) {
-				// Streak just ended at i-1
-				const endIdx = i - 1
-
-				// Find first and last ticked dates in this visible run
-				let firstTickDate = null
-				let lastTickDate = null
-				for (let j = streakStartIdx; j <= endIdx; j++) {
-					if (days[j].ticked) {
-						if (!firstTickDate) firstTickDate = days[j].date
-						lastTickDate = days[j].date
-					}
-				}
-
-				// streakStart: only if the streak truly begins here
-				// (no entry within maxGap before the first visible date)
-				if (firstTickDate) {
-					const firstTickIdx = entries.indexOf(firstTickDate)
-					const prevEntry = firstTickIdx > 0 ? entries[firstTickIdx - 1] : null
-					const continuesFromBefore =
-						prevEntry &&
-						differenceInCalendarDays(
-							parseISO(firstTickDate),
-							parseISO(prevEntry),
-						) -
-							1 <=
-							maxGap
-					if (!continuesFromBefore) {
-						days[streakStartIdx].streakStart = true
-					}
-				} else {
-					days[streakStartIdx].streakStart = true
-				}
-
-				// streakEnd: only if the streak truly ends within the visible range
-				if (lastTickDate) {
-					const lastTickIdx = entries.indexOf(lastTickDate)
-					const nextEntry =
-						lastTickIdx < entries.length - 1 ? entries[lastTickIdx + 1] : null
-					const continuesAfter =
-						nextEntry &&
-						differenceInCalendarDays(
-							parseISO(nextEntry),
-							parseISO(lastTickDate),
-						) -
-							1 <=
-							maxGap
-					if (!continuesAfter) {
-						days[endIdx].streakEnd = true
-					}
-				} else {
-					days[endIdx].streakEnd = true
-				}
-
-				// Count: walk backward through entries from the last visible tick
-				let count = 0
-				if (lastTickDate) {
-					const anchorIdx = entries.indexOf(lastTickDate)
-					if (anchorIdx !== -1) {
-						count = 1
-						for (let j = anchorIdx; j > 0; j--) {
-							const gapDays =
-								differenceInCalendarDays(
-									parseISO(entries[j]),
-									parseISO(entries[j - 1]),
-								) - 1
-							if (gapDays > maxGap) break
-							count++
-						}
-					}
-				}
-
-				days[endIdx].streakCount = count
-
-				streakStartIdx = -1
-			}
-		}
-
-		// Pass 3 — ghost dot on the last day of the gap (deadline to keep streak alive)
-		if (maxGap > 0 && entries.length > 0) {
-			const today = format(new Date(), 'yyyy-MM-dd')
-			const lastEntry = entries[entries.length - 1]
-			const deadlineDate = format(
-				new Date(parseISO(lastEntry).getTime() + (maxGap + 1) * 86400000),
-				'yyyy-MM-dd',
-			)
-			if (deadlineDate >= today) {
-				const ghostDay = days.find((d) => d.date === deadlineDate)
-				if (ghostDay && !ghostDay.ticked) {
-					ghostDay.deadline = true
-				}
-			}
-		}
+			}),
+		)
 
 		// Build classes
 		for (const day of days) {
@@ -191,7 +66,11 @@
 				if (inStrk) cls.push('habit-tick--streak')
 				if (day.gap && !day.ticked) {
 					cls.push('habit-tick--streak-gap')
-					cls.push(gapStyle === 'faded' ? 'habit-tick--gap-faded' : 'habit-tick--gap-default')
+					cls.push(
+						gapStyle === 'faded'
+							? 'habit-tick--gap-faded'
+							: 'habit-tick--gap-default',
+					)
 				}
 				if (day.streakStart) cls.push('habit-tick--streak-start')
 				if (day.streakEnd) cls.push('habit-tick--streak-end')
@@ -209,7 +88,7 @@
 		debugLog(`Loading habit ${habitName}`, debug, undefined, pluginName)
 
 		const getFrontmatter = async function (path) {
-			const file = this.app.vault.getAbstractFileByPath(path)
+			const file = app.vault.getAbstractFileByPath(path)
 
 			if (!file || !(file instanceof TFile)) {
 				debugLog(
@@ -222,7 +101,7 @@
 			}
 
 			try {
-				return await this.app.vault.read(file).then((result) => {
+				return await app.vault.read(file).then((result) => {
 					const frontmatter = result.split('---')[1]
 
 					if (!frontmatter) {
@@ -249,7 +128,7 @@
 		frontmatter = await getFrontmatter(path)
 		debugLog(`Frontmatter for ${path} ↴`, debug)
 		debugLog(frontmatter, debug)
-		entries = frontmatter.entries
+		entries = frontmatter.entries || []
 		entries = entries.sort()
 		habitName = frontmatter.title || habitName
 
@@ -258,7 +137,7 @@
 	}
 
 	const toggleHabit = function (date) {
-		const file = this.app.vault.getAbstractFileByPath(path)
+		const file = app.vault.getAbstractFileByPath(path)
 		if (!file || !(file instanceof TFile)) {
 			new Notice(`${pluginName}: file missing while trying to toggle habit`)
 			return
@@ -274,7 +153,7 @@
 
 		savingChanges = true
 
-		this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+		app.fileManager.processFrontMatter(file, (frontmatter) => {
 			frontmatter['entries'] = entries
 		})
 	}
@@ -342,9 +221,9 @@
 				on:mouseleave={hideTooltip}
 				on:click={() => toggleHabit(day.date)}
 			>
-				<span
-					class="habit-tick__inner"
-				>{#if showStreaks && day.streakEnd && day.streakCount > 1}{day.streakCount}{/if}</span>
+				<span class="habit-tick__inner"
+					>{#if showStreaks && day.streakEnd && day.streakCount > 1}{day.streakCount}{/if}</span
+				>
 			</div>
 		{/each}
 	{/if}

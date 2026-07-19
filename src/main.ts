@@ -1,12 +1,12 @@
 // TODO Add integration tests with jest
-import {Plugin, Notice, setIcon, App, PluginSettingTab, Setting} from 'obsidian'
+import { Plugin, Notice, setIcon, App, PluginSettingTab, Setting } from 'obsidian'
 import HabitTracker from './HabitTracker.svelte'
 import HabitTrackerError from './HabitTrackerError.svelte'
 import { debugLog, isValidCSSColor } from './utils'
 
-	import {
-		format,
-	} from 'date-fns'
+import {
+	format,
+} from 'date-fns'
 
 interface HabitTrackerSettings {
 	path: string;
@@ -17,6 +17,8 @@ interface HabitTrackerSettings {
 	showStreaks: boolean;
 	openDailyNoteOnClick: boolean;
 	gapStyle: string;
+	mode: 'default' | 'graph';
+	fillToPreviousMonday: boolean;
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
@@ -27,7 +29,9 @@ const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	defaultColor: '',
 	showStreaks: true,
 	openDailyNoteOnClick: true,
-	gapStyle: 'default'
+	gapStyle: 'default',
+	mode: 'default',
+	fillToPreviousMonday: true
 }
 
 export default class HabitTracker21 extends Plugin {
@@ -52,15 +56,15 @@ export default class HabitTracker21 extends Plugin {
 				debugLog(`Tracker settings: ${JSON.stringify(userSettings)}`, debugMode);
 				debugLog(`Today is ${format(new Date(), 'yyyy-MM-dd')}`, debugMode);
 				new HabitTracker({
-						target: el,
-						props: {
-							app: this.app,
-							userSettings,
-							globalSettings: this.settings,
-							pluginName: this.manifest.name,
-						},
-					})
-			} catch(error) {
+					target: el,
+					props: {
+						app: this.app,
+						userSettings,
+						globalSettings: this.settings,
+						pluginName: this.manifest.name,
+					},
+				})
+			} catch (error) {
 				new HabitTrackerError({
 					target: el,
 					props: {
@@ -291,14 +295,14 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
-		containerEl.createEl('h3', {text: `${this.plugin.manifest.name} Settings`});
+		containerEl.createEl('h3', { text: `${this.plugin.manifest.name} Settings` });
 
 		// General Settings Section
-		let generalHeader = containerEl.createEl('h4', {text: 'General Settings'});
+		let generalHeader = containerEl.createEl('h4', { text: 'General Settings' });
 		generalHeader.style.marginBottom = '0';
 		const generalDesc = containerEl.createEl('div', {
 			cls: 'setting-item-description',
@@ -392,6 +396,28 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Display mode')
+			.setDesc('How habits are displayed. "Default" shows a grid, "Contribution Graph" shows a GitHub-style contribution graph. Can be overridden with "mode" in code blocks.')
+			.addDropdown(dropdown => dropdown
+				.addOption('default', 'Default')
+				.addOption('graph', 'Contribution Graph')
+				.setValue(this.plugin.settings.mode)
+				.onChange(async (value: 'default' | 'graph') => {
+					this.plugin.settings.mode = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Fill graph to previous Monday')
+			.setDesc('In contribution graph mode, pad the first week back to Monday so the graph stays square. Can be overridden with "fillToPreviousMonday" in code blocks.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.fillToPreviousMonday)
+				.onChange(async (value) => {
+					this.plugin.settings.fillToPreviousMonday = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Open daily note on date click')
 			.setDesc('Click a date in the header row to open the corresponding daily note. Requires the Daily Notes core plugin or Periodic Notes community plugin.')
 			.addToggle(toggle => toggle
@@ -412,7 +438,7 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 				}));
 
 		// Troubleshooting Section
-		const troubleshootingHeader = containerEl.createEl('h4', {text: 'Troubleshooting'});
+		const troubleshootingHeader = containerEl.createEl('h4', { text: 'Troubleshooting' });
 		troubleshootingHeader.style.marginTop = '30px';
 
 		new Setting(containerEl)

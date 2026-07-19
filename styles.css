@@ -43,6 +43,7 @@ div:has(.block-language-habittracker),
 	/* Spacing */
 	--habit-streak-padding: 4px;
 	--habit-tooltip-padding: 2px 6px;
+	--graph-gap-opacity: 0.3;
 }
 
 /* Action bar for habit tracker code blocks */
@@ -175,6 +176,10 @@ div:has(.block-language-habittracker),
 	min-width: calc(
 		var(--file-line-width) - 2px
 	); /* TODO: this is a hack since I know the widht of the border. but it won't scale. figure out a way to fix this that hopefully doesn't break overrides people added in place */
+}
+
+.is-readable-line-width .habit-tracker-graph--match-line-length {
+	min-width: calc(var(--file-line-width) - 2px);
 }
 
 .habit-tracker__row {
@@ -383,4 +388,145 @@ div:has(.block-language-habittracker),
 
 .habit-tracker__header .habit-tracker__cell--today {
 	color: var(--habit-name-text-color);
+}
+
+/* === Contribution Graph Mode === */
+.habit-tracker-graph {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 8px;
+}
+
+.contribution-graph__header {
+	display: flex;
+}
+
+.contribution-graph__name {
+	color: var(--habit-name-text-color);
+	font-size: var(--habit-name-font-size);
+	text-decoration: none;
+	font-weight: var(--link-weight);
+	max-width: var(--habit-name-max-width);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: fit-content;
+	display: inline-block;
+}
+
+.contribution-graph__body {
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.contribution-graph__grid-wrapper {
+	display: grid;
+	--graph-cell-size: 18px;
+	--graph-cell-gap: 4px;
+	--graph-gap-opacity-percentage: calc(var(--graph-gap-opacity) * 100%);
+	gap: var(--graph-cell-gap);
+	padding-bottom: 4px;
+	min-width: 0;
+}
+
+.contribution-graph__month-labels {
+	display: grid;
+	grid-template-columns: repeat(var(--graph-weeks), var(--graph-cell-size));
+	gap: var(--graph-cell-gap);
+	height: 18px;
+	margin-bottom: var(--graph-cell-gap);
+}
+
+.contribution-graph__month-label {
+	font-size: var(--habit-header-font-size);
+	line-height: 18px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.contribution-graph__grid {
+	display: grid;
+	grid-template-columns: repeat(var(--graph-weeks), var(--graph-cell-size));
+	grid-template-rows: repeat(7, var(--graph-cell-size));
+	grid-auto-flow: column;
+	gap: var(--graph-cell-gap);
+}
+
+.contribution-graph__cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--graph-cell-size);
+	height: var(--graph-cell-size);
+	border-radius: 2px;
+	background-color: var(--background-modifier-border);
+	border: 1px solid color-mix(in srgb, var(--graph-cell-color, var(--habit-bg-ticked)) 12%, var(--background-modifier-border));
+	box-sizing: border-box;
+	cursor: pointer;
+	overflow: visible;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.contribution-graph__cell:hover {
+	outline: 1px solid var(--text-muted);
+	outline-offset: -1px;
+}
+
+.contribution-graph__cell--ticked {
+	background-color: var(--graph-cell-color, var(--habit-bg-ticked));
+	border-color: color-mix(in srgb, var(--graph-cell-color, var(--habit-bg-ticked)) 45%, var(--background-primary));
+}
+
+.contribution-graph__cell--gap {
+	background-color: color-mix(
+		in srgb,
+		var(--graph-cell-color, var(--habit-bg-ticked)) var(--graph-gap-opacity-percentage),
+		var(--background-primary) calc(100% - var(--graph-gap-opacity-percentage))
+	);
+	border-color: color-mix(in srgb, var(--graph-cell-contrast-color, var(--text-muted)) 35%, var(--background-primary));
+}
+
+.contribution-graph__cell--deadline {
+	position: relative;
+}
+
+.contribution-graph__cell--deadline::after {
+	content: '';
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background-color: color-mix(in srgb, var(--graph-cell-color, var(--habit-bg-ticked)) 72%, var(--background-primary) 28%);
+}
+
+.contribution-graph__cell--today {
+	outline: 2px solid
+		color-mix(in srgb, var(--graph-today-color, var(--graph-cell-color, var(--habit-bg-ticked))) 65%, var(--graph-cell-contrast-color, black) 35%);
+	outline-offset: 1px;
+	box-shadow: 0 0 0 1px var(--background-primary) inset;
+}
+
+.contribution-graph__cell--streak-end {
+	color: var(--graph-cell-text-color, var(--text-on-accent, var(--text-normal)));
+	font-size: 10px;
+	font-weight: 500;
+	line-height: 1;
+	text-shadow: 0 0 1px color-mix(in srgb, var(--background-primary) 55%, transparent);
+	opacity: 0.95;
+}
+
+.contribution-graph__streak-count {
+	pointer-events: none;
+	background: transparent;
+	border-radius: 0;
+	padding: 0;
+}
+
+.contribution-graph__cell--empty {
+	background-color: transparent;
+	border-color: transparent;
+	cursor: default;
+	pointer-events: none;
 }

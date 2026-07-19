@@ -9,6 +9,7 @@
 	import {onMount, onDestroy} from 'svelte'
 
 	import Habit from './Habit.svelte'
+	import ContributionGraph from './ContributionGraph.svelte'
 
 	import {TFile, TFolder, Notice, type Plugin} from 'obsidian'
 	import {getDateAsString, getDayOfTheWeek} from './utils.js'
@@ -19,6 +20,7 @@
 		isToday,
 		parseISO,
 		subDays,
+		startOfWeek,
 	} from 'date-fns'
 
 	// TypeScript interfaces for better state management
@@ -29,6 +31,8 @@
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
+		mode: 'default' | 'graph'
+		fillToPreviousMonday: boolean
 	}
 
 	interface HabitData {
@@ -63,9 +67,11 @@
 		debug: boolean
 		matchLineLength: boolean
 		defaultColor: string
-		showStreaks: boolean	
+		showStreaks: boolean
 		openDailyNoteOnClick: boolean
 		gapStyle: string
+		mode: 'default' | 'graph'
+		fillToPreviousMonday: boolean
 	}
 	export let userSettings: Partial<{
 		path: string
@@ -77,7 +83,15 @@
 		color: string
 		showStreaks: boolean
 		gapStyle: string
+		mode: 'default' | 'graph'
+		fillToPreviousMonday: boolean
 	}>
+
+	const resolveBoolean = (value: unknown, fallback: boolean): boolean => {
+		if (value === true || value === 'true') return true
+		if (value === false || value === 'false') return false
+		return fallback
+	}
 
 	// Default settings - use global settings as defaults
 	const createDefaultSettings = (): HabitTrackerSettings => ({
@@ -89,6 +103,11 @@
 		daysToShow: globalSettings.daysToShow,
 		debug: globalSettings.debug,
 		matchLineLength: globalSettings.matchLineLength,
+		mode: globalSettings.mode || 'default',
+		fillToPreviousMonday: resolveBoolean(
+			globalSettings.fillToPreviousMonday,
+			true,
+		),
 	})
 
 	// Initialize unified state
@@ -134,6 +153,14 @@
 				userSettings.debug !== undefined
 					? userSettings.debug
 					: state.settings.debug,
+			mode:
+				userSettings.mode !== undefined
+					? userSettings.mode
+					: state.settings.mode,
+			fillToPreviousMonday: resolveBoolean(
+				userSettings.fillToPreviousMonday,
+				state.settings.fillToPreviousMonday,
+			),
 		}
 
 		// Apply smart firstDisplayedDate logic
@@ -163,6 +190,17 @@
 		}
 
 		state.settings = resolvedSettings
+
+		// If graph mode and fillToPreviousMonday is true, push the tracked data range back to Monday
+		if (
+			state.settings.mode === 'graph' &&
+			state.settings.fillToPreviousMonday
+		) {
+			const firstDateObj = parseISO(state.settings.firstDisplayedDate)
+			state.settings.firstDisplayedDate = getDateAsString(
+				startOfWeek(firstDateObj, {weekStartsOn: 1}),
+			)
+		}
 
 		// Only validate essential business logic
 		try {
@@ -323,6 +361,23 @@
 	let vaultDeleteRef: any
 	let vaultRenameRef: any
 	let midnightTimer: ReturnType<typeof setTimeout>
+	let syncingGraphScroll = false
+
+	const syncGraphScroll = (sourceElement: HTMLElement) => {
+		if (syncingGraphScroll || !state.ui.rootElement) return
+		syncingGraphScroll = true
+
+		const graphRows = Array.from(
+			state.ui.rootElement.querySelectorAll('.contribution-graph__body'),
+		) as HTMLElement[]
+		for (const row of graphRows) {
+			if (row !== sourceElement) {
+				row.scrollLeft = sourceElement.scrollLeft
+			}
+		}
+
+		syncingGraphScroll = false
+	}
 
 	const isInWatchedPath = (filePath: string) =>
 		filePath === state.settings.path ||
@@ -356,7 +411,11 @@
 		// Schedule reload at midnight so dates stay current
 		const scheduleMidnightReload = () => {
 			const now = new Date()
-			const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+			const midnight = new Date(
+				now.getFullYear(),
+				now.getMonth(),
+				now.getDate() + 1,
+			)
 			const msUntilMidnight = midnight.getTime() - now.getTime()
 			midnightTimer = setTimeout(() => {
 				debugLog('Midnight reload triggered', state.settings.debug)
@@ -407,6 +466,28 @@
 		<strong>😕 {pluginName}</strong>
 	</div>
 	No habits to show at "{state.settings.path}"
+{:else if state.settings.mode === 'graph'}
+	<div
+		class="habit-tracker-graph {state.settings.matchLineLength
+			? 'habit-tracker-graph--match-line-length'
+			: ''}"
+		bind:this={state.ui.rootElement}
+	>
+		{#each state.computed.habits as habit}
+			<ContributionGraph
+				name={habit.basename}
+				path={habit.path}
+				dates={state.computed.dates}
+				debug={state.settings.debug}
+				onGraphScroll={syncGraphScroll}
+				fillToPreviousMonday={state.settings.fillToPreviousMonday}
+				{app}
+				{pluginName}
+				{userSettings}
+				{globalSettings}
+			/>
+		{/each}
+	</div>
 {:else}
 	<div
 		class="habit-tracker {state.settings.matchLineLength
