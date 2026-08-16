@@ -8,7 +8,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": true,
   "showStreaks": true,
@@ -20,7 +20,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": false,
   "showStreaks": false,
@@ -32,7 +32,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": true,
   "showStreaks": false,
@@ -44,7 +44,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": false,
   "showStreaks": true,
@@ -56,7 +56,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": false,
   "showStreaks": false,
@@ -70,7 +70,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 1,
   "debug": true
 }
@@ -80,7 +80,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 7,
   "debug": true
 }
@@ -90,7 +90,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": true
 }
@@ -100,7 +100,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 30,
   "debug": true
 }
@@ -110,9 +110,11 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
-  "daysToShow": 365,
-  "debug": true
+  "path": "habits",
+  "firstDisplayedDate": "2026-01-01",
+  "lastDisplayedDate": "2026-12-31",
+  "debug": true,
+  "maxGap": 5
 }
 ```
 
@@ -122,7 +124,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 14,
   "color": "#4CAF50",
   "debug": true
@@ -133,7 +135,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 14,
   "color": "rgb(255, 107, 107)",
   "debug": true
@@ -144,7 +146,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 14,
   "color": "coral",
   "debug": true
@@ -155,7 +157,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 14,
   "color": "not-a-color",
   "debug": true
@@ -168,7 +170,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/single-habits/custom-color.md",
+  "path": "single-habits/custom-color.md",
   "daysToShow": 14,
   "debug": true
 }
@@ -178,7 +180,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/nested/deep",
+  "path": "nested/deep",
   "daysToShow": 14,
   "debug": true
 }
@@ -188,7 +190,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/mixed-content",
+  "path": "mixed-content",
   "daysToShow": 14,
   "debug": true
 }
@@ -200,7 +202,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "lastDisplayedDate": "2024-01-15",
   "debug": true
@@ -211,7 +213,7 @@ This page tests all combinations of settings to ensure they work correctly.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "lastDisplayedDate": "2025-12-31",
   "debug": true

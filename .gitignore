@@ -21,3 +21,6 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Obsidian local UI state (test vault)
+test-vault/.obsidian/workspace.json

@@ -8,7 +8,7 @@ This page tests error conditions and edge cases to ensure robust behavior.
 
 ```habittracker
 {
-  "path": "test-vault/habits"
+  "path": "habits"
   "daysToShow": 21
 }
 ```
@@ -17,7 +17,7 @@ This page tests error conditions and edge cases to ensure robust behavior.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
 }
 ```
@@ -35,7 +35,7 @@ This page tests error conditions and edge cases to ensure robust behavior.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": "not-a-number",
   "debug": "not-a-boolean"
 }
@@ -59,7 +59,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/folder-that-does-not-exist",
+  "path": "folder-that-does-not-exist",
   "debug": true
 }
 ```
@@ -77,7 +77,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits/special-chars-habit-名前.md",
+  "path": "habits/special-chars-habit-名前.md",
   "debug": true
 }
 ```
@@ -86,7 +86,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits/Long Habit Name That Tests UI Wrapping.md",
+  "path": "habits/Long Habit Name That Tests UI Wrapping.md",
   "debug": true
 }
 ```
@@ -97,7 +97,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 0,
   "debug": true
 }
@@ -107,7 +107,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": -5,
   "debug": true
 }
@@ -117,7 +117,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 999,
   "debug": true
 }
@@ -127,7 +127,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "lastDisplayedDate": "1900-01-01",
   "debug": true
@@ -138,7 +138,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "lastDisplayedDate": "not-a-date",
   "debug": true
@@ -151,7 +151,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/broken-habits",
+  "path": "broken-habits",
   "debug": true
 }
 ```
@@ -160,7 +160,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/empty-folder",
+  "path": "empty-folder",
   "debug": true
 }
 ```
@@ -169,7 +169,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault//system/protected/folder",
+  "path": "system/protected/folder",
   "debug": true
 }
 ```
@@ -180,7 +180,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/single-habits/special-chars-habit-名前.md",
+  "path": "single-habits/special-chars-habit-名前.md",
   "debug": true
 }
 ```
@@ -189,7 +189,7 @@ this is not json at all!
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "color": "🔴",
   "debug": true
 }
@@ -205,7 +205,7 @@ These test the plugin's ability to recover from errors:
 
 ```habittracker
 {
-  "path": "test-vault/invalid-path",
+  "path": "invalid-path",
   "debug": true
 }
 ```
@@ -214,7 +214,7 @@ These test the plugin's ability to recover from errors:
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "debug": true
 }
 ```
@@ -225,7 +225,7 @@ These test the plugin's ability to recover from errors:
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21
   // missing comma above
 }
@@ -239,7 +239,7 @@ These test the plugin's ability to recover from errors:
 
 ```habittracker
 {
-  "path": "test-vault/habits/Long Habit Name That Tests UI Wrapping.md",
+  "path": "habits/Long Habit Name That Tests UI Wrapping.md",
   "debug": true
 }
 ```
@@ -248,7 +248,7 @@ These test the plugin's ability to recover from errors:
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 1,
   "debug": true
 }

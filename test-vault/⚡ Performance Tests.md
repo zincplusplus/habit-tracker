@@ -6,7 +6,7 @@ This page tests performance with large data sets and extreme configurations.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 365,
   "debug": false,
   "showStreaks": true
@@ -17,7 +17,7 @@ This page tests performance with large data sets and extreme configurations.
 
 ```habittracker
 {
-  "path": "test-vault/single-habits/long-streak.md",
+  "path": "single-habits/long-streak.md",
   "daysToShow": 365,
   "debug": false
 }
@@ -27,7 +27,7 @@ This page tests performance with large data sets and extreme configurations.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 1,
   "debug": false,
   "showStreaks": false,
@@ -39,7 +39,7 @@ This page tests performance with large data sets and extreme configurations.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 1000,
   "debug": true,
   "showStreaks": true,

@@ -8,7 +8,7 @@ This vault tests all functionality of the Habit Tracker 21 plugin.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 21,
   "debug": true
 }
@@ -18,7 +18,7 @@ This vault tests all functionality of the Habit Tracker 21 plugin.
 
 ```habittracker
 {
-  "path": "test-vault/single-habits/minimal-habit.md",
+  "path": "single-habits/minimal-habit.md",
   "daysToShow": 14,
   "debug": true
 }
@@ -28,7 +28,7 @@ This vault tests all functionality of the Habit Tracker 21 plugin.
 
 ```habittracker
 {
-  "path": "test-vault/habits",
+  "path": "habits",
   "daysToShow": 7,
   "color": "#ff6b6b",
   "showStreaks": true,
@@ -41,7 +41,7 @@ This vault tests all functionality of the Habit Tracker 21 plugin.
 
 ```habittracker
 {
-  "path": "test-vault/empty-folder",
+  "path": "empty-folder",
   "debug": true
 }
 ```
@@ -50,7 +50,7 @@ This vault tests all functionality of the Habit Tracker 21 plugin.
 
 ```habittracker
 {
-  "path": "test-vault/nonexistent-folder",
+  "path": "nonexistent-folder",
   "debug": true
 }
 ```
