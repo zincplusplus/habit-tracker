@@ -4,7 +4,7 @@
 	import {onDestroy} from 'svelte'
 	import {parseYaml, TFile} from 'obsidian'
 	import {getDayOfTheWeek} from './utils'
-	import {differenceInCalendarDays, parseISO, format} from 'date-fns'
+	import {addDays, differenceInCalendarDays, parseISO, format} from 'date-fns'
 
 	export let app
 	export let name
@@ -167,7 +167,7 @@
 			const today = format(new Date(), 'yyyy-MM-dd')
 			const lastEntry = entries[entries.length - 1]
 			const deadlineDate = format(
-				new Date(parseISO(lastEntry).getTime() + (maxGap + 1) * 86400000),
+				addDays(parseISO(lastEntry), maxGap + 1),
 				'yyyy-MM-dd',
 			)
 			if (deadlineDate >= today) {
