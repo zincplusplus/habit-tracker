@@ -29,6 +29,7 @@
 		daysToShow: number
 		debug: boolean
 		matchLineLength: boolean
+		sortProperty: string
 	}
 
 	interface HabitData {
@@ -66,6 +67,7 @@
 		showStreaks: boolean	
 		openDailyNoteOnClick: boolean
 		gapStyle: string
+		sortProperty: string
 	}
 	export let userSettings: Partial<{
 		path: string
@@ -77,6 +79,7 @@
 		color: string
 		showStreaks: boolean
 		gapStyle: string
+		sortProperty: string
 	}>
 
 	// Default settings - use global settings as defaults
@@ -89,6 +92,7 @@
 		daysToShow: globalSettings.daysToShow,
 		debug: globalSettings.debug,
 		matchLineLength: globalSettings.matchLineLength,
+		sortProperty: globalSettings.sortProperty,
 	})
 
 	// Initialize unified state
@@ -134,6 +138,10 @@
 				userSettings.debug !== undefined
 					? userSettings.debug
 					: state.settings.debug,
+			sortProperty:
+				userSettings.sortProperty !== undefined
+					? userSettings.sortProperty
+					: state.settings.sortProperty,
 		}
 
 		// Apply smart firstDisplayedDate logic
@@ -284,11 +292,7 @@
 				undefined,
 				pluginName,
 			)
-			// Sort files alphabetically by name
-			const sortedFiles = filesOnly.sort((a, b) =>
-				a.basename.localeCompare(b.basename),
-			)
-			return sortedFiles as HabitData[]
+			return sortHabits(filesOnly as HabitData[])
 		}
 
 		if (state.ui.habitSource && state.ui.habitSource instanceof TFile) {
@@ -311,6 +315,41 @@
 		return []
 	}
 
+	// Numeric value of the sort property, or null if the habit has none
+	const getSortValue = function (file: TFile): number | null {
+		const property = state.settings.sortProperty
+		if (!property) return null
+		const value =
+			app.metadataCache.getFileCache(file)?.frontmatter?.[property]
+		if (value === undefined || value === null || value === '') return null
+		const number = Number(value)
+		return Number.isFinite(number) ? number : null
+	}
+
+	// Habits with a sort value come first, in numeric order. Habits without
+	// one follow. Ties and habits without a value sort alphabetically by name.
+	const sortHabits = function (habits: HabitData[]): HabitData[] {
+		const values = new Map(habits.map((habit) => [habit, getSortValue(habit)]))
+		return [...habits].sort((a, b) => {
+			const valueA = values.get(a)
+			const valueB = values.get(b)
+			if (valueA !== null && valueB !== null && valueA !== valueB)
+				return valueA - valueB
+			if (valueA !== null && valueB === null) return -1
+			if (valueA === null && valueB !== null) return 1
+			return a.basename.localeCompare(b.basename)
+		})
+	}
+
+	// Re-sort when a habit's sort property changes
+	const resortHabits = function () {
+		if (state.computed.habits.length < 2) return
+		const sorted = sortHabits(state.computed.habits)
+		if (sorted.some((habit, i) => habit !== state.computed.habits[i])) {
+			state.computed.habits = sorted
+		}
+	}
+
 	$: if (state.ui.rootElement) {
 		setTimeout(() => {
 			scrollToEnd()
@@ -322,6 +361,7 @@
 	let vaultCreateRef: any
 	let vaultDeleteRef: any
 	let vaultRenameRef: any
+	let metadataChangedRef: any
 	let midnightTimer: ReturnType<typeof setTimeout>
 
 	const isInWatchedPath = (filePath: string) =>
@@ -378,6 +418,9 @@
 			if (isInWatchedPath(file.path) || isInWatchedPath(oldPath))
 				init(userSettings)
 		})
+		metadataChangedRef = app.metadataCache.on('changed', (file) => {
+			if (isInWatchedPath(file.path)) resortHabits()
+		})
 	})
 
 	onDestroy(() => {
@@ -390,6 +433,7 @@
 		if (vaultCreateRef) app.vault.offref(vaultCreateRef)
 		if (vaultDeleteRef) app.vault.offref(vaultDeleteRef)
 		if (vaultRenameRef) app.vault.offref(vaultRenameRef)
+		if (metadataChangedRef) app.metadataCache.offref(metadataChangedRef)
 		if (midnightTimer) clearTimeout(midnightTimer)
 	})
 
@@ -432,7 +476,7 @@
 				</div>
 			{/each}
 		</div>
-		{#each state.computed.habits as habit}
+		{#each state.computed.habits as habit (habit.path)}
 			<Habit
 				name={habit.basename}
 				path={habit.path}

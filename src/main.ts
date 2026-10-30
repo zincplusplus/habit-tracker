@@ -17,6 +17,7 @@ interface HabitTrackerSettings {
 	showStreaks: boolean;
 	openDailyNoteOnClick: boolean;
 	gapStyle: string;
+	sortProperty: string;
 }
 
 const DEFAULT_SETTINGS: HabitTrackerSettings = {
@@ -27,7 +28,8 @@ const DEFAULT_SETTINGS: HabitTrackerSettings = {
 	defaultColor: '',
 	showStreaks: true,
 	openDailyNoteOnClick: true,
-	gapStyle: 'default'
+	gapStyle: 'default',
+	sortProperty: 'sort_index'
 }
 
 export default class HabitTracker21 extends Plugin {
@@ -388,6 +390,17 @@ class HabitTrackerSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.gapStyle)
 				.onChange(async (value) => {
 					this.plugin.settings.gapStyle = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Sort property')
+			.setDesc('Frontmatter property that sets the order of habits. Habits are sorted by its numeric value, and habits without it follow in alphabetical order. Leave empty to sort all habits alphabetically. Can be overridden with "sortProperty" in code blocks.')
+			.addText(text => text
+				.setValue(this.plugin.settings.sortProperty)
+				.setPlaceholder('sort_index')
+				.onChange(async (value) => {
+					this.plugin.settings.sortProperty = value.trim();
 					await this.plugin.saveSettings();
 				}));
 

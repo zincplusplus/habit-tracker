@@ -97,6 +97,24 @@ entries: []
 | Call a friend or family member | Weekly | `6` | One call per week, any day |
 | Car service / deep clean | Monthly | `30` | Up to 30 days between occurrences |
 
+### Habit Order
+
+Habits are sorted alphabetically by file name. To set your own order, add a `sort_index` number to the frontmatter of each habit:
+
+```markdown
+---
+title: "Morning Workout 💪"
+sort_index: 10
+entries: []
+---
+```
+
+- Habits with a `sort_index` come first, sorted by number: `10` comes before `1000`
+- Habits without a `sort_index` follow, sorted alphabetically
+- Habits with the same `sort_index` are sorted alphabetically
+
+To use a different property name, change **Sort Property** in the plugin settings, or set `sortProperty` in a code block.
+
 ## Configuration
 
 ### Global Settings
@@ -106,6 +124,7 @@ Access via **Settings > Community plugins > Habit Tracker** to set defaults for 
 - **Default Path** - Choose from dropdown of vault folders
 - **Days to Show** - Number input (default: 21)
 - **Show Streaks** - Toggle streak indicators and counts on/off (default: on)
+- **Sort Property** - Frontmatter property that sets the order of habits (default: `sort_index`). See [Habit Order](#habit-order)
 - **Open daily note on date click** - Click a date in the header row to open the corresponding daily note (default: on). Requires the Daily Notes core plugin or the Periodic Notes community plugin
 - **Debug Mode** - Toggle debug output on/off
 - **Match Line Length** - Fit tracker to readable line width
@@ -138,6 +157,7 @@ Override global settings in individual code blocks:
 | `daysToShow`        | number  | 21      | Number of days to display. Ignored when firstDisplayedDate is explicitly provided |
 | `color`             | string  | ""      | Custom color for this tracker (hex, RGB, or CSS color name)                     |
 | `showStreaks`       | boolean | true    | Display streak indicators and counts                                             |
+| `sortProperty`      | string  | "sort_index" | Frontmatter property that sets the order of habits. Use "" to sort alphabetically |
 | `debug`             | boolean | false   | Enable debug console output                                                      |
 | `matchLineLength`   | boolean | false   | Match readable line width                                                        |
 
@@ -148,6 +168,7 @@ Override global settings in individual code blocks:
 | `title`   | string | ""      | Custom display name. Falls back to filename if not set                                       |
 | `color`   | string | ""      | Custom color for this habit (hex, RGB, or CSS color name)                                    |
 | `maxGap`  | number | 0       | Allow up to N consecutive missed days within a streak. Gap days show at reduced opacity; only actual ticked days are counted |
+| `sort_index` | number | none  | Position of the habit in the tracker. Lower numbers come first. The property name is set by `sortProperty` |
 | `entries` | array  | []      | Array of completed dates in YYYY-MM-DD format. Managed automatically when clicking the grid  |
 
 ## Usage Examples
